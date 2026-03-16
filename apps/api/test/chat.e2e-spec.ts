@@ -1,4 +1,5 @@
 import { INestApplication, ServiceUnavailableException } from '@nestjs/common';
+import type { Server } from 'node:http';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from 'nestjs-pino';
 import request from 'supertest';
@@ -10,7 +11,7 @@ import { ChatService } from '../src/modules/chat/services/chat.service';
 
 describe('Chat API (e2e)', () => {
   let app: INestApplication;
-  let httpApp: Parameters<typeof request>[0];
+  let httpServer: Server;
   let chatService: {
     chat: jest.Mock;
     streamChat: jest.Mock;
@@ -126,7 +127,7 @@ describe('Chat API (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.useGlobalFilters(new GlobalExceptionFilter(moduleFixture.get(Logger)));
     await app.init();
-    httpApp = app.getHttpAdapter().getInstance();
+    httpServer = app.getHttpServer() as Server;
   });
 
   afterEach(async () => {
@@ -136,7 +137,7 @@ describe('Chat API (e2e)', () => {
   });
 
   it('accepts a valid chat request and returns a structured response', async () => {
-    const response = await request(httpApp)
+    const response = await request(httpServer)
       .post('/api/v1/chat')
       .send({
         question: 'What is pgvector?',
@@ -165,7 +166,7 @@ describe('Chat API (e2e)', () => {
   });
 
   it('streams SSE events when the client requests text/event-stream', async () => {
-    const response = await request(httpApp)
+    const response = await request(httpServer)
       .post('/api/v1/chat')
       .set('Accept', 'text/event-stream')
       .send({
@@ -188,7 +189,7 @@ describe('Chat API (e2e)', () => {
       new ServiceUnavailableException('RAG pipeline is unavailable'),
     );
 
-    const response = await request(httpApp)
+    const response = await request(httpServer)
       .post('/api/v1/chat')
       .send({
         question: 'What is pgvector?',

@@ -1,4 +1,5 @@
 import { SearchController } from './search.controller';
+import { TenantContextService } from '../../../common/tenancy/tenant-context.service';
 import { SearchService } from '../services/search.service';
 
 describe('SearchController', () => {
@@ -17,9 +18,9 @@ describe('SearchController', () => {
         ],
       }),
     } as unknown as SearchService;
-    const tenantContextService = {
+    const tenantContextService: Pick<TenantContextService, 'resolveTenant'> = {
       resolveTenant: jest.fn().mockReturnValue('tenant-a'),
-    } as any;
+    };
 
     const controller = new SearchController(
       searchService,
