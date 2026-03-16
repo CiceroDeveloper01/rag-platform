@@ -210,6 +210,53 @@ Keep the boundary explicit and observable. Over time, decide whether this
 dependency is part of the intended platform design or whether some capabilities
 should move closer to the runtime itself.
 
+### 3. The API application may need clearer separation of presentation,
+
+runtime, and internal concerns
+
+The current API application hosts multiple kinds of responsibilities in the
+same application boundary:
+
+- web and portal-facing endpoints used by the UI
+- synchronous business or runtime-like entry points such as chat and document
+  ingestion
+- internal endpoints and capabilities used by orchestrator agents and tools
+
+This does not make the current implementation incorrect. It does, however,
+increase the chance of architectural drift because the same boundary can be
+used for both user-facing presentation flows and internal platform operations.
+
+The risk is visible in the current repository shape:
+
+- the web application talks directly to API chat and ingestion flows
+- the orchestrator also depends on API-backed internal capabilities
+- the intended `orchestrator -> agents -> tools` runtime path is therefore not
+  the only path through which business behavior can be reached
+
+#### Impact
+
+- it becomes easier for new web features to bypass the orchestrator runtime by
+  adding direct API flows
+- architectural ownership of business execution becomes less obvious over time
+- internal platform operations and public-facing API concerns can evolve under
+  different pressures while still sharing the same boundary
+
+#### Desired direction
+
+If the long-term platform direction is to validate agents and RAG as the core
+runtime path, the architecture may eventually benefit from a clearer boundary
+split such as:
+
+- `api-web` for presentation or BFF-style endpoints consumed by the portal
+- `api-runtime` for business entry points that should align with the agent and
+  orchestrator runtime
+- `api-internal` for platform operations used only by agents, tools, and other
+  internal services
+
+This is a future architectural improvement, not an implemented structure in the
+current repository. The immediate debt is the lack of sharper separation inside
+the current API boundary.
+
 ## Web Flows That May Bypass the Intended Agent/Runtime Path
 
 These flows currently bypass the orchestrator path and use direct API behavior:
