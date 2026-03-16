@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DocumentIndexerService } from "../rag/document-indexer.service";
+import { DocumentIndexerService } from "../../rag/document-indexer.service";
 
 @Injectable()
 export class GenerateEmbeddingsToolService {

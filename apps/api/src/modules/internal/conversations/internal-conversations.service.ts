@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { ReplyConversationDto } from '../dto/reply-conversation.dto';
+import { ReplyConversationDto } from './reply-conversation.dto';
 
 @Injectable()
 export class InternalConversationsService {

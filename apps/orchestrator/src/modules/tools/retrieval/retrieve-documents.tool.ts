@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { RetrievalService } from "../rag/retrieval.service";
+import { RetrievalService } from "../../rag/retrieval.service";
 
 @Injectable()
 export class RetrieveDocumentsToolService {

@@ -1,10 +1,10 @@
 import { DocumentIndexerService } from "../rag/document-indexer.service";
 import { RetrievalService } from "../rag/retrieval.service";
-import { DownloadFileToolService } from "./download-file.tool";
-import { GenerateEmbeddingsToolService } from "./generate-embeddings.tool";
-import { IndexDocumentToolService } from "./index-document.tool";
-import { ParseDocumentToolService } from "./parse-document.tool";
-import { RetrieveDocumentsToolService } from "./retrieve-documents.tool";
+import { DownloadFileToolService } from "./document-ingestion/download-file.tool";
+import { GenerateEmbeddingsToolService } from "./document-ingestion/generate-embeddings.tool";
+import { IndexDocumentToolService } from "./document-ingestion/index-document.tool";
+import { ParseDocumentToolService } from "./document-ingestion/parse-document.tool";
+import { RetrieveDocumentsToolService } from "./retrieval/retrieve-documents.tool";
 
 describe("Tool services", () => {
   it("generates embeddings for each chunk using the document indexer", () => {

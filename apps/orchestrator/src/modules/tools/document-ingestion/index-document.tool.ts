@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { DocumentIndexerService } from "../rag/document-indexer.service";
-import { RagDocumentRecord } from "../rag/vector.repository";
+import { DocumentIndexerService } from "../../rag/document-indexer.service";
+import { RagDocumentRecord } from "../../rag/vector.repository";
 
 @Injectable()
 export class IndexDocumentToolService {

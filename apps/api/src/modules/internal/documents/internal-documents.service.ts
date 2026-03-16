@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DocumentsService } from '../../documents/services/documents.service';
-import { RegisterDocumentDto } from '../dto/register-document.dto';
+import { RegisterDocumentDto } from './register-document.dto';
 
 @Injectable()
 export class InternalDocumentsService {

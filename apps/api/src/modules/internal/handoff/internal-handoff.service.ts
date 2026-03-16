@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { CreateHandoffDto } from '../dto/create-handoff.dto';
+import { CreateHandoffDto } from './create-handoff.dto';
 
 @Injectable()
 export class InternalHandoffService {

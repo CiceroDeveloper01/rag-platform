@@ -3,7 +3,7 @@ import { ConversationMemoryService } from "../../memory/conversation-memory.serv
 import { MemoryContextBuilder } from "../../memory/memory-context.builder";
 import { ContextBuilderService } from "../../rag/context-builder.service";
 import { DocumentIndexerService } from "../../rag/document-indexer.service";
-import { RetrieveDocumentsToolService } from "../../tools/retrieve-documents.tool";
+import { RetrieveDocumentsToolService } from "../../tools/retrieval/retrieve-documents.tool";
 import { LanguageDetectionService } from "../language-detection.service";
 import { ConversationAgent } from "./conversation.agent";
 

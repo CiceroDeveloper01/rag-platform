@@ -23,7 +23,7 @@ import {
   FLOW_EXECUTION_QUEUE,
 } from "../queue/queue.constants";
 import { FlowExecutionPayload } from "../queue/flow-execution.types";
-import { DocumentIngestionPipelineService } from "../tools/document-ingestion.pipeline";
+import { DocumentIngestionPipelineService } from "../tools/document-ingestion/document-ingestion.pipeline";
 
 @Injectable()
 export class FlowExecutionProcessor implements OnModuleInit, OnModuleDestroy {

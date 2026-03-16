@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { RegisterDocumentDto } from '../dto/register-document.dto';
-import { InternalDocumentsService } from '../services/internal-documents.service';
+import { InternalDocumentsService } from './internal-documents.service';
+import { RegisterDocumentDto } from './register-document.dto';
 
 @ApiExcludeController()
 @Controller(['documents', 'api/v1/internal/documents'])

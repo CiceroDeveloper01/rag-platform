@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { ReplyConversationDto } from '../dto/reply-conversation.dto';
-import { InternalConversationsService } from '../services/internal-conversations.service';
+import { InternalConversationsService } from './internal-conversations.service';
+import { ReplyConversationDto } from './reply-conversation.dto';
 
 @ApiExcludeController()
 @Controller(['conversations', 'api/v1/internal/conversations'])

@@ -1,8 +1,8 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { QueryMemoryContextDto } from '../dto/query-memory-context.dto';
-import { StoreMemoryDto } from '../dto/store-memory.dto';
-import { InternalMemoryService } from '../services/internal-memory.service';
+import { InternalMemoryService } from './internal-memory.service';
+import { QueryMemoryContextDto } from './query-memory-context.dto';
+import { StoreMemoryDto } from './store-memory.dto';
 
 @ApiExcludeController()
 @Controller(['memory', 'api/v1/internal/memory'])

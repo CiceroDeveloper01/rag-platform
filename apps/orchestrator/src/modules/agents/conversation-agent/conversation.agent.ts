@@ -7,7 +7,7 @@ import { ContextBuilderService } from "../../rag/context-builder.service";
 import { DocumentIndexerService } from "../../rag/document-indexer.service";
 import { EXECUTE_REPLY_CONVERSATION_JOB } from "../../queue/queue.constants";
 import { FlowExecutionPayload } from "../../queue/flow-execution.types";
-import { RetrieveDocumentsToolService } from "../../tools/retrieve-documents.tool";
+import { RetrieveDocumentsToolService } from "../../tools/retrieval/retrieve-documents.tool";
 import { FlowExecutionRequest } from "../document-agent/document.agent";
 import { LanguageDetectionService } from "../language-detection.service";
 import { AgentDecision } from "../supervisor/supervisor.agent";

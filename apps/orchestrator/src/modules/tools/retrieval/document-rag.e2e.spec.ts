@@ -5,9 +5,9 @@ import {
   TracingService,
 } from "@rag-platform/observability";
 import { RagSearchInternalClient } from "@rag-platform/sdk";
-import { RetrievalService } from "../rag/retrieval.service";
-import { VectorRepository } from "../rag/vector.repository";
-import { DocumentIndexerService } from "../rag/document-indexer.service";
+import { DocumentIndexerService } from "../../rag/document-indexer.service";
+import { RetrievalService } from "../../rag/retrieval.service";
+import { VectorRepository } from "../../rag/vector.repository";
 
 describe("Document ingestion to RAG flow", () => {
   it("indexes a document and retrieves it later for a user question", async () => {

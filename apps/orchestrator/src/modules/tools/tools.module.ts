@@ -5,14 +5,14 @@ import {
   TracingModule,
 } from "@rag-platform/observability";
 import { RagModule } from "../rag/rag.module";
-import { ChunkDocumentToolService } from "./chunk-document.tool";
-import { DocumentIngestionPipelineService } from "./document-ingestion.pipeline";
-import { DownloadFileToolService } from "./download-file.tool";
-import { GenerateEmbeddingsToolService } from "./generate-embeddings.tool";
-import { IndexDocumentToolService } from "./index-document.tool";
-import { ParseDocumentToolService } from "./parse-document.tool";
-import { RetrieveDocumentsToolService } from "./retrieve-documents.tool";
-import { StoreDocumentToolService } from "./store-document.tool";
+import { ChunkDocumentToolService } from "./document-ingestion/chunk-document.tool";
+import { DocumentIngestionPipelineService } from "./document-ingestion/document-ingestion.pipeline";
+import { DownloadFileToolService } from "./document-ingestion/download-file.tool";
+import { GenerateEmbeddingsToolService } from "./document-ingestion/generate-embeddings.tool";
+import { IndexDocumentToolService } from "./document-ingestion/index-document.tool";
+import { ParseDocumentToolService } from "./document-ingestion/parse-document.tool";
+import { StoreDocumentToolService } from "./document-ingestion/store-document.tool";
+import { RetrieveDocumentsToolService } from "./retrieval/retrieve-documents.tool";
 
 @Module({
   imports: [LoggerModule, TracingModule, RagModule],

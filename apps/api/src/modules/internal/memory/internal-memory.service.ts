@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConversationMemoryService } from '../../memory/services/conversation-memory.service';
-import { QueryMemoryContextDto } from '../dto/query-memory-context.dto';
-import { StoreMemoryDto } from '../dto/store-memory.dto';
+import { QueryMemoryContextDto } from './query-memory-context.dto';
+import { StoreMemoryDto } from './store-memory.dto';
 
 @Injectable()
 export class InternalMemoryService {
