@@ -28,5 +28,5 @@ The vector persistence layer is functional, but still evolving for larger-scale 
 
 Source:
 
-- [docs/ARCHITECTURE.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE.md)
-- [docs/rag/rag-flow.md](/home/cicero/projects/rag-platform/docs/rag/rag-flow.md)
+- [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
+- [docs/rag/rag-flow.md](../rag/rag-flow.md)

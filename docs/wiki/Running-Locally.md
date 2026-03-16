@@ -29,4 +29,4 @@ If Telegram is enabled without credentials, the orchestrator will fail fast duri
 
 Source:
 
-- [docs/RUNNING_LOCALLY.md](/home/cicero/projects/rag-platform/docs/RUNNING_LOCALLY.md)
+- [docs/RUNNING_LOCALLY.md](../RUNNING_LOCALLY.md)

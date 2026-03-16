@@ -50,5 +50,5 @@ flowchart LR
 
 Source:
 
-- [docs/DATABASE.md](/home/cicero/projects/rag-platform/docs/DATABASE.md)
-- [database/migrations](/home/cicero/projects/rag-platform/database/migrations)
+- [docs/DATABASE.md](../DATABASE.md)
+- [database/migrations](../../database/migrations)

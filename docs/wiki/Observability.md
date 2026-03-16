@@ -35,5 +35,5 @@ flowchart LR
 
 Source:
 
-- [docs/ARCHITECTURE.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE.md)
-- [docs/observability/OBSERVABILITY.md](/home/cicero/projects/rag-platform/docs/observability/OBSERVABILITY.md)
+- [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
+- [docs/observability/OBSERVABILITY.md](../observability/OBSERVABILITY.md)

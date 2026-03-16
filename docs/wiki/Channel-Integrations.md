@@ -58,5 +58,5 @@ Email and WhatsApp follow the same overall direction, but remain less mature ope
 
 Source:
 
-- [docs/CHANNEL_INTEGRATION.md](/home/cicero/projects/rag-platform/docs/CHANNEL_INTEGRATION.md)
-- [docs/channels/telegram.md](/home/cicero/projects/rag-platform/docs/channels/telegram.md)
+- [docs/CHANNEL_INTEGRATION.md](../CHANNEL_INTEGRATION.md)
+- [docs/channels/telegram.md](../channels/telegram.md)

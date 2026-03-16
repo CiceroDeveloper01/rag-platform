@@ -37,5 +37,5 @@ The graph is explicit and readable, but the surrounding runtime still concentrat
 
 Source:
 
-- [docs/ARCHITECTURE.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE.md)
-- [docs/ARCHITECTURE_DECISIONS.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE_DECISIONS.md)
+- [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
+- [docs/ARCHITECTURE_DECISIONS.md](../ARCHITECTURE_DECISIONS.md)

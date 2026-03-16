@@ -33,5 +33,5 @@ The code supports the core ingestion path, but the full enterprise-grade binary 
 
 Source:
 
-- [docs/ARCHITECTURE.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE.md)
-- [docs/rag/document-ingestion.md](/home/cicero/projects/rag-platform/docs/rag/document-ingestion.md)
+- [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
+- [docs/rag/document-ingestion.md](../rag/document-ingestion.md)

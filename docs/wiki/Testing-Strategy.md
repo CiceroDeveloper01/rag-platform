@@ -36,4 +36,4 @@ flowchart TD
 
 Source:
 
-- [docs/TESTING_GUIDE.md](/home/cicero/projects/rag-platform/docs/TESTING_GUIDE.md)
+- [docs/TESTING_GUIDE.md](../TESTING_GUIDE.md)

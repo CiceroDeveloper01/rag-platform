@@ -33,5 +33,5 @@ flowchart TD
 
 Source:
 
-- [docs/ARCHITECTURE.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE.md)
-- [docs/architecture/feature-flags.md](/home/cicero/projects/rag-platform/docs/architecture/feature-flags.md)
+- [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
+- [docs/architecture/feature-flags.md](../architecture/feature-flags.md)

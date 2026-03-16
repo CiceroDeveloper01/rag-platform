@@ -40,5 +40,5 @@ sequenceDiagram
 
 Source:
 
-- [docs/ARCHITECTURE.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE.md)
-- [docs/runtime-flow.md](/home/cicero/projects/rag-platform/docs/runtime-flow.md)
+- [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
+- [docs/runtime-flow.md](../runtime-flow.md)

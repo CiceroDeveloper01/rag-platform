@@ -45,9 +45,9 @@ flowchart LR
 
 Canonical repository documents:
 
-- [docs/ARCHITECTURE.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE.md)
-- [docs/ARCHITECTURE_DECISIONS.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE_DECISIONS.md)
-- [docs/RUNNING_LOCALLY.md](/home/cicero/projects/rag-platform/docs/RUNNING_LOCALLY.md)
-- [docs/TESTING_GUIDE.md](/home/cicero/projects/rag-platform/docs/TESTING_GUIDE.md)
-- [docs/CHANNEL_INTEGRATION.md](/home/cicero/projects/rag-platform/docs/CHANNEL_INTEGRATION.md)
-- [docs/DATABASE.md](/home/cicero/projects/rag-platform/docs/DATABASE.md)
+- [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
+- [docs/ARCHITECTURE_DECISIONS.md](../ARCHITECTURE_DECISIONS.md)
+- [docs/RUNNING_LOCALLY.md](../RUNNING_LOCALLY.md)
+- [docs/TESTING_GUIDE.md](../TESTING_GUIDE.md)
+- [docs/CHANNEL_INTEGRATION.md](../CHANNEL_INTEGRATION.md)
+- [docs/DATABASE.md](../DATABASE.md)

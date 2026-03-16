@@ -1,4 +1,4 @@
-# Architecture Decisions
+# Architecture Decisions (ADR)
 
 [Home](Home) | [Architecture Overview](Architecture-Overview) | [System Architecture](System-Architecture)
 
@@ -36,4 +36,4 @@ flowchart LR
 
 Source:
 
-- [docs/ARCHITECTURE_DECISIONS.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE_DECISIONS.md)
+- [docs/ARCHITECTURE_DECISIONS.md](../ARCHITECTURE_DECISIONS.md)

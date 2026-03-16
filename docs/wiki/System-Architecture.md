@@ -53,4 +53,4 @@ flowchart TD
 
 Source:
 
-- [docs/ARCHITECTURE.md](/home/cicero/projects/rag-platform/docs/ARCHITECTURE.md)
+- [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
