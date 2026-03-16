@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rag-api-config
+data:
+  APP_NAME: rag-platform-api
+  NODE_ENV: production
+  PORT: "3001"
+  FRONTEND_ORIGINS: https://rag-platform.local
+  DATABASE_ENABLED: "true"
+  DB_HOST: rag-postgres
+  DB_PORT: "5432"
+  DB_USERNAME: rag
+  DB_NAME: ragdb
+  DB_SCHEMA: public
+  DB_SSL: "false"
+  DB_SYNCHRONIZE: "false"
+  DB_LOGGING: "false"
+  AUTH_SESSION_TTL_HOURS: "8"
+  AUTH_SESSION_COOKIE_NAME: rag_platform_session
+  AUTH_SECURE_COOKIES: "true"
+  AUTH_RATE_LIMIT_TTL_MS: "60000"
+  AUTH_RATE_LIMIT_LIMIT: "120"
+  DEMO_USER_EMAIL: demo@ragplatform.dev
+  DEMO_USER_NAME: Demo Operator
+  OPENAI_EMBEDDING_MODEL: text-embedding-3-small
+  OPENAI_LLM_MODEL: gpt-4o-mini
+  LLM_TIMEOUT_MS: "30000"
+  METRICS_PREFIX: rag_platform_api_
+  METRICS_DEFAULTS_ENABLED: "true"
+  LOG_LEVEL: info
+  LOG_REDACT_ENABLED: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rag-api-secret
+type: Opaque
+stringData:
+  DB_PASSWORD: rag
+  DEMO_USER_PASSWORD: demo123
+  OPENAI_API_KEY: replace-me
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-api
+  template:
+    metadata:
+      labels:
+        app: rag-api
+    spec:
+      containers:
+        - name: api
+          image: rag-platform-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: rag-api-config
+            - secretRef:
+                name: rag-api-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 20
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rag-api
+spec:
+  selector:
+    app: rag-api
+  ports:
+    - port: 3001
+      targetPort: 3001

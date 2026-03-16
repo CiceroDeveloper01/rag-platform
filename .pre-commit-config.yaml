@@ -1,0 +1,69 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+        args: [--config=.gitleaks.toml]
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.89.0
+    hooks:
+      - id: terraform_fmt
+        stages: [manual]
+      - id: terraform_validate
+        stages: [manual]
+      - id: terraform_tflint
+        stages: [manual]
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: [--failure-threshold, warning]
+
+  - repo: local
+    hooks:
+      - id: markdownlint
+        name: markdownlint
+        entry: npx markdownlint-cli
+        language: system
+        args: [--config, .markdownlint.json]
+        types_or: [markdown]
+        files: ^(README\.md|docs/(README\.md|ARCHITECTURE\.md|ARCHITECTURE_DECISIONS\.md|RUNNING_LOCALLY\.md|TESTING_GUIDE\.md|CHANNEL_INTEGRATION\.md|DATABASE\.md|wiki/.*\.md))$
+
+      - id: eslint-api
+        name: eslint-api
+        entry: npm
+        language: system
+        args: [--prefix, apps/api, run, lint]
+        pass_filenames: false
+
+      - id: eslint-orchestrator
+        name: eslint-orchestrator
+        entry: npm
+        language: system
+        args: [--prefix, apps/orchestrator, run, lint]
+        pass_filenames: false
+
+      - id: eslint-web
+        name: eslint-web
+        entry: npm
+        language: system
+        args: [--prefix, apps/web, run, lint]
+        pass_filenames: false
+
+      - id: prettier
+        name: prettier
+        entry: npx prettier --check
+        language: system
+        types_or: [markdown, yaml, json]

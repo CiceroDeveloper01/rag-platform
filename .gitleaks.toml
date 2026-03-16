@@ -1,0 +1,5 @@
+[allowlist]
+description = "Allow Recharts dataKey props in dashboard components"
+paths = [
+  '''apps/web/src/components/.*Chart\.tsx''',
+]

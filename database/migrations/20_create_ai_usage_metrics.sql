@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS ai_usage_metrics (
+  tenant_id VARCHAR(120) NOT NULL,
+  agent_name VARCHAR(120) NOT NULL,
+  tokens_input INTEGER NOT NULL DEFAULT 0,
+  tokens_output INTEGER NOT NULL DEFAULT 0,
+  cost NUMERIC(12, 6) NOT NULL DEFAULT 0,
+  "timestamp" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

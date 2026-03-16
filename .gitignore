@@ -1,0 +1,12 @@
+node_modules/
+.next/
+dist/
+coverage/
+build/
+tmp/
+*.log
+.env
+.env.*
+!.env.example
+!**/.env.example
+!**/.env.*.example

@@ -1,0 +1,16 @@
+aws_region                  = "us-east-1"
+project_name                = "rag-platform"
+environment                 = "dev"
+vpc_cidr                    = "10.10.0.0/16"
+availability_zones          = ["us-east-1a", "us-east-1b"]
+public_subnet_cidrs         = ["10.10.1.0/24", "10.10.2.0/24"]
+private_subnet_cidrs        = ["10.10.101.0/24", "10.10.102.0/24"]
+allowed_cidrs               = ["0.0.0.0/0"]
+app_instance_type           = "t3.small"
+observability_instance_type = "t3.small"
+key_name                    = null
+db_name                     = "rag_platform"
+db_username                 = "postgres"
+db_password                 = "change-me-dev"
+db_instance_class           = "db.t4g.micro"
+redis_node_type             = "cache.t4g.micro"

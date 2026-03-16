@@ -1,0 +1,5 @@
+ALTER TABLE sources
+ADD COLUMN IF NOT EXISTS storage_key TEXT;
+
+ALTER TABLE sources
+ADD COLUMN IF NOT EXISTS storage_url TEXT;

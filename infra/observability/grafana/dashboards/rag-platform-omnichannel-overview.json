@@ -1,0 +1,168 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(rag_platform_api_omnichannel_requests_total[5m]))",
+          "refId": "A"
+        }
+      ],
+      "title": "Requests / s",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(rag_platform_api_omnichannel_execution_latency_ms_sum[5m])) / sum(rate(rag_platform_api_omnichannel_execution_latency_ms_count[5m]))",
+          "refId": "A"
+        }
+      ],
+      "title": "Average Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(rag_platform_api_omnichannel_rag_usage_total[5m]))",
+          "refId": "A"
+        }
+      ],
+      "title": "RAG Usage / s",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(rag_platform_api_omnichannel_failures_total[5m]))",
+          "refId": "A"
+        }
+      ],
+      "title": "Failures / s",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 8 },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "sum by (channel, status) (rate(rag_platform_api_omnichannel_requests_total[5m]))",
+          "legendFormat": "{{channel}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Requests by Channel / Status",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
+      "id": 6,
+      "targets": [
+        {
+          "expr": "sum by (channel) (rate(rag_platform_api_omnichannel_dispatch_latency_ms_sum[5m])) / sum by (channel) (rate(rag_platform_api_omnichannel_dispatch_latency_ms_count[5m]))",
+          "legendFormat": "{{channel}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Dispatch Latency by Channel",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 18 },
+      "id": 7,
+      "targets": [
+        {
+          "expr": "sum by (channel) (rate(rag_platform_api_omnichannel_channel_inbound_total[5m]))",
+          "legendFormat": "{{channel}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Inbound per Channel",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 18 },
+      "id": 8,
+      "targets": [
+        {
+          "expr": "sum by (channel, status) (rate(rag_platform_api_omnichannel_channel_outbound_total[5m]))",
+          "legendFormat": "{{channel}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Outbound per Channel / Status",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["rag-platform", "omnichannel"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "browser",
+  "title": "RAG Platform Omnichannel Overview",
+  "uid": "rag-platform-omnichannel-overview",
+  "version": 1
+}

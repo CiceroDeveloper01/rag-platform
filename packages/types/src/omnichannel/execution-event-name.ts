@@ -1,0 +1,16 @@
+export enum ExecutionEventName {
+  MESSAGE_RECEIVED = "message_received",
+  MESSAGE_NORMALIZED = "message_normalized",
+  FEATURE_FLAG_CHECKED = "feature_flag_checked",
+  FEATURE_FLAG_BLOCKED = "feature_flag_blocked",
+  FEATURE_FLAG_FALLBACK_APPLIED = "feature_flag_fallback_applied",
+  AI_POLICY_CHECKED = "ai_policy_checked",
+  AI_POLICY_PASSED = "ai_policy_passed",
+  AI_POLICY_REJECTED = "ai_policy_rejected",
+  RAG_RETRIEVAL_STARTED = "rag_retrieval_started",
+  RAG_RETRIEVAL_COMPLETED = "rag_retrieval_completed",
+  AGENT_EXECUTION_STARTED = "agent_execution_started",
+  AGENT_EXECUTION_COMPLETED = "agent_execution_completed",
+  RESPONSE_SENT = "response_sent",
+  ERROR = "error",
+}

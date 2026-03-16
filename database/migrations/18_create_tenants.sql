@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS tenants (
+  tenant_id VARCHAR(120) PRIMARY KEY,
+  tenant_name VARCHAR(255) NOT NULL,
+  config JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

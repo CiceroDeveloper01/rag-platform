@@ -1,0 +1,53 @@
+{
+  "name": "rag-platform",
+  "version": "1.0.0",
+  "description": "Full-stack Retrieval Augmented Generation platform with NestJS, Next.js, PostgreSQL, pgvector and observability tooling.",
+  "main": "index.js",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:packages": "npm --prefix packages/types run build && npm --prefix packages/contracts run build && npm --prefix packages/shared run build && npm --prefix packages/config run build && npm --prefix packages/observability run build && npm --prefix packages/sdk run build && npm --prefix packages/utils run build",
+    "test:packages": "npm --prefix packages/utils run test",
+    "perf:smoke": "k6 run tests/performance/smoke/health.js",
+    "perf:load:analytics": "k6 run tests/performance/load/analytics-languages.js",
+    "perf:load:chat": "k6 run tests/performance/load/chat-authenticated.js",
+    "perf:stress:documents": "k6 run tests/performance/stress/internal-documents-register.js",
+    "lint:api": "npm --prefix apps/api run lint",
+    "test:api": "npm --prefix apps/api run test -- --runInBand",
+    "test:e2e:api": "npm --prefix apps/api run test:e2e -- --runInBand",
+    "coverage:api": "npm --prefix apps/api run test:cov:ci",
+    "build:api": "npm --prefix apps/api run build",
+    "test:orchestrator": "npm --prefix apps/orchestrator run test -- --runInBand",
+    "coverage:orchestrator": "npm --prefix apps/orchestrator run test:cov:ci",
+    "build:orchestrator": "npm --prefix apps/orchestrator run build",
+    "lint:web": "npm --prefix apps/web run lint",
+    "test:web": "npm --prefix apps/web run test",
+    "coverage:web": "npm --prefix apps/web run test:coverage",
+    "build:web": "npm --prefix apps/web run build",
+    "docker:build:api": "docker build -f apps/api/Dockerfile -t rag-platform-api .",
+    "docker:build:orchestrator": "docker build -f apps/orchestrator/Dockerfile -t rag-platform-orchestrator .",
+    "docker:build:web": "docker build -f apps/web/Dockerfile -t rag-platform-web .",
+    "ci": "npm run build:packages && npm run test:packages && npm run lint:api && npm run test:api && npm run test:e2e:api && npm run coverage:api && npm run build:api && npm run test:orchestrator && npm run coverage:orchestrator && npm run build:orchestrator && npm run lint:web && npm run test:web && npm run coverage:web && npm run build:web"
+  },
+  "keywords": [
+    "rag",
+    "nestjs",
+    "nextjs",
+    "pgvector",
+    "openai",
+    "observability"
+  ],
+  "author": "Cicero + Codex",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "@types/node": "^25.5.0",
+    "markdownlint-cli": "^0.48.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
