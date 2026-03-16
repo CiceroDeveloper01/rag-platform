@@ -29,6 +29,7 @@ flowchart TD
 - [Testing Guide](TESTING_GUIDE.md)
 - [Channel Integration](CHANNEL_INTEGRATION.md)
 - [Database and Persistence](DATABASE.md)
+- [Release Tasks](RELEASE_TASKS.md)
 
 ## Supporting Documents
 
