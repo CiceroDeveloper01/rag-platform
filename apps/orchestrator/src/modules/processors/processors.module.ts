@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
 import { LoggerModule } from "@rag-platform/observability";
 import { AgentTraceModule } from "../agent-trace/agent-trace.module";
+import { AgentsModule } from "../agents/agents.module";
 import { AnalyticsModule } from "../analytics/analytics.module";
 import { CostMonitoringModule } from "../cost-monitoring/cost-monitoring.module";
 import { EvaluationModule } from "../evaluation/evaluation.module";
 import { GuardrailsModule } from "../guardrails/guardrails.module";
-import { OrchestrationModule } from "../orchestration/orchestration.module";
 import { ChannelsModule } from "../channels/channels.module";
 import { QueueModule } from "../queue/queue.module";
 import { TenancyModule } from "../tenancy/tenancy.module";
@@ -22,7 +22,7 @@ import { InboundMessageProcessor } from "./inbound-message.processor";
     CostMonitoringModule,
     EvaluationModule,
     GuardrailsModule,
-    OrchestrationModule,
+    AgentsModule,
     ChannelsModule,
     ToolsModule,
     QueueModule,

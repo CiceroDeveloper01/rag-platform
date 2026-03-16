@@ -1,14 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": [
-    "node_modules",
-    "test",
-    "dist",
-    "**/*spec.ts",
-    "src/modules/listeners/**/*",
-    "src/modules/orchestration/agents/**/*",
-    "src/modules/orchestration/supervisor/**/*",
-    "src/modules/orchestration/inbound-message.processor.ts",
-    "src/modules/orchestration/orchestrator-runtime.service.ts"
-  ]
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }

@@ -10,9 +10,9 @@ import { queueConfig } from "./config/queue.config";
 import { ragConfig } from "./config/rag.config";
 import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { AgentTraceModule } from "./modules/agent-trace/agent-trace.module";
+import { AgentsModule } from "./modules/agents/agents.module";
 import { CostMonitoringModule } from "./modules/cost-monitoring/cost-monitoring.module";
 import { HealthModule } from "./modules/health/health.module";
-import { OrchestrationModule } from "./modules/orchestration/orchestration.module";
 import { ChannelsModule } from "./modules/channels/channels.module";
 import { ProcessorsModule } from "./modules/processors/processors.module";
 import { QueueModule } from "./modules/queue/queue.module";
@@ -127,7 +127,7 @@ const orchestratorEnvironmentSchema = z.object({
     CostMonitoringModule,
     AgentTraceModule,
     QueueModule,
-    OrchestrationModule,
+    AgentsModule,
     ChannelsModule,
     ProcessorsModule,
     SimulationModule,
