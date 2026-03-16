@@ -8,10 +8,7 @@ import type { FileStorage } from '../../common/storage/interfaces/file-storage.i
 import { DatabaseService } from '../../infra/database/database.service';
 import { SEARCH_REPOSITORY } from '../search/interfaces/search-repository.interface';
 import type { SearchRepositoryInterface } from '../search/interfaces/search-repository.interface';
-
-interface RedisHealthClient {
-  ping(): Promise<string>;
-}
+import type { RedisHealthClient } from './interfaces';
 
 @Injectable()
 export class HealthService {

@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import {
   SimulationScenarioList,
   type SimulationScenarioItem,
-} from "@/src/components/SimulationScenarioList";
+} from "@/src/components/simulation/SimulationScenarioList";
 import {
   SimulationResultsTable,
   type SimulationResultItem,
-} from "@/src/components/SimulationResultsTable";
+} from "@/src/components/simulation/SimulationResultsTable";
 import { ErrorState } from "@/src/components/states/error-state";
 import { LoadingPanel } from "@/src/components/states/loading-panel";
 import { EmptyState } from "@/src/components/ui/empty-state";

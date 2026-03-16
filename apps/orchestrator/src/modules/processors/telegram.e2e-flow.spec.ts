@@ -1,7 +1,7 @@
 import { Channel } from "@rag-platform/contracts";
-import { TelegramInboundAdapter } from "../channels/telegram.inbound.adapter";
-import { TelegramCommandService } from "../channels/telegram-command.service";
-import { TelegramResponseComposerService } from "../channels/telegram-response-composer.service";
+import { TelegramInboundAdapter } from "../channels/telegram/inbound/telegram.inbound.adapter";
+import { TelegramCommandService } from "../channels/telegram/commands/telegram-command.service";
+import { TelegramResponseComposerService } from "../channels/telegram/composer/telegram-response-composer.service";
 import { InboundMessageProcessor } from "./inbound-message.processor";
 import { FlowExecutionProcessor } from "./flow-execution.processor";
 

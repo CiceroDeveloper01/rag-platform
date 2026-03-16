@@ -1,15 +1,6 @@
 import { RagQueryRequest, RagQueryResponse } from "@rag-platform/contracts";
 import { InternalApiClient } from "../api/internal-api.client";
-
-interface SearchApiRequest {
-  tenantId: string;
-  query: string;
-  top_k: number;
-}
-
-interface SearchApiResponse {
-  results: RagQueryResponse["contexts"];
-}
+import type { SearchApiRequest, SearchApiResponse } from "./interfaces";
 
 export class RagSearchClient {
   constructor(

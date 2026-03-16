@@ -7,8 +7,8 @@ import {
 import { Subscription } from 'rxjs';
 import {
   AnalyticsService,
-  type AnalyticsStreamEvent,
 } from './analytics.service';
+import type { AnalyticsStreamEvent } from './interfaces';
 
 @WebSocketGateway({
   path: '/ws/analytics',

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CostPerAgentChart } from "@/src/components/CostPerAgentChart";
-import { CostPerTenantChart } from "@/src/components/CostPerTenantChart";
+import { CostPerAgentChart } from "@/src/components/analytics/CostPerAgentChart";
+import { CostPerTenantChart } from "@/src/components/analytics/CostPerTenantChart";
 import { ErrorState } from "@/src/components/states/error-state";
 import { LoadingPanel } from "@/src/components/states/loading-panel";
 import { EmptyState } from "@/src/components/ui/empty-state";

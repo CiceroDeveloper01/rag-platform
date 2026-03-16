@@ -1,7 +1,7 @@
 import { Channel } from "@rag-platform/contracts";
-import { ChannelOutboundRouterService } from "../channels/channel-outbound-router.service";
-import { TelegramCommandService } from "../channels/telegram-command.service";
-import { TelegramResponseComposerService } from "../channels/telegram-response-composer.service";
+import { ChannelOutboundRouterService } from "../channels/core/router/channel-outbound-router.service";
+import { TelegramCommandService } from "../channels/telegram/commands/telegram-command.service";
+import { TelegramResponseComposerService } from "../channels/telegram/composer/telegram-response-composer.service";
 import { FlowExecutionProcessor } from "./flow-execution.processor";
 
 describe("FlowExecutionProcessor", () => {

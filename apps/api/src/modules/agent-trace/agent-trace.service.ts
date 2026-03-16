@@ -6,13 +6,7 @@ import {
   AgentTraceEvent,
   AgentTraceRepository,
 } from './agent-trace.repository';
-
-interface IncomingAgentTraceEvent {
-  traceId: string;
-  timestamp: string;
-  step: AgentTraceEvent['step'];
-  data?: Record<string, unknown>;
-}
+import type { IncomingAgentTraceEvent } from './interfaces';
 
 @Injectable()
 export class AgentTraceService implements OnModuleInit, OnModuleDestroy {

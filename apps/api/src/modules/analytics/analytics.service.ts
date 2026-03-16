@@ -2,111 +2,13 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ReplaySubject, Observable } from 'rxjs';
 import { createClient, type RedisClientType } from 'redis';
-
-export interface AnalyticsStreamEvent {
-  eventType:
-    | 'message_received'
-    | 'agent_selected'
-    | 'flow_executed'
-    | 'agent_quality'
-    | 'user_feedback'
-    | 'ai_cost'
-    | 'tenant_usage';
-  timestamp: string;
-  channel?: string;
-  language?: string;
-  agent?: string;
-  flow?: string;
-  tenantId?: string;
-  model?: string;
-  keywords?: string[];
-  averageQualityScore?: number;
-  failureRate?: number;
-  userSatisfaction?: number;
-  averageRating?: number;
-  totalCost?: number;
-  tokensInput?: number;
-  tokensOutput?: number;
-  costByAgent?: Array<{
-    agentName: string;
-    cost: number;
-    tokensInput: number;
-    tokensOutput: number;
-  }>;
-  costByTenant?: Array<{
-    tenantId: string;
-    cost: number;
-    tokensInput: number;
-    tokensOutput: number;
-  }>;
-}
-
-export interface LanguageAggregate {
-  language: string;
-  label: string;
-  count: number;
-}
-
-export interface LanguageTimelinePoint {
-  date: string;
-  count: number;
-}
-
-export interface LanguageTimelineSeries {
-  language: string;
-  label: string;
-  points: LanguageTimelinePoint[];
-}
-
-interface IncomingAnalyticsEvent {
-  eventType: string;
-  timestamp: string;
-  channel?: string;
-  language?: string;
-  agent?: string;
-  flow?: string;
-  tenantId?: string;
-  model?: string;
-  keywords?: string[];
-  averageQualityScore?: number;
-  failureRate?: number;
-  userSatisfaction?: number;
-  averageRating?: number;
-  totalCost?: number;
-  tokensInput?: number;
-  tokensOutput?: number;
-  costByAgent?: Array<{
-    agentName: string;
-    cost: number;
-    tokensInput: number;
-    tokensOutput: number;
-  }>;
-  costByTenant?: Array<{
-    tenantId: string;
-    cost: number;
-    tokensInput: number;
-    tokensOutput: number;
-  }>;
-}
-
-export interface AnalyticsCostSnapshot {
-  totalCost: number;
-  costByAgent: Array<{
-    agentName: string;
-    cost: number;
-    tokensInput: number;
-    tokensOutput: number;
-  }>;
-}
-
-export interface TenantUsageSnapshot {
-  costByTenant: Array<{
-    tenantId: string;
-    cost: number;
-    tokensInput: number;
-    tokensOutput: number;
-  }>;
-}
+import type {
+  AnalyticsCostSnapshot,
+  AnalyticsStreamEvent,
+  IncomingAnalyticsEvent,
+  LanguageAggregate,
+  TenantUsageSnapshot,
+} from './interfaces';
 
 @Injectable()
 export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
@@ -520,3 +422,10 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
     }
   }
 }
+
+export type {
+  AnalyticsCostSnapshot,
+  AnalyticsStreamEvent,
+  LanguageAggregate,
+  TenantUsageSnapshot,
+} from './interfaces';

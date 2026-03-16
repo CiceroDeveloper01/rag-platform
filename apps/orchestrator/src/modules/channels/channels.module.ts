@@ -6,22 +6,22 @@ import {
 } from "@rag-platform/observability";
 import { AgentTraceModule } from "../agent-trace/agent-trace.module";
 import { QueueModule } from "../queue/queue.module";
-import { CHANNEL_LISTENERS } from "./channel-listeners.token";
-import { ChannelsBootstrapService } from "./channels-bootstrap.service";
-import { ChannelHttpClient } from "./channel-http.client";
-import { EmailListener } from "./email.listener";
-import { EmailInboundAdapter } from "./email.inbound.adapter";
-import { EmailOutboundService } from "./email.outbound.service";
-import { ChannelOutboundRouterService } from "./channel-outbound-router.service";
-import { TelegramInboundAdapter } from "./telegram.inbound.adapter";
-import { TelegramCommandService } from "./telegram-command.service";
-import { TelegramListener } from "./telegram.listener";
-import { TelegramOutboundService } from "./telegram.outbound.service";
-import { TelegramPollingService } from "./telegram.polling.service";
-import { TelegramResponseComposerService } from "./telegram-response-composer.service";
-import { WhatsAppInboundAdapter } from "./whatsapp.inbound.adapter";
-import { WhatsAppOutboundService } from "./whatsapp.outbound.service";
-import { WhatsAppListener } from "./whatsapp.listener";
+import { CHANNEL_LISTENERS } from "./core/bootstrap/channel-listeners.token";
+import { ChannelsBootstrapService } from "./core/bootstrap/channels-bootstrap.service";
+import { ChannelHttpClient } from "./core/http/channel-http.client";
+import { ChannelOutboundRouterService } from "./core/router/channel-outbound-router.service";
+import { EmailInboundAdapter } from "./email/inbound/email.inbound.adapter";
+import { EmailListener } from "./email/listener/email.listener";
+import { EmailOutboundService } from "./email/outbound/email.outbound.service";
+import { TelegramCommandService } from "./telegram/commands/telegram-command.service";
+import { TelegramResponseComposerService } from "./telegram/composer/telegram-response-composer.service";
+import { TelegramInboundAdapter } from "./telegram/inbound/telegram.inbound.adapter";
+import { TelegramListener } from "./telegram/listener/telegram.listener";
+import { TelegramOutboundService } from "./telegram/outbound/telegram.outbound.service";
+import { TelegramPollingService } from "./telegram/polling/telegram.polling.service";
+import { WhatsAppInboundAdapter } from "./whatsapp/inbound/whatsapp.inbound.adapter";
+import { WhatsAppListener } from "./whatsapp/listener/whatsapp.listener";
+import { WhatsAppOutboundService } from "./whatsapp/outbound/whatsapp.outbound.service";
 
 const channelListenerProviders = [
   EmailListener,

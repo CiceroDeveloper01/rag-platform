@@ -14,8 +14,8 @@ import {
 } from "@rag-platform/observability";
 import { Job, Worker } from "bullmq";
 import { AgentTracePublisherService } from "../agent-trace/agent-trace.publisher";
-import { ChannelOutboundRouterService } from "../channels/channel-outbound-router.service";
-import { TelegramResponseComposerService } from "../channels/telegram-response-composer.service";
+import { ChannelOutboundRouterService } from "../channels/core/router/channel-outbound-router.service";
+import { TelegramResponseComposerService } from "../channels/telegram/composer/telegram-response-composer.service";
 import { DeadLetterQueueService } from "../queue/dead-letter.queue";
 import {
   EXECUTE_REGISTER_DOCUMENT_JOB,

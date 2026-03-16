@@ -2,45 +2,7 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AppLoggerService } from "@rag-platform/observability";
 import { createClient, type RedisClientType } from "redis";
-import { Channel } from "@rag-platform/contracts";
-
-interface AnalyticsPublishPayload {
-  eventType:
-    | "analytics.message.received"
-    | "analytics.agent.selected"
-    | "analytics.flow.executed"
-    | "analytics.agent.quality"
-    | "analytics.user.feedback"
-    | "analytics.ai.cost"
-    | "analytics.tenant.usage";
-  timestamp: string;
-  channel?: Channel;
-  language?: "pt" | "en" | "es";
-  agent?: string;
-  flow?: string;
-  tenantId?: string;
-  model?: string;
-  keywords?: string[];
-  averageQualityScore?: number;
-  failureRate?: number;
-  userSatisfaction?: number;
-  averageRating?: number;
-  totalCost?: number;
-  tokensInput?: number;
-  tokensOutput?: number;
-  costByAgent?: Array<{
-    agentName: string;
-    cost: number;
-    tokensInput: number;
-    tokensOutput: number;
-  }>;
-  costByTenant?: Array<{
-    tenantId: string;
-    cost: number;
-    tokensInput: number;
-    tokensOutput: number;
-  }>;
-}
+import type { AnalyticsPublishPayload } from "./interfaces";
 
 @Injectable()
 export class AnalyticsPublisherService

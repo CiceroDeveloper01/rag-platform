@@ -3,15 +3,7 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
 import { REDIS_CACHE_CLIENT } from '../cache.constants';
 import type { CacheWrapOptions } from '../interfaces/cache-options.interface';
-
-interface RedisCacheClient {
-  isOpen: boolean;
-  scanIterator(options: {
-    MATCH: string;
-    COUNT: number;
-  }): AsyncIterable<unknown>;
-  del(keys: string[]): Promise<number>;
-}
+import type { RedisCacheClient } from '../interfaces/redis-cache-client.interface';
 
 @Injectable()
 export class AppCacheService {

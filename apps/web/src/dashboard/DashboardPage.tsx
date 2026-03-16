@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AgentQualityChart } from "@/src/components/AgentQualityChart";
-import { AgentUsageChart } from "@/src/components/AgentUsageChart";
-import { ChannelTrafficChart } from "@/src/components/ChannelTrafficChart";
-import { FlowExecutionChart } from "@/src/components/FlowExecutionChart";
-import { KeywordCloud } from "@/src/components/KeywordCloud";
-import { LanguageDistributionPanel } from "@/src/components/LanguageDistributionPanel";
-import { LanguageTimelineChart } from "@/src/components/LanguageTimelineChart";
-import { LanguageUsageChart } from "@/src/components/LanguageUsageChart";
-import { UserFeedbackChart } from "@/src/components/UserFeedbackChart";
+import { AgentQualityChart } from "@/src/components/analytics/AgentQualityChart";
+import { AgentUsageChart } from "@/src/components/analytics/AgentUsageChart";
+import { ChannelTrafficChart } from "@/src/components/analytics/ChannelTrafficChart";
+import { FlowExecutionChart } from "@/src/components/analytics/FlowExecutionChart";
+import { KeywordCloud } from "@/src/components/analytics/KeywordCloud";
+import { LanguageDistributionPanel } from "@/src/components/analytics/LanguageDistributionPanel";
+import { LanguageTimelineChart } from "@/src/components/analytics/LanguageTimelineChart";
+import { LanguageUsageChart } from "@/src/components/analytics/LanguageUsageChart";
+import { UserFeedbackChart } from "@/src/components/analytics/UserFeedbackChart";
 import { navigationItems } from "@/src/components/layout/navigation";
 import { DashboardOverview } from "@/src/features/dashboard/components/dashboard-overview";
 import { analyticsApiService } from "@/src/services/analytics-api.service";
