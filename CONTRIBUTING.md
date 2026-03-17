@@ -1,8 +1,8 @@
-# Contributing to RAG-PLATAFORM
+# Contributing to RAG Platform
 
-First of all, thank you for considering contributing to **RAG-PLATAFORM**.
+First of all, thank you for considering contributing to **RAG Platform**.
 
-This project aims to build a production-ready **Omnichannel AI Gateway with RAG capabilities**, combining modern backend architecture, observability, and AI orchestration.
+This project is a production-oriented TypeScript monorepo for AI agent orchestration, RAG, asynchronous document ingestion, and observability.
 
 We welcome contributions from developers, engineers, researchers, and AI enthusiasts.
 
@@ -75,17 +75,32 @@ Clone the repository:
 git clone https://github.com/cicero.developer01/RAG-PLATAFORM.git
 cd RAG-PLATAFORM
 npm ci
-npm --prefix apps/api-business ci
-npm --prefix apps/web ci
 ```
 
-Start the local infrastructure when backend integration and e2e flows require dependencies such as PostgreSQL, Redis, or the observability stack:
+Use Docker for infrastructure and run the apps locally for normal development:
+
+```bash
+npm run dev:infra
+```
+
+If you need the full containerized stack instead:
 
 ```bash
 docker compose --env-file ./infra/docker/.env.docker up -d --build
 ```
 
-PostgreSQL remains externally available on port `5433`.
+Current app boundaries:
+
+- `apps/web`
+  - UI only
+- `apps/api-web`
+  - portal-facing BFF and presentation concerns
+- `apps/api-business`
+  - synchronous business/domain APIs
+- `apps/orchestrator`
+  - asynchronous runtime, workers, channels, and agents
+
+RabbitMQ is used only for asynchronous document ingestion. Chat remains synchronous.
 
 ## Testing
 
@@ -112,6 +127,18 @@ Full CI-style validation:
 ```bash
 npm run ci
 ```
+
+## Architecture and Documentation
+
+Before making structural changes, review the canonical documentation:
+
+- `README.md`
+- `docs/ARCHITECTURE.md`
+- `docs/ARCHITECTURE_DECISIONS.md`
+- `docs/RUNNING_LOCALLY.md`
+- `docs/TESTING_GUIDE.md`
+
+When changing boundaries between apps, queue topology, or asynchronous document ingestion behavior, update the relevant docs and ADRs in the same change.
 
 ## Performance Tests
 
