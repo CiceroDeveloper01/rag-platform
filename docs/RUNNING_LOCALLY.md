@@ -12,7 +12,7 @@ This guide summarizes the local development setup that matches the repository as
 
 ```mermaid
 flowchart LR
-    Web[apps/web] --> API[apps/api]
+    Web[apps/web] --> API[apps/api-business]
     API --> Postgres[(PostgreSQL)]
     API --> Redis[(Redis)]
     Orchestrator[apps/orchestrator] --> Redis
@@ -56,7 +56,7 @@ Use separate terminals.
 ### API
 
 ```bash
-npm --prefix apps/api run start:dev
+npm --prefix apps/api-business run start:dev
 ```
 
 ### Orchestrator

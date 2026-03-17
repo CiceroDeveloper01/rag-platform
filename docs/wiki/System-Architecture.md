@@ -4,7 +4,7 @@
 
 ## Monorepo Structure
 
-- `apps/api`
+- `apps/api-business`
   - synchronous NestJS API for management, analytics, documents, search, memory, health, and admin surfaces
 - `apps/web`
   - Next.js application for dashboards, chat views, and omnichannel operator screens
@@ -22,7 +22,7 @@
 ```mermaid
 flowchart TD
     subgraph Apps
-        API[apps/api]
+        API[apps/api-business]
         WEB[apps/web]
         ORCH[apps/orchestrator]
     end

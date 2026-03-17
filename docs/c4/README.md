@@ -16,7 +16,7 @@ For RAG-PLATAFORM, the C4 documentation is used to explain:
 
 - **System Context**: shows the main actors and external systems around RAG-PLATAFORM
 - **Container Diagram**: shows the primary runtime containers and infrastructure services
-- **Component Diagram**: shows the main internal backend components inside `apps/api`
+- **Component Diagram**: shows the main internal backend components inside `apps/api-business`
 
 ## Documents
 
@@ -28,7 +28,7 @@ For RAG-PLATAFORM, the C4 documentation is used to explain:
 
 These documents reflect the current architecture already implemented in the repository, including:
 
-- `apps/api` as the NestJS backend
+- `apps/api-business` as the NestJS backend
 - `apps/web` as the Next.js operational dashboard
 - PostgreSQL with `pgvector`
 - the omnichannel / MCP orchestration model

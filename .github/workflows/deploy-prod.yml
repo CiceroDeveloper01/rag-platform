@@ -34,7 +34,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./apps/api/Dockerfile
+          file: ./apps/api-business/Dockerfile
           push: false
           tags: rag-platform-api:prod
 

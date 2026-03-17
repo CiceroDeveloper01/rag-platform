@@ -75,7 +75,7 @@ Clone the repository:
 git clone https://github.com/cicero.developer01/RAG-PLATAFORM.git
 cd RAG-PLATAFORM
 npm ci
-npm --prefix apps/api ci
+npm --prefix apps/api-business ci
 npm --prefix apps/web ci
 ```
 

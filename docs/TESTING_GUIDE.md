@@ -60,9 +60,9 @@ npm --prefix apps/orchestrator run test:cov:ci
 ### API
 
 ```bash
-npm --prefix apps/api run test -- --runInBand
-npm --prefix apps/api run test:e2e -- --runInBand
-npm --prefix apps/api run test:cov:ci
+npm --prefix apps/api-business run test -- --runInBand
+npm --prefix apps/api-business run test:e2e -- --runInBand
+npm --prefix apps/api-business run test:cov:ci
 ```
 
 ### Web

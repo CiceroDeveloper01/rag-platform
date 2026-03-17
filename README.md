@@ -45,7 +45,8 @@ flowchart LR
 
 ```text
 apps/
-  api
+  api-business
+  api-web
   orchestrator
   web
 
@@ -69,8 +70,11 @@ docs/
 
 ## Module Responsibilities
 
-- `apps/api`
-  - synchronous APIs for administration, analytics, documents, search, internal memory, and management surfaces
+- `apps/api-business`
+  - synchronous business APIs for chat, documents, ingestion, search, memory, and internal platform operations
+
+- `apps/api-web`
+  - portal-facing APIs for auth, analytics, agent traces, health, omnichannel monitoring, and simulation surfaces
 
 - `apps/orchestrator`
   - asynchronous runtime, queues, agents, tools, RAG, memory, guardrails, feature toggles, tracing, and outbound routing

@@ -22,7 +22,7 @@ buildable, testable, and understandable.
 The repository already includes:
 
 - a domain-oriented monorepo structure
-- strict application boundaries across `apps/web`, `apps/api`, and
+- strict application boundaries across `apps/web`, `apps/api-business`, and
   `apps/orchestrator`
 - channel-specific organization under the orchestrator
 - canonical architecture documentation in English
@@ -41,7 +41,7 @@ Known operational note:
 ### Monorepo boundaries
 
 - [ ] Confirm `apps/web` contains only frontend concerns.
-- [ ] Confirm `apps/api` contains only API and synchronous backend concerns.
+- [ ] Confirm `apps/api-business` contains only API and synchronous backend concerns.
 - [ ] Confirm `apps/orchestrator` contains the async runtime and channel-facing
       orchestration concerns.
 - [ ] Confirm `packages/*` only contains code that is truly reusable across

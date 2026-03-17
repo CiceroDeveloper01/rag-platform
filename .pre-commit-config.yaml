@@ -45,7 +45,7 @@ repos:
         name: eslint-api
         entry: npm
         language: system
-        args: [--prefix, apps/api, run, lint]
+        args: [--prefix, apps/api-business, run, lint]
         pass_filenames: false
 
       - id: eslint-orchestrator

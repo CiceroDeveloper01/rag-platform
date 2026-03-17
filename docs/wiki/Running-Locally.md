@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart LR
-    Web[apps/web] --> API[apps/api]
+    Web[apps/web] --> API[apps/api-business]
     API --> Postgres[(PostgreSQL)]
     API --> Redis[(Redis)]
     Orchestrator[apps/orchestrator] --> Redis

@@ -18,7 +18,7 @@ Frontend application for the monorepo, implemented in `apps/web` with Next.js Ap
 ```mermaid
 flowchart LR
     Browser[Browser] --> Web[Next.js web app]
-    Web --> API[apps/api]
+    Web --> API[apps/api-business]
     API --> Postgres[(PostgreSQL)]
     API --> Redis[(Redis)]
 ```

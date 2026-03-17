@@ -23,11 +23,11 @@ flowchart LR
 
 ## ADR-001 — Agent-first Runtime
 
-### Intent
+### ADR-001 Intent
 
 The runtime should decide through agents rather than embedding business logic in channels or controllers.
 
-### Validation
+### ADR-001 Validation
 
 The current codebase follows this direction:
 
@@ -35,11 +35,11 @@ The current codebase follows this direction:
 - `SupervisorAgent` chooses the target agent
 - `conversation-agent`, `document-agent`, and `handoff-agent` plan downstream execution
 
-### Current Drift
+### ADR-001 Current Drift
 
 The main attention point is not channel logic, but the amount of operational work concentrated in `InboundMessageProcessor`.
 
-### Status
+### ADR-001 Status
 
 `Aligned, with some operational concentration still evolving`
 
@@ -53,11 +53,11 @@ flowchart TD
 
 ## ADR-002 — Channel Agnostic
 
-### Intent
+### ADR-002 Intent
 
 Channels should normalize transport payloads without embedding runtime business logic.
 
-### Validation
+### ADR-002 Validation
 
 The current runtime is aligned with this principle:
 
@@ -65,11 +65,11 @@ The current runtime is aligned with this principle:
 - channel services focus on input and output transport
 - agent selection happens in the orchestrator, not in the channel layer
 
-### Current Drift
+### ADR-002 Current Drift
 
 No major business drift is visible in the channel layer. Telegram-specific logic is mostly limited to transport handling, metrics, and traces.
 
-### Status
+### ADR-002 Status
 
 `Aligned`
 
@@ -82,39 +82,41 @@ flowchart LR
 
 ## ADR-003 — Orchestrator Runtime
 
-### Intent
+### ADR-003 Intent
 
-`apps/orchestrator` should be the message runtime, while `apps/api` should remain a synchronous boundary for management, persistence, and queries.
+`apps/orchestrator` should be the message runtime, while synchronous API boundaries should remain outside that path. In the current structure, `apps/api-business` carries business-facing synchronous capabilities and `apps/api-web` carries portal-facing presentation APIs.
 
-### Validation
+### ADR-003 Validation
 
 This is how the repository behaves today:
 
 - runtime queues, processors, agents, and outbound routing live in `apps/orchestrator`
-- `apps/api` exposes synchronous application surfaces such as analytics, documents, search, and administrative endpoints
+- `apps/api-business` exposes synchronous business capabilities such as chat, documents, ingestion, search, memory, and internal platform operations
+- `apps/api-web` exposes portal-facing surfaces such as auth, analytics, agent traces, health, omnichannel dashboards, and simulation endpoints
 
-### Current Drift
+### ADR-003 Current Drift
 
 No strong evidence shows the API taking over the asynchronous message runtime path.
 
-### Status
+### ADR-003 Status
 
 `Aligned`
 
 ```mermaid
 flowchart LR
     Channels[Channels] --> Orchestrator[apps/orchestrator]
-    Orchestrator --> API[apps/api]
-    API --> Web[apps/web]
+    Orchestrator --> APIBusiness[apps/api-business]
+    APIBusiness --> APIWeb[apps/api-web]
+    APIWeb --> Web[apps/web]
 ```
 
 ## ADR-004 — Async Queues
 
-### Intent
+### ADR-004 Intent
 
 Message processing should be asynchronous, with explicit decoupling between intake, planning, and downstream execution.
 
-### Validation
+### ADR-004 Validation
 
 The current implementation matches that intent:
 
@@ -122,11 +124,11 @@ The current implementation matches that intent:
 - `flow-execution` handles the downstream execution stage
 - retries, exponential backoff, and DLQ packaging are implemented
 
-### Current Drift
+### ADR-004 Current Drift
 
 No significant drift is visible. The topology remains intentionally simple.
 
-### Status
+### ADR-004 Status
 
 `Aligned`
 
@@ -140,11 +142,11 @@ flowchart TD
 
 ## ADR-005 — Feature Toggles
 
-### Intent
+### ADR-005 Intent
 
 Critical capabilities should be switchable at runtime with safe degradation when disabled.
 
-### Validation
+### ADR-005 Validation
 
 The current orchestrator runtime applies explicit toggles for:
 
@@ -157,11 +159,11 @@ The current orchestrator runtime applies explicit toggles for:
 - outbound sending
 - training pipeline behavior
 
-### Current Drift
+### ADR-005 Current Drift
 
 The core runtime is consistent. More granular tenant-scoped or rollout-scoped governance remains an improvement opportunity, not a contradiction of the current architecture.
 
-### Status
+### ADR-005 Status
 
 `Aligned`
 

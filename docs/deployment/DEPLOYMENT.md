@@ -345,7 +345,7 @@ kubectl apply -f k8s/
 For local demos, the API includes a seed script:
 
 ```bash
-cd apps/api
+cd apps/api-business
 npm run seed
 ```
 

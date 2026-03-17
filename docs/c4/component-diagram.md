@@ -1,6 +1,6 @@
 # Component Diagram
 
-This view focuses on the main internal components of the backend in `apps/api`, especially the omnichannel and RAG orchestration path.
+This view focuses on the main internal components of the backend in `apps/api-business`, especially the omnichannel and RAG orchestration path.
 
 The goal is to show how the platform keeps transport concerns, orchestration logic, retrieval logic, persistence, analytics, and observability separated while still working as one cohesive backend.
 

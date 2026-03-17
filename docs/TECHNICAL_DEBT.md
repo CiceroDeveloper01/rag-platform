@@ -44,8 +44,8 @@ Those flows call:
 
 The corresponding API implementations live in:
 
-- `apps/api/src/modules/chat/controllers/chat.controller.ts`
-- `apps/api/src/modules/ingestion/controllers/ingestion.controller.ts`
+- `apps/api-business/src/modules/chat/controllers/chat.controller.ts`
+- `apps/api-business/src/modules/ingestion/controllers/ingestion.controller.ts`
 
 This means the repository currently has two different ways to exercise the
 platform:
@@ -73,7 +73,7 @@ an intentional second execution model.
 The repository currently contains two real RAG-oriented execution paths:
 
 - API chat path:
-  - `apps/api/src/modules/chat/services/chat.service.ts`
+  - `apps/api-business/src/modules/chat/services/chat.service.ts`
 - orchestrator retrieval path:
   - `apps/orchestrator/src/modules/agents/conversation-agent/conversation.agent.ts`
   - `apps/orchestrator/src/modules/rag/retrieval.service.ts`
@@ -100,7 +100,7 @@ surface.
 
 The API owns a direct upload and ingestion pipeline:
 
-- `apps/api/src/modules/ingestion/services/ingestion.service.ts`
+- `apps/api-business/src/modules/ingestion/services/ingestion.service.ts`
 
 The orchestrator owns a separate document-ingestion tool pipeline and a document
 indexer:
@@ -267,16 +267,16 @@ These flows currently bypass the orchestrator path and use direct API behavior:
   - `apps/web/src/features/chat/hooks/use-chat.ts`
   - `apps/web/src/features/chat/services/chat-api.service.ts`
 - backend entry:
-  - `apps/api/src/modules/chat/controllers/chat.controller.ts`
-  - `apps/api/src/modules/chat/services/chat.service.ts`
+  - `apps/api-business/src/modules/chat/controllers/chat.controller.ts`
+  - `apps/api-business/src/modules/chat/services/chat.service.ts`
 
 ### Document upload experience
 
 - web entry:
   - `apps/web/src/features/documents/services/documents-api.service.ts`
 - backend entry:
-  - `apps/api/src/modules/ingestion/controllers/ingestion.controller.ts`
-  - `apps/api/src/modules/ingestion/services/ingestion.service.ts`
+  - `apps/api-business/src/modules/ingestion/controllers/ingestion.controller.ts`
+  - `apps/api-business/src/modules/ingestion/services/ingestion.service.ts`
 
 ### Why this matters
 
@@ -316,7 +316,7 @@ The orchestrator document indexer currently builds local embeddings through
 The API ingestion flow uses the API embedding service and persists document data
 through repository abstractions:
 
-- `apps/api/src/modules/ingestion/services/ingestion.service.ts`
+- `apps/api-business/src/modules/ingestion/services/ingestion.service.ts`
 
 #### Impact
 
@@ -337,8 +337,8 @@ reason about as one platform capability.
 Examples:
 
 - `apps/orchestrator/src/modules/tenancy/tenant-resolver.service.ts`
-- `apps/api/src/common/tenancy/tenant-context.service.ts`
-- `apps/api/src/modules/ingestion/services/ingestion.service.ts`
+- `apps/api-business/src/common/tenancy/tenant-context.service.ts`
+- `apps/api-business/src/modules/ingestion/services/ingestion.service.ts`
 - `apps/orchestrator/src/modules/rag/document-indexer.service.ts`
 
 #### Impact
@@ -356,7 +356,7 @@ in environments where isolation matters.
 
 The repository has a real idempotency service in the API omnichannel module:
 
-- `apps/api/src/modules/omnichannel/application/services/idempotency.service.ts`
+- `apps/api-business/src/modules/omnichannel/application/services/idempotency.service.ts`
 
 The orchestrator also reduces duplicate queue processing by using stable
 `jobId`s and queue-level deduplication patterns.

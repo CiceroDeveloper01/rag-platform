@@ -3,7 +3,8 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json ./
-COPY apps/api/package.json ./apps/api/package.json
+COPY apps/api-business/package.json ./apps/api-business/package.json
+COPY apps/api-web/package.json ./apps/api-web/package.json
 COPY apps/orchestrator/package.json ./apps/orchestrator/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/config/package.json ./packages/config/package.json
@@ -27,7 +28,8 @@ RUN npm --workspace apps/orchestrator run build
 
 FROM base AS production-deps
 COPY package.json package-lock.json ./
-COPY apps/api/package.json ./apps/api/package.json
+COPY apps/api-business/package.json ./apps/api-business/package.json
+COPY apps/api-web/package.json ./apps/api-web/package.json
 COPY apps/orchestrator/package.json ./apps/orchestrator/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/config/package.json ./packages/config/package.json

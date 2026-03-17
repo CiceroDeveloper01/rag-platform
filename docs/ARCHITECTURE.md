@@ -34,9 +34,12 @@ flowchart LR
 
 ### Applications
 
-- `apps/api`
+- `apps/api-web`
+  - synchronous NestJS API for portal-facing presentation concerns
+  - auth, analytics, agent traces, health, omnichannel dashboards, and simulation surfaces
+- `apps/api-business`
   - synchronous NestJS API
-  - management, analytics, document, search, memory, health, and administrative surfaces
+  - chat, document, ingestion, search, memory, and internal business-facing surfaces
 - `apps/web`
   - Next.js application
   - dashboards, chat screens, omnichannel command center, and operator views
@@ -64,7 +67,8 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Apps
-        API[apps/api]
+        APIWEB[apps/api-web]
+        API[apps/api-business]
         ORCH[apps/orchestrator]
         WEB[apps/web]
     end
@@ -82,6 +86,9 @@ flowchart TD
     WEB --> CONTRACTS
     WEB --> TYPES
     WEB --> UTILS
+    APIWEB --> CONTRACTS
+    APIWEB --> CONFIG
+    APIWEB --> OBS
     ORCH --> CONTRACTS
     ORCH --> SDK
     ORCH --> CONFIG

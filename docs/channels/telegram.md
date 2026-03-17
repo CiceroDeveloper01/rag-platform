@@ -50,7 +50,7 @@ The bootstrap validates `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_USERNAME` when th
 ## Running Locally
 
 1. Start Redis and the main stack.
-2. Ensure `apps/api` is running for internal clients.
+2. Ensure `apps/api-business` is running for internal clients.
 3. Start `apps/orchestrator`.
 4. Open the bot in Telegram and send a message.
 

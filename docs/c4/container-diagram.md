@@ -11,7 +11,7 @@ flowchart LR
     User[User / Operator]
 
     Web[Next.js Web Dashboard\napps/web]
-    Api[NestJS API\napps/api]
+    Api[NestJS API\napps/api-business]
     Db[(PostgreSQL + pgvector)]
     OpenAI[OpenAI]
 
@@ -57,7 +57,7 @@ It consumes the backend API and presents the analytics/query layer in a usable i
 
 ### NestJS API
 
-The backend in `apps/api`.
+The backend in `apps/api-business`.
 
 It is responsible for:
 

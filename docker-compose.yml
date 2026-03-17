@@ -40,7 +40,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
+      dockerfile: apps/api-business/Dockerfile
     container_name: rag-api
     restart: unless-stopped
     depends_on:
