@@ -30,6 +30,7 @@ Current architectural principles:
 - `channel-agnostic`: channels do not contain business rules
 - `orchestrator-centered`: the real runtime lives in `apps/orchestrator`
 - `event-driven`: BullMQ queues decouple intake from execution
+- `document ingestion async path`: document uploads can be handed off from `apps/api-business` to `apps/orchestrator` through RabbitMQ without changing chat runtime behavior
 
 ```mermaid
 flowchart LR
@@ -100,6 +101,7 @@ docs/
 - Next.js
 - BullMQ
 - Redis
+- RabbitMQ
 - PostgreSQL
 - OpenTelemetry
 - Prometheus

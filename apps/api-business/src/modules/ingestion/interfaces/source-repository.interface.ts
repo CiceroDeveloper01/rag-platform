@@ -1,3 +1,4 @@
+import { SourceIngestionStatus } from "./source-status.type";
 import { SourceRecord } from './source-record.interface';
 
 export interface CreateSourcePayload {
@@ -5,6 +6,8 @@ export interface CreateSourcePayload {
   type: string;
   storageKey?: string | null;
   storageUrl?: string | null;
+  ingestionStatus?: SourceIngestionStatus;
+  ingestionFailureReason?: string | null;
 }
 
 export interface ListSourcesPayload {
@@ -24,6 +27,8 @@ export interface SourceRepositoryInterface {
     payload: {
       filename?: string;
       type?: string;
+      ingestionStatus?: SourceIngestionStatus;
+      ingestionFailureReason?: string | null;
       storageKey?: string | null;
       storageUrl?: string | null;
     },

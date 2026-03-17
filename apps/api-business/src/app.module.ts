@@ -14,12 +14,14 @@ import { omnichannelTelegramConfig } from './config/omnichannel-telegram.config'
 import { omnichannelEmailConfig } from './config/omnichannel-email.config';
 import { storageConfig } from './config/storage.config';
 import { memoryConfig } from './config/memory.config';
+import { rabbitMqConfig } from './config/rabbitmq.config';
 import { validateEnvironment } from './config/environment.validation';
 import { AiModule } from './infra/ai/ai.module';
 import { LoggerConfigModule } from './common/logger/logger.module';
 import { CommonCacheModule } from './common/cache/cache.module';
 import { EmailModule } from './common/email/email.module';
 import { CommonFeatureFlagsModule } from './common/feature-flags/feature-flags.module';
+import { MessagingModule } from './common/messaging/messaging.module';
 import { CommonObservabilityModule } from './common/observability/observability.module';
 import { StorageModule } from './common/storage/storage.module';
 import { DatabaseModule } from './infra/database/database.module';
@@ -53,6 +55,7 @@ import { SearchModule } from './modules/search/search.module';
         omnichannelEmailConfig,
         storageConfig,
         memoryConfig,
+        rabbitMqConfig,
       ],
       validate: validateEnvironment,
     }),
@@ -68,6 +71,7 @@ import { SearchModule } from './modules/search/search.module';
     CommonCacheModule,
     EmailModule,
     CommonFeatureFlagsModule,
+    MessagingModule,
     StorageModule,
     LoggerConfigModule,
     DatabaseModule,

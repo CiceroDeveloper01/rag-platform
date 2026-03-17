@@ -34,7 +34,7 @@ export class IngestionController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({
     summary:
-      'Uploads a supported document, validates it, stores the original file, generates chunks and embeddings, and persists the results.',
+      'Uploads a supported document, validates it, stores the original file, and queues asynchronous ingestion.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -50,7 +50,7 @@ export class IngestionController {
     },
   })
   @ApiOkResponse({
-    description: 'Document uploaded and ingested successfully.',
+    description: 'Document upload accepted and queued for asynchronous ingestion.',
   })
   @ApiBadRequestResponse({
     description: 'Invalid upload payload or unsupported file type.',

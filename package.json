@@ -28,6 +28,7 @@
     "test:web": "npm --prefix apps/web run test",
     "coverage:web": "npm --prefix apps/web run test:coverage",
     "build:web": "npm --prefix apps/web run build",
+    "dev:infra": "bash ./scripts/dev/start-infra-only.sh",
     "docker:build:api": "docker build -f apps/api-business/Dockerfile -t rag-platform-api .",
     "docker:build:api-web": "docker build -f apps/api-web/Dockerfile -t rag-platform-api-web .",
     "docker:build:orchestrator": "docker build -f apps/orchestrator/Dockerfile -t rag-platform-orchestrator .",

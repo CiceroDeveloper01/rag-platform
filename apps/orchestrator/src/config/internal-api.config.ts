@@ -18,6 +18,10 @@ export const internalApiConfig = registerAs("internalApi", () => ({
   paths: {
     registerDocument:
       process.env.INTERNAL_API_DOCUMENTS_REGISTER_PATH ?? "/documents/register",
+    completeDocumentIngestion:
+      process.env.INTERNAL_API_INGESTION_COMPLETE_PATH ?? "/ingestion/complete",
+    failDocumentIngestion:
+      process.env.INTERNAL_API_INGESTION_FAIL_PATH ?? "/ingestion/fail",
     replyConversation:
       process.env.INTERNAL_API_CONVERSATIONS_REPLY_PATH ??
       "/conversations/reply",

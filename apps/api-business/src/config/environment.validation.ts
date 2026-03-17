@@ -46,6 +46,34 @@ class EnvironmentVariables {
   REDIS_HOST?: string;
 
   @IsOptional()
+  @IsString()
+  RABBITMQ_HOST?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  RABBITMQ_PORT?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_USERNAME?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_PASSWORD?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_VHOST?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_QUEUE?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  RABBITMQ_DOCUMENT_INGESTION_PREFETCH?: string;
+
+  @IsOptional()
   @IsNumberString()
   REDIS_PORT?: string;
 

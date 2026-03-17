@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MessagingModule } from '../../common/messaging/messaging.module';
 import { FileValidationService } from '../../common/validation/file-validation.service';
 import { ChunkingService } from '../../infra/chunking/chunking.service';
 import { ObservabilityModule } from '../../infra/observability/observability.module';
@@ -15,7 +16,7 @@ import { IngestionService } from './services/ingestion.service';
 import { SourcesService } from './services/sources.service';
 
 @Module({
-  imports: [ConfigModule, DocumentsModule, ObservabilityModule],
+  imports: [ConfigModule, DocumentsModule, ObservabilityModule, MessagingModule],
   controllers: [IngestionController, SourcesController],
   providers: [
     IngestionService,
@@ -31,6 +32,6 @@ import { SourcesService } from './services/sources.service';
       useExisting: SourcePostgresRepository,
     },
   ],
-  exports: [ChunkingService],
+  exports: [ChunkingService, SOURCE_REPOSITORY],
 })
 export class IngestionModule {}

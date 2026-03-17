@@ -15,7 +15,9 @@ flowchart LR
     Web[apps/web] --> API[apps/api-business]
     API --> Postgres[(PostgreSQL)]
     API --> Redis[(Redis)]
+    API --> Rabbit[(RabbitMQ)]
     Orchestrator[apps/orchestrator] --> Redis
+    Orchestrator --> Rabbit
     Orchestrator --> API
     Prometheus[Prometheus] --> Grafana[Grafana]
     Loki[Loki] --> Grafana
@@ -42,6 +44,7 @@ The compose stack currently includes:
 
 - PostgreSQL
 - Redis
+- RabbitMQ
 - Prometheus
 - Grafana
 - Loki
