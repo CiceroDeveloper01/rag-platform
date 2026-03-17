@@ -48,11 +48,19 @@ describe("FlowExecutionProcessor worker lifecycle", () => {
   const channelOutboundRouterService = {
     send: jest.fn().mockResolvedValue(undefined),
   };
-  const documentIngestionPipelineService = {
-    ingest: jest.fn().mockResolvedValue({
-      documentId: "doc-1",
+  const downloadFileToolService = {
+    execute: jest.fn().mockResolvedValue({
+      providerFileId: "file-1",
       fileName: "policy.pdf",
-      chunkCount: 3,
+      mimeType: "application/pdf",
+      extractedText: "Monthly statement",
+      bodyFallback: "Monthly statement",
+    }),
+  };
+  const documentIngestionInternalClient = {
+    requestIngestion: jest.fn().mockResolvedValue({
+      documentId: 1,
+      status: "PENDING",
     }),
   };
   const deadLetterQueueService = {
@@ -81,7 +89,8 @@ describe("FlowExecutionProcessor worker lifecycle", () => {
         resolveRecipientId: jest.fn().mockReturnValue("1001"),
       } as any,
       channelOutboundRouterService as any,
-      documentIngestionPipelineService as any,
+      downloadFileToolService as any,
+      documentIngestionInternalClient as any,
       deadLetterQueueService as any,
     );
   }
@@ -131,19 +140,30 @@ describe("FlowExecutionProcessor worker lifecycle", () => {
       },
     });
 
-    expect(documentIngestionPipelineService.ingest).toHaveBeenCalledWith(
+    expect(downloadFileToolService.execute).toHaveBeenCalledWith(
       expect.objectContaining({
-        channel: Channel.TELEGRAM,
-        document: expect.objectContaining({
-          fileName: "policy.pdf",
+        message: expect.objectContaining({
+          channel: Channel.TELEGRAM,
+          document: expect.objectContaining({
+            fileName: "policy.pdf",
+          }),
         }),
+      }),
+    );
+    expect(documentIngestionInternalClient.requestIngestion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: "tenant-a",
+        sourceChannel: Channel.TELEGRAM,
+        conversationId: undefined,
+        filename: "policy.pdf.txt",
+        mimeType: "text/plain",
       }),
     );
     expect(channelOutboundRouterService.send).toHaveBeenCalledWith(
       Channel.TELEGRAM,
       expect.objectContaining({
         recipientId: "1001",
-        text: expect.stringContaining("indexed successfully"),
+        text: expect.stringContaining("queued for asynchronous ingestion"),
       }),
     );
   });
@@ -208,6 +228,7 @@ describe("FlowExecutionProcessor worker lifecycle", () => {
 
   it("indexes documents without sending an outbound message when no recipient can be resolved", async () => {
     const processor = createProcessor();
+    processor.onModuleInit();
 
     await processor.handleJob({
       id: "flow-job-4",
@@ -221,11 +242,14 @@ describe("FlowExecutionProcessor worker lifecycle", () => {
       },
     } as any);
 
-    expect(documentIngestionPipelineService.ingest).toHaveBeenCalledWith(
+    expect(downloadFileToolService.execute).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: "Body only",
+        message: expect.objectContaining({
+          body: "Body only",
+        }),
       }),
     );
+    expect(documentIngestionInternalClient.requestIngestion).toHaveBeenCalled();
     expect(channelOutboundRouterService.send).not.toHaveBeenCalled();
   });
 
@@ -241,6 +265,7 @@ describe("FlowExecutionProcessor worker lifecycle", () => {
     });
 
     const processor = createProcessor();
+    processor.onModuleInit();
 
     await processor.handleJob({
       id: "flow-job-5",
@@ -258,7 +283,7 @@ describe("FlowExecutionProcessor worker lifecycle", () => {
       },
     } as any);
 
-    expect(documentIngestionPipelineService.ingest).toHaveBeenCalled();
+    expect(documentIngestionInternalClient.requestIngestion).toHaveBeenCalled();
     expect(channelOutboundRouterService.send).not.toHaveBeenCalled();
     expect(agentTracePublisherService.publish).toHaveBeenCalledWith(
       expect.objectContaining({

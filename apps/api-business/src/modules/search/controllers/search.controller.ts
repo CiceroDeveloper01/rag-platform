@@ -6,7 +6,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { SearchDto, SearchResponseDto } from '../dto/search.dto';
+import { SearchRequest } from '../dtos/request/search.request';
+import { SearchResponse } from '../dtos/response/search.response';
+import { SearchResponseMapper } from '../mappers/search-response.mapper';
 import { SearchService } from '../services/search.service';
 import { TenantContextService } from '../../../common/tenancy/tenant-context.service';
 
@@ -16,20 +18,21 @@ export class SearchController {
   constructor(
     private readonly searchService: SearchService,
     private readonly tenantContextService: TenantContextService,
+    private readonly searchResponseMapper: SearchResponseMapper,
   ) {}
 
   @Post()
   @ApiOperation({
     summary: 'Performs semantic vector search against indexed RAG documents.',
   })
-  @ApiBody({ type: SearchDto })
+  @ApiBody({ type: SearchRequest })
   @ApiOkResponse({
     description: 'Semantic search executed successfully.',
-    type: SearchResponseDto,
+    type: SearchResponse,
   })
   @ApiBadRequestResponse({ description: 'Invalid semantic search payload.' })
-  search(
-    @Body() dto: SearchDto,
+  async search(
+    @Body() dto: SearchRequest,
     @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
     const tenantId = this.tenantContextService.resolveTenant({
@@ -37,6 +40,7 @@ export class SearchController {
       explicitTenantId: dto.tenantId,
     });
 
-    return this.searchService.search(dto, tenantId);
+    const result = await this.searchService.search(dto, tenantId);
+    return this.searchResponseMapper.toResponse(result.results);
   }
 }

@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { authConfig } from './config/auth.config';
 import { aiConfig } from './config/ai.config';
 import { appConfig } from './config/app.config';
+import { businessApiConfig } from './config/business-api.config';
 import { cacheConfig } from './config/cache.config';
 import { databaseConfig } from './config/database.config';
 import { emailConfig } from './config/email.config';
@@ -27,6 +28,7 @@ import { ObservabilityModule } from './infra/observability/observability.module'
 import { AuthModule } from './modules/auth/auth.module';
 import { AgentTraceModule } from './modules/agent-trace/agent-trace.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 import { HealthModule } from './modules/health/health.module';
 import { OmnichannelModule } from './modules/omnichannel/omnichannel.module';
 import { SimulationModule } from './modules/simulation/simulation.module';
@@ -39,6 +41,7 @@ import { SimulationModule } from './modules/simulation/simulation.module';
       expandVariables: true,
       load: [
         appConfig,
+        businessApiConfig,
         cacheConfig,
         emailConfig,
         authConfig,
@@ -74,6 +77,7 @@ import { SimulationModule } from './modules/simulation/simulation.module';
     AgentTraceModule,
     AnalyticsModule,
     AuthModule,
+    DocumentsModule,
     HealthModule,
     OmnichannelModule,
     SimulationModule,

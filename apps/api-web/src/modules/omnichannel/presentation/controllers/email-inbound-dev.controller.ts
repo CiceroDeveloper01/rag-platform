@@ -7,7 +7,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { EmailInboundDevDto } from '../../application/dto/email-inbound-dev.dto';
+import { EmailInboundDevRequest } from '../../application/dtos/request/email-inbound-dev.request';
 import { EmailInboundDevService } from '../../application/services/email-inbound-dev.service';
 
 @ApiTags('Omnichannel')
@@ -24,12 +24,12 @@ export class EmailInboundDevController {
     summary:
       'Processes a development email payload through the omnichannel orchestrator.',
   })
-  @ApiBody({ type: EmailInboundDevDto })
+  @ApiBody({ type: EmailInboundDevRequest })
   @ApiOkResponse({
     description: 'Development email payload accepted and processed.',
   })
   @ApiBadRequestResponse({ description: 'Invalid development email payload.' })
-  handleInbound(@Body() dto: EmailInboundDevDto) {
+  handleInbound(@Body() dto: EmailInboundDevRequest) {
     return this.emailInboundDevService.handleInbound(dto);
   }
 }

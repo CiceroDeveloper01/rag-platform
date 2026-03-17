@@ -1,192 +1,175 @@
-# Architecture Decision Validation
+# Architecture Decisions
 
-This document validates the architectural direction of the current repository against the implementation that actually exists today.
+This document summarizes the architecture decisions that are most relevant to the current public codebase. Historical ADR files remain under `docs/adr/`.
 
-It complements the historical ADRs under `docs/adr/`, but it is intentionally scoped to the current public codebase.
-
-## Decision Summary
+## Current Decision Map
 
 ```mermaid
-flowchart LR
-    ADR1[ADR-001 Agent-first runtime]
-    ADR2[ADR-002 Channel agnostic]
-    ADR3[ADR-003 Orchestrator runtime]
-    ADR4[ADR-004 Async queues]
-    ADR5[ADR-005 Feature toggles]
-
-    ADR1 --> Current[Current codebase]
-    ADR2 --> Current
-    ADR3 --> Current
-    ADR4 --> Current
-    ADR5 --> Current
+flowchart TD
+    ADR1[ADR-001 agent-first runtime]
+    ADR2[ADR-002 channel agnostic]
+    ADR3[ADR-003 orchestrator runtime]
+    ADR4[ADR-004 async queues]
+    ADR5[ADR-005 feature toggles]
+    ADR8[ADR-008 API boundary separation]
+    ADR9[ADR-009 RabbitMQ for document ingestion]
+    ADR10[ADR-010 sync chat, async documents]
+    ADR11[ADR-011 persisted document status as source of truth]
 ```
 
 ## ADR-001 — Agent-first Runtime
 
 ### ADR-001 Intent
 
-The runtime should decide through agents rather than embedding business logic in channels or controllers.
+Runtime decisions should be made by agents instead of embedding business logic in channels.
 
-### ADR-001 Validation
+### ADR-001 Current Validation
 
-The current codebase follows this direction:
+Aligned.
 
-- `AgentGraphService` centralizes runtime decisions
-- `SupervisorAgent` chooses the target agent
-- `conversation-agent`, `document-agent`, and `handoff-agent` plan downstream execution
+- `AgentGraphService` remains the decision hub
+- `SupervisorAgent` selects the target agent
+- specialized agents plan the next execution step
 
 ### ADR-001 Current Drift
 
-The main attention point is not channel logic, but the amount of operational work concentrated in `InboundMessageProcessor`.
-
-### ADR-001 Status
-
-`Aligned, with some operational concentration still evolving`
-
-```mermaid
-flowchart TD
-    Inbound[Canonical inbound payload] --> Supervisor[SupervisorAgent]
-    Supervisor --> Conversation[conversation-agent]
-    Supervisor --> Document[document-agent]
-    Supervisor --> Handoff[handoff-agent]
-```
+Operational work is still concentrated in `InboundMessageProcessor`, but the runtime model remains agent-first.
 
 ## ADR-002 — Channel Agnostic
 
 ### ADR-002 Intent
 
-Channels should normalize transport payloads without embedding runtime business logic.
+Channels must remain transport-focused.
 
-### ADR-002 Validation
+### ADR-002 Current Validation
 
-The current runtime is aligned with this principle:
+Aligned.
 
-- Telegram normalizes updates before queueing them
-- channel services focus on input and output transport
-- agent selection happens in the orchestrator, not in the channel layer
+- channels normalize inbound events
+- channels enqueue canonical payloads
+- channels do not own agent choice or retrieval logic
 
 ### ADR-002 Current Drift
 
-No major business drift is visible in the channel layer. Telegram-specific logic is mostly limited to transport handling, metrics, and traces.
-
-### ADR-002 Status
-
-`Aligned`
-
-```mermaid
-flowchart LR
-    Provider[External channel provider] --> Adapter[Inbound adapter]
-    Adapter --> Queue[inbound-messages]
-    Queue --> Orchestrator[Orchestrator runtime]
-```
+Telegram is more mature than Email and WhatsApp, but the core principle still holds.
 
 ## ADR-003 — Orchestrator Runtime
 
 ### ADR-003 Intent
 
-`apps/orchestrator` should be the message runtime, while synchronous API boundaries should remain outside that path. In the current structure, `apps/api-business` carries business-facing synchronous capabilities and `apps/api-web` carries portal-facing presentation APIs.
+The asynchronous runtime lives in `apps/orchestrator`.
 
-### ADR-003 Validation
+### ADR-003 Current Validation
 
-This is how the repository behaves today:
+Aligned.
 
-- runtime queues, processors, agents, and outbound routing live in `apps/orchestrator`
-- `apps/api-business` exposes synchronous business capabilities such as chat, documents, ingestion, search, memory, and internal platform operations
-- `apps/api-web` exposes portal-facing surfaces such as auth, analytics, agent traces, health, omnichannel dashboards, and simulation endpoints
-
-### ADR-003 Current Drift
-
-No strong evidence shows the API taking over the asynchronous message runtime path.
-
-### ADR-003 Status
-
-`Aligned`
-
-```mermaid
-flowchart LR
-    Channels[Channels] --> Orchestrator[apps/orchestrator]
-    Orchestrator --> APIBusiness[apps/api-business]
-    APIBusiness --> APIWeb[apps/api-web]
-    APIWeb --> Web[apps/web]
-```
+- BullMQ processors, channel listeners, agents, tools, and document workers remain in the orchestrator
+- `api-web` and `api-business` stay outside the async runtime path
 
 ## ADR-004 — Async Queues
 
 ### ADR-004 Intent
 
-Message processing should be asynchronous, with explicit decoupling between intake, planning, and downstream execution.
+Decouple intake, planning, and downstream execution through queues.
 
-### ADR-004 Validation
+### ADR-004 Current Validation
 
-The current implementation matches that intent:
+Aligned.
 
-- `inbound-messages` handles inbound runtime intake
-- `flow-execution` handles the downstream execution stage
-- retries, exponential backoff, and DLQ packaging are implemented
-
-### ADR-004 Current Drift
-
-No significant drift is visible. The topology remains intentionally simple.
-
-### ADR-004 Status
-
-`Aligned`
-
-```mermaid
-flowchart TD
-    Intake[Inbound intake] --> InboundQ[inbound-messages]
-    InboundQ --> Planning[Agent planning]
-    Planning --> FlowQ[flow-execution]
-    FlowQ --> Delivery[Downstream execution and delivery]
-```
+- BullMQ remains the runtime queue system
+- retries and failure handling remain explicit
+- RabbitMQ has now been added for a narrow asynchronous document workload
 
 ## ADR-005 — Feature Toggles
 
 ### ADR-005 Intent
 
-Critical capabilities should be switchable at runtime with safe degradation when disabled.
+Important capabilities must degrade safely when toggled off.
 
-### ADR-005 Validation
+### ADR-005 Current Validation
 
-The current orchestrator runtime applies explicit toggles for:
+Aligned.
 
-- Telegram listener behavior
-- document ingestion
-- parsing
-- retrieval
-- conversation memory
-- evaluation
-- outbound sending
-- training pipeline behavior
+The orchestrator still uses runtime toggles for ingestion, parsing, retrieval, memory, outbound sending, and related capabilities.
 
-### ADR-005 Current Drift
+## ADR-008 — API Boundary Separation
 
-The core runtime is consistent. More granular tenant-scoped or rollout-scoped governance remains an improvement opportunity, not a contradiction of the current architecture.
+Historical file: [ADR-008](adr/ADR-008-api-boundary-separation.md)
 
-### ADR-005 Status
+### ADR-008 Intent
 
-`Aligned`
+Separate portal-facing concerns from synchronous business APIs and from the asynchronous runtime.
 
-```mermaid
-flowchart TD
-    Capability[Capability invoked] --> Toggle{Enabled?}
-    Toggle -->|Yes| Execute[Run capability]
-    Toggle -->|No| Skip[Skip safely]
-    Skip --> Observe[Log, trace, and continue predictably]
-```
+### ADR-008 Current Validation
+
+Partially aligned and improving.
+
+- `apps/api-web` now exists as a presentation/BFF boundary
+- `apps/api-business` now owns business/domain capabilities
+- `apps/orchestrator` remains separate
+
+### ADR-008 Current Drift
+
+Some web flows are still not fully aligned with the intended long-term boundary model. This remains an active technical debt item, not a contradiction of the current direction.
+
+## ADR-009 — RabbitMQ for Document Ingestion
+
+Historical file: [ADR-009](adr/ADR-009-rabbitmq-document-ingestion.md)
+
+### ADR-009 Intent
+
+Introduce RabbitMQ only for heavy document ingestion work.
+
+### ADR-009 Current Validation
+
+Aligned with the current implementation.
+
+- queue: `document.ingestion.requested`
+- producer: `apps/api-business`
+- consumer: `apps/orchestrator`
+
+### ADR-009 Current Drift
+
+None beyond the deliberate narrow scope.
+
+## ADR-010 — Synchronous Chat, Asynchronous Documents
+
+Historical file: [ADR-010](adr/ADR-010-sync-chat-async-documents.md)
+
+### ADR-010 Intent
+
+Keep immediate message/reply flows synchronous while moving heavy document processing out of the request path.
+
+### ADR-010 Current Validation
+
+Aligned.
+
+- chat remains synchronous
+- web and channel-origin documents can be handed off asynchronously
+
+## ADR-011 — Persisted Document Status as Source of Truth
+
+Historical file: [ADR-011](adr/ADR-011-persisted-document-status.md)
+
+### ADR-011 Intent
+
+The UI should observe persisted status, not RabbitMQ internals.
+
+### ADR-011 Current Validation
+
+Aligned.
+
+- `api-business` persists document status and step information
+- `api-web` exposes BFF proxy endpoints
+- `web` polls persisted status
 
 ## Overall Reading
 
-Current platform alignment:
+The current architecture is coherent around four boundaries:
 
-- ADR-001 agent-first runtime: aligned
-- ADR-002 channel agnostic: aligned
-- ADR-003 orchestrator runtime: aligned
-- ADR-004 async queues: aligned
-- ADR-005 feature toggles: aligned
+- `web`
+- `api-web`
+- `api-business`
+- `orchestrator`
 
-Current architectural attention points:
-
-- `InboundMessageProcessor` still concentrates a large amount of runtime responsibility
-- end-to-end idempotency is still not centralized
-- document lifecycle and vector persistence are still evolving for larger-scale production scenarios
+Documents are now explicitly asynchronous when heavy processing is required. Chat remains synchronous. RabbitMQ is intentionally narrow in scope.

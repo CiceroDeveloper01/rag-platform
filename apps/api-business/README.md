@@ -1,18 +1,47 @@
 # API Business
 
-`apps/api-business` is the synchronous business-facing NestJS API.
+`apps/api-business` is the synchronous business/domain API boundary.
 
-It owns the repository-backed capabilities that already exist in the platform today, including:
+## Responsibilities
+
+This app owns business capabilities that already exist in the repository, including:
 
 - chat
 - documents
-- document ingestion
+- ingestion
 - search and retrieval
-- conversations and memory
-- internal endpoints used by the orchestrator runtime
+- conversations
+- memory
+- internal ingestion callbacks used by the orchestrator
 
-This app is intentionally separate from:
+## Document Ingestion Role
 
-- `apps/web`, which remains UI-only
-- `apps/api-web`, which is the portal-facing presentation and BFF-oriented API layer
-- `apps/orchestrator`, which remains the asynchronous runtime for agents, queues, channels, and tools
+`api-business` is the RabbitMQ producer for asynchronous document ingestion.
+
+When a document is accepted for heavy processing, this app:
+
+1. validates and stores metadata
+2. persists initial status such as `PENDING`
+3. publishes `document.ingestion.requested`
+4. returns `202 Accepted`
+
+It also exposes persisted status queries and internal callbacks for:
+
+- status updates
+- completion
+- failure
+
+## Architectural Boundaries
+
+- it is not the portal UI
+- it is not the asynchronous worker runtime
+- it should not absorb presentation concerns that belong to `api-web`
+
+## Typical Local Commands
+
+```bash
+npm --prefix apps/api-business run lint
+npm --prefix apps/api-business run test -- --runInBand
+npm --prefix apps/api-business run build
+npm --prefix apps/api-business run start:debug
+```

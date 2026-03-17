@@ -27,12 +27,13 @@ import {
   parseCookieHeader,
 } from '../../../common/utils/cookie.util';
 import {
-  LoginDto,
-  LoginResponseDto,
-  LogoutResponseDto,
-  MeResponseDto,
-} from '../dto/login.dto';
+  LoginRequest,
+} from '../dtos/request/login.request';
+import { LoginResponse } from '../dtos/response/login.response';
+import { LogoutResponse } from '../dtos/response/logout.response';
+import { MeResponse } from '../dtos/response/me.response';
 import { SessionAuthGuard } from '../guards/session-auth.guard';
+import { AuthResponseMapper } from '../mappers/auth-response.mapper';
 import { AuthService } from '../services/auth.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -42,6 +43,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly authResponseMapper: AuthResponseMapper,
   ) {}
 
   @Post('login')
@@ -49,13 +51,13 @@ export class AuthController {
   @ApiOperation({
     summary: 'Authenticates a user and creates a session cookie.',
   })
-  @ApiBody({ type: LoginDto })
+  @ApiBody({ type: LoginRequest })
   @ApiOkResponse({
     description: 'Authentication succeeded.',
-    type: LoginResponseDto,
+    type: LoginResponse,
   })
   async login(
-    @Body() dto: LoginDto,
+    @Body() dto: LoginRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
     const session = await this.authService.login(dto.email, dto.password);
@@ -70,16 +72,7 @@ export class AuthController {
       buildSessionCookieOptions(this.configService, session.expiresAt),
     );
 
-    return {
-      token: session.sessionToken,
-      expiresAt: session.expiresAt.toISOString(),
-      user: {
-        id: session.user.id,
-        email: session.user.email,
-        name: session.user.fullName,
-        role: session.user.role,
-      },
-    };
+    return this.authResponseMapper.toLoginResponse(session);
   }
 
   @Get('me')
@@ -88,18 +81,11 @@ export class AuthController {
   @ApiCookieAuth('rag_platform_session')
   @ApiOkResponse({
     description: 'Authenticated user returned successfully.',
-    type: MeResponseDto,
+    type: MeResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   getMe(@CurrentUser() user: AuthenticatedUser) {
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.fullName,
-        role: user.role,
-      },
-    };
+    return this.authResponseMapper.toMeResponse(user);
   }
 
   @Post('logout')
@@ -109,7 +95,7 @@ export class AuthController {
   @ApiCookieAuth('rag_platform_session')
   @ApiOkResponse({
     description: 'Logout completed successfully.',
-    type: LogoutResponseDto,
+    type: LogoutResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   async logout(
@@ -132,6 +118,6 @@ export class AuthController {
       buildSessionCookieOptions(this.configService),
     );
 
-    return { success: true };
+    return this.authResponseMapper.toLogoutResponse();
   }
 }

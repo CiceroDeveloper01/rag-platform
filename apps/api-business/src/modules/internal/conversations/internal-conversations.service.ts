@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { ReplyConversationDto } from './reply-conversation.dto';
+import { ReplyConversationRequest } from './dtos/request/reply-conversation.request';
 
 @Injectable()
 export class InternalConversationsService {
@@ -8,7 +8,7 @@ export class InternalConversationsService {
     this.logger.setContext(InternalConversationsService.name);
   }
 
-  async reply(dto: ReplyConversationDto) {
+  async reply(dto: ReplyConversationRequest) {
     this.logger.info(
       {
         tenantId: dto.tenantId,

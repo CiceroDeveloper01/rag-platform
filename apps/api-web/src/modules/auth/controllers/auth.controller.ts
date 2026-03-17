@@ -27,11 +27,11 @@ import {
   parseCookieHeader,
 } from '../../../common/utils/cookie.util';
 import {
-  LoginDto,
-  LoginResponseDto,
-  LogoutResponseDto,
-  MeResponseDto,
-} from '../dto/login.dto';
+  LoginRequest,
+} from '../dtos/request/login.request';
+import { LoginResponse } from '../dtos/response/login.response';
+import { LogoutResponse } from '../dtos/response/logout.response';
+import { MeResponse } from '../dtos/response/me.response';
 import { SessionAuthGuard } from '../guards/session-auth.guard';
 import { AuthService } from '../services/auth.service';
 import { ConfigService } from '@nestjs/config';
@@ -49,13 +49,13 @@ export class AuthController {
   @ApiOperation({
     summary: 'Authenticates a user and creates a session cookie.',
   })
-  @ApiBody({ type: LoginDto })
+  @ApiBody({ type: LoginRequest })
   @ApiOkResponse({
     description: 'Authentication succeeded.',
-    type: LoginResponseDto,
+    type: LoginResponse,
   })
   async login(
-    @Body() dto: LoginDto,
+    @Body() dto: LoginRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
     const session = await this.authService.login(dto.email, dto.password);
@@ -88,7 +88,7 @@ export class AuthController {
   @ApiCookieAuth('rag_platform_session')
   @ApiOkResponse({
     description: 'Authenticated user returned successfully.',
-    type: MeResponseDto,
+    type: MeResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   getMe(@CurrentUser() user: AuthenticatedUser) {
@@ -109,7 +109,7 @@ export class AuthController {
   @ApiCookieAuth('rag_platform_session')
   @ApiOkResponse({
     description: 'Logout completed successfully.',
-    type: LogoutResponseDto,
+    type: LogoutResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   async logout(

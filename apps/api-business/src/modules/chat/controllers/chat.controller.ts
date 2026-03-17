@@ -23,7 +23,9 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../common/interfaces/authenticated-request.interface';
 import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
 import { TenantContextService } from '../../../common/tenancy/tenant-context.service';
-import { ChatDto, ChatResponseDto } from '../dto/chat.dto';
+import { ChatRequest } from '../dtos/request/chat.request';
+import { ChatResponse } from '../dtos/response/chat.response';
+import { ChatResponseMapper } from '../mappers/chat-response.mapper';
 import { ChatService } from '../services/chat.service';
 
 @ApiTags('Chat', 'RAG')
@@ -34,6 +36,7 @@ export class ChatController {
   constructor(
     private readonly chatService: ChatService,
     private readonly tenantContextService: TenantContextService,
+    private readonly chatResponseMapper: ChatResponseMapper,
   ) {}
 
   @Post()
@@ -43,16 +46,16 @@ export class ChatController {
       'Runs the end-to-end RAG chat pipeline and optionally streams tokens using SSE.',
   })
   @ApiConsumes('application/json')
-  @ApiBody({ type: ChatDto })
+  @ApiBody({ type: ChatRequest })
   @ApiOkResponse({
     description:
       'Returns a chat response as JSON or streams events when the client requests text/event-stream.',
-    type: ChatResponseDto,
+    type: ChatResponse,
   })
   @ApiBadRequestResponse({ description: 'Invalid chat payload.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   async chat(
-    @Body() dto: ChatDto,
+    @Body() dto: ChatRequest,
     @CurrentUser() user: AuthenticatedUser,
     @Req() request: Request,
     @Res() response: Response,
@@ -71,7 +74,11 @@ export class ChatController {
     };
 
     if (!wantsStreaming) {
-      return response.json(await this.chatService.chat(scopedDto, user));
+      return response.json(
+        this.chatResponseMapper.toResponse(
+          await this.chatService.chat(scopedDto, user),
+        ),
+      );
     }
 
     response.setHeader('Content-Type', 'text/event-stream');

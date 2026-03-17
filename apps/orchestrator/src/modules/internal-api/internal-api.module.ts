@@ -148,10 +148,16 @@ import {
         new DocumentIngestionClient(
           httpClient,
           configService.getOrThrow<string>(
+            "internalApi.paths.requestDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
             "internalApi.paths.completeDocumentIngestion",
           ),
           configService.getOrThrow<string>(
             "internalApi.paths.failDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.updateDocumentIngestionStatus",
           ),
         ),
     },
@@ -179,10 +185,16 @@ import {
         new DocumentIngestionInternalClient(
           httpClient,
           configService.getOrThrow<string>(
+            "internalApi.paths.requestDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
             "internalApi.paths.completeDocumentIngestion",
           ),
           configService.getOrThrow<string>(
             "internalApi.paths.failDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.updateDocumentIngestionStatus",
           ),
         ),
     },

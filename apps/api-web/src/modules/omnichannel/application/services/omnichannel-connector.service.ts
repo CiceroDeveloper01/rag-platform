@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { AppCacheService } from '../../../../common/cache/services/app-cache.service';
-import { ToggleConnectorDto } from '../dto/toggle-connector.dto';
+import { ToggleConnectorRequest } from '../dtos/request/toggle-connector.request';
 import { OMNICHANNEL_CONNECTOR_REPOSITORY } from '../../domain/repositories/connector-repository.interface';
 import type { IConnectorRepository } from '../../domain/repositories/connector-repository.interface';
 
@@ -16,7 +16,7 @@ export class OmnichannelConnectorService {
     this.logger.setContext(OmnichannelConnectorService.name);
   }
 
-  async toggle(connectorId: number, dto: ToggleConnectorDto) {
+  async toggle(connectorId: number, dto: ToggleConnectorRequest) {
     const current = await this.connectorRepository.findById(connectorId);
 
     if (!current) {

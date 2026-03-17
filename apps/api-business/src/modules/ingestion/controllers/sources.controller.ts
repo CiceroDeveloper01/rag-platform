@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -6,7 +7,6 @@ import {
   ParseIntPipe,
   Patch,
   Query,
-  Body,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -20,8 +20,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
-import { ListSourcesDto } from '../dto/list-sources.dto';
-import { UpdateSourceDto } from '../dto/update-source.dto';
+import { DocumentStatusQueryRequest } from '../dtos/request/document-status-query.request';
+import { ListSourcesRequest } from '../dtos/request/list-sources.request';
+import { UpdateSourceRequest } from '../dtos/request/update-source.request';
 import { SourcesService } from '../services/sources.service';
 
 @ApiTags('Documents')
@@ -37,8 +38,30 @@ export class SourcesController {
   })
   @ApiOkResponse({ description: 'Source list returned successfully.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
-  list(@Query() query: ListSourcesDto) {
+  list(@Query() query: ListSourcesRequest) {
     return this.sourcesService.list(query);
+  }
+
+  @Get('status')
+  @ApiOperation({
+    summary: 'Returns source documents with persisted ingestion status fields.',
+  })
+  @ApiOkResponse({ description: 'Source status list returned successfully.' })
+  @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
+  listStatuses(@Query() query: DocumentStatusQueryRequest) {
+    return this.sourcesService.listDocumentStatuses(query);
+  }
+
+  @Get(':id/status')
+  @ApiOperation({
+    summary: 'Returns the persisted ingestion status for a source document.',
+  })
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @ApiOkResponse({ description: 'Source status returned successfully.' })
+  @ApiNotFoundResponse({ description: 'Source not found.' })
+  @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
+  getStatus(@Param('id', ParseIntPipe) sourceId: number) {
+    return this.sourcesService.getDocumentStatus(sourceId);
   }
 
   @Patch(':id')
@@ -46,13 +69,13 @@ export class SourcesController {
     summary: 'Updates source metadata such as filename or status flags.',
   })
   @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiBody({ type: UpdateSourceDto })
+  @ApiBody({ type: UpdateSourceRequest })
   @ApiOkResponse({ description: 'Source updated successfully.' })
   @ApiNotFoundResponse({ description: 'Source not found.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   update(
     @Param('id', ParseIntPipe) sourceId: number,
-    @Body() dto: UpdateSourceDto,
+    @Body() dto: UpdateSourceRequest,
   ) {
     return this.sourcesService.update(sourceId, dto);
   }

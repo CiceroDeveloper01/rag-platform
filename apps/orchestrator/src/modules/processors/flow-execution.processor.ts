@@ -12,6 +12,7 @@ import {
   MetricsService,
   TELEGRAM_RESPONSES_SENT_TOTAL,
 } from "@rag-platform/observability";
+import { DocumentIngestionInternalClient } from "@rag-platform/sdk";
 import { Job, Worker } from "bullmq";
 import { AgentTracePublisherService } from "../agent-trace/agent-trace.publisher";
 import { ChannelOutboundRouterService } from "../channels/core/router/channel-outbound-router.service";
@@ -23,7 +24,7 @@ import {
   FLOW_EXECUTION_QUEUE,
 } from "../queue/queue.constants";
 import { FlowExecutionPayload } from "../queue/flow-execution.types";
-import { DocumentIngestionPipelineService } from "../tools/document-ingestion/document-ingestion.pipeline";
+import { DownloadFileToolService } from "../tools/document-ingestion/download-file.tool";
 
 @Injectable()
 export class FlowExecutionProcessor implements OnModuleInit, OnModuleDestroy {
@@ -36,7 +37,8 @@ export class FlowExecutionProcessor implements OnModuleInit, OnModuleDestroy {
     private readonly agentTracePublisherService: AgentTracePublisherService,
     private readonly telegramResponseComposerService: TelegramResponseComposerService,
     private readonly channelOutboundRouterService: ChannelOutboundRouterService,
-    private readonly documentIngestionPipelineService: DocumentIngestionPipelineService,
+    private readonly downloadFileToolService: DownloadFileToolService,
+    private readonly documentIngestionInternalClient: DocumentIngestionInternalClient,
     private readonly deadLetterQueueService: DeadLetterQueueService,
   ) {}
 
@@ -175,18 +177,48 @@ export class FlowExecutionProcessor implements OnModuleInit, OnModuleDestroy {
     payload: FlowExecutionPayload,
   ): Promise<void> {
     const message = toChannelMessageEvent(payload);
-    const result = await this.documentIngestionPipelineService.ingest(message);
+    const downloaded = await this.downloadFileToolService.execute({
+      message,
+    });
+    const content =
+      downloaded.extractedText ?? downloaded.bodyFallback ?? downloaded.fileName;
+    const tenantId = extractTenantId(payload);
+    const normalizedMimeType = resolveAsyncDocumentMimeType(
+      downloaded.mimeType,
+      content,
+    );
+    const normalizedFilename = normalizeAsyncDocumentFilename(
+      downloaded.fileName,
+      normalizedMimeType,
+    );
+    const result = await this.documentIngestionInternalClient.requestIngestion<{
+      documentId: number;
+      status: string;
+    }>({
+      tenantId,
+      sourceChannel: String(payload.channel),
+      conversationId: message.conversationId,
+      filename: normalizedFilename,
+      mimeType: normalizedMimeType,
+      fileContentBase64: Buffer.from(content, "utf-8").toString("base64"),
+      metadata: sanitizeStringMetadata({
+        ...((payload.context?.metadata as Record<string, unknown> | undefined) ??
+          {}),
+        providerFileId: downloaded.providerFileId,
+        originalMimeType: downloaded.mimeType,
+        externalMessageId: payload.externalMessageId,
+      }),
+    });
     const recipientId = resolveRecipientId(payload);
 
     if (recipientId) {
-      const tenantId = extractTenantId(payload);
       await this.sendOutboundMessage(
         payload.channel,
         {
           recipientId,
           text: buildDocumentIndexedResponse(
-            result.fileName,
-            result.chunkCount,
+            downloaded.fileName,
+            result.status ?? "PENDING",
           ),
           metadata: {
             documentId: result.documentId,
@@ -198,8 +230,8 @@ export class FlowExecutionProcessor implements OnModuleInit, OnModuleDestroy {
           tenantId,
           externalMessageId: payload.externalMessageId,
           responseText: buildDocumentIndexedResponse(
-            result.fileName,
-            result.chunkCount,
+            downloaded.fileName,
+            result.status ?? "PENDING",
           ),
         },
       );
@@ -375,7 +407,49 @@ function toChannelMessageEvent(
 
 function buildDocumentIndexedResponse(
   fileName: string,
-  chunkCount: number,
+  status: string,
 ): string {
-  return `Document "${fileName}" indexed successfully with ${chunkCount} chunks. You can ask questions about it now.`;
+  return `Document "${fileName}" was received and queued for asynchronous ingestion. Current status: ${status}.`;
+}
+
+function resolveAsyncDocumentMimeType(
+  originalMimeType: string,
+  content: string,
+): string {
+  if (originalMimeType.startsWith("text/")) {
+    return originalMimeType;
+  }
+
+  return content.trim().length > 0 ? "text/plain" : originalMimeType;
+}
+
+function normalizeAsyncDocumentFilename(
+  fileName: string,
+  mimeType: string,
+): string {
+  if (mimeType !== "text/plain") {
+    return fileName;
+  }
+
+  if (/\.(txt|md)$/i.test(fileName)) {
+    return fileName;
+  }
+
+  return `${fileName}.txt`;
+}
+
+function sanitizeStringMetadata(
+  metadata: Record<string, unknown>,
+): Record<string, string> {
+  return Object.entries(metadata).reduce<Record<string, string>>(
+    (accumulator, [key, value]) => {
+      if (value === undefined || value === null) {
+        return accumulator;
+      }
+
+      accumulator[key] = String(value);
+      return accumulator;
+    },
+    {},
+  );
 }

@@ -15,7 +15,7 @@ import type { IMetricsService } from '../interfaces/metrics-service.interface';
 import { OMNICHANNEL_TRACE_SERVICE } from '../interfaces/trace-service.interface';
 import type { ITraceService } from '../interfaces/trace-service.interface';
 import { MessageChannel } from '../../domain/enums/message-channel.enum';
-import { TelegramWebhookDto } from '../dto/telegram-webhook.dto';
+import { TelegramWebhookRequest } from '../dtos/request/telegram-webhook.request';
 import { DefaultChannelAdapterRegistryService } from '../../infra/providers/default-channel-adapter-registry.service';
 import { OmnichannelOrchestratorService } from './omnichannel-orchestrator.service';
 import { IdempotencyService } from './idempotency.service';
@@ -44,7 +44,7 @@ export class TelegramWebhookService {
     metricName: 'omnichannel_telegram_webhook_duration_ms',
     labels: { channel: MessageChannel.TELEGRAM },
   })
-  async handleWebhook(dto: TelegramWebhookDto, secret?: string) {
+  async handleWebhook(dto: TelegramWebhookRequest, secret?: string) {
     this.runtimePolicyService.assertApiRuntimeEnabled('telegram.webhook');
 
     if (!this.featureFlagsService.isTelegramEnabled()) {

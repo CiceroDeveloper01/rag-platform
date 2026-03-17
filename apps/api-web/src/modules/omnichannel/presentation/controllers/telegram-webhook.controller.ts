@@ -8,7 +8,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { TelegramWebhookDto } from '../../application/dto/telegram-webhook.dto';
+import { TelegramWebhookRequest } from '../../application/dtos/request/telegram-webhook.request';
 import { TelegramWebhookService } from '../../application/services/telegram-webhook.service';
 
 @ApiTags('Omnichannel')
@@ -31,11 +31,11 @@ export class TelegramWebhookController {
     description:
       'Optional Telegram webhook secret token used for request verification.',
   })
-  @ApiBody({ type: TelegramWebhookDto })
+  @ApiBody({ type: TelegramWebhookRequest })
   @ApiOkResponse({ description: 'Telegram update accepted and processed.' })
   @ApiBadRequestResponse({ description: 'Invalid Telegram update payload.' })
   handleWebhook(
-    @Body() dto: TelegramWebhookDto,
+    @Body() dto: TelegramWebhookRequest,
     @Headers('x-telegram-bot-api-secret-token') secret?: string,
   ) {
     return this.telegramWebhookService.handleWebhook(dto, secret);

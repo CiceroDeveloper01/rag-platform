@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { DocumentsService } from '../../documents/services/documents.service';
-import { RegisterDocumentDto } from './register-document.dto';
+import { RegisterDocumentRequest } from './dtos/request/register-document.request';
 
 @Injectable()
 export class InternalDocumentsService {
   constructor(private readonly documentsService: DocumentsService) {}
 
-  async register(dto: RegisterDocumentDto) {
+  async register(dto: RegisterDocumentRequest) {
     const document = await this.documentsService.createDocument({
       tenantId: dto.tenantId,
       content: dto.content,

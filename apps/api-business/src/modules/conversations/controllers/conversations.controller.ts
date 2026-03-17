@@ -23,9 +23,9 @@ import {
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../common/interfaces/authenticated-request.interface';
 import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
-import { AddConversationMessageDto } from '../dto/add-message.dto';
-import { ConversationsQueryDto } from '../dto/conversations-query.dto';
-import { CreateConversationDto } from '../dto/create-conversation.dto';
+import { AddConversationMessageRequest } from '../dtos/request/add-message.request';
+import { ConversationsQueryRequest } from '../dtos/request/conversations-query.request';
+import { CreateConversationRequest } from '../dtos/request/create-conversation.request';
 import { ConversationsService } from '../services/conversations.service';
 
 @ApiTags('Conversations')
@@ -43,7 +43,7 @@ export class ConversationsController {
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   list(
     @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ConversationsQueryDto,
+    @Query() query: ConversationsQueryRequest,
   ) {
     return this.conversationsService.listForUser(
       user.id,
@@ -69,13 +69,13 @@ export class ConversationsController {
   @ApiOperation({
     summary: 'Creates a new conversation for the authenticated user.',
   })
-  @ApiBody({ type: CreateConversationDto })
+  @ApiBody({ type: CreateConversationRequest })
   @ApiOkResponse({ description: 'Conversation created successfully.' })
   @ApiBadRequestResponse({ description: 'Invalid conversation payload.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   create(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateConversationDto,
+    @Body() dto: CreateConversationRequest,
   ) {
     return this.conversationsService.createConversation(user.id, dto.title);
   }
@@ -83,7 +83,7 @@ export class ConversationsController {
   @Post(':id/messages')
   @ApiOperation({ summary: 'Appends a message to an existing conversation.' })
   @ApiParam({ name: 'id', type: Number, example: 12 })
-  @ApiBody({ type: AddConversationMessageDto })
+  @ApiBody({ type: AddConversationMessageRequest })
   @ApiOkResponse({ description: 'Conversation message appended successfully.' })
   @ApiBadRequestResponse({
     description: 'Invalid conversation message payload.',
@@ -93,7 +93,7 @@ export class ConversationsController {
   appendMessage(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseIntPipe) conversationId: number,
-    @Body() dto: AddConversationMessageDto,
+    @Body() dto: AddConversationMessageRequest,
   ) {
     return this.conversationsService.appendMessage(
       conversationId,

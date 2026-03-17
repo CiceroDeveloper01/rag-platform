@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { InboundEmailMessage } from '../../../../common/email/interfaces/email-provider.interface';
-import { EmailInboundDevDto } from '../../application/dto/email-inbound-dev.dto';
+import { EmailInboundDevRequest } from '../../application/dtos/request/email-inbound-dev.request';
 
 @Injectable()
 export class DevEmailInboundProvider {
-  createPayload(dto: EmailInboundDevDto): InboundEmailMessage {
+  createPayload(dto: EmailInboundDevRequest): InboundEmailMessage {
     return {
       provider: 'dev',
       fromName: dto.fromName,

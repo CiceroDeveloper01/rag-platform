@@ -10,7 +10,7 @@ import {
   OmnichannelRequestDetailsDto,
   OmnichannelRequestListItemDto,
   RagUsageMetricsDto,
-} from '../../../application/dto/omnichannel-dashboard-response.dto';
+} from '../../../application/dtos/response/omnichannel-dashboard.response';
 import {
   IOmnichannelDashboardQueryRepository,
   PaginatedQueryResult,

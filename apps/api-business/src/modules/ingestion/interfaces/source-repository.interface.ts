@@ -1,12 +1,17 @@
-import { SourceIngestionStatus } from "./source-status.type";
+import {
+  SourceIngestionStatus,
+  SourceProcessingStep,
+} from "./source-status.type";
 import { SourceRecord } from './source-record.interface';
 
 export interface CreateSourcePayload {
   filename: string;
   type: string;
+  sourceChannel?: string | null;
   storageKey?: string | null;
   storageUrl?: string | null;
   ingestionStatus?: SourceIngestionStatus;
+  ingestionCurrentStep?: SourceProcessingStep | null;
   ingestionFailureReason?: string | null;
 }
 
@@ -27,10 +32,14 @@ export interface SourceRepositoryInterface {
     payload: {
       filename?: string;
       type?: string;
+      sourceChannel?: string | null;
       ingestionStatus?: SourceIngestionStatus;
+      ingestionCurrentStep?: SourceProcessingStep | null;
       ingestionFailureReason?: string | null;
       storageKey?: string | null;
       storageUrl?: string | null;
+      processingStartedAt?: Date | null;
+      completedAt?: Date | null;
     },
   ): Promise<SourceRecord | null>;
   delete(sourceId: number): Promise<void>;

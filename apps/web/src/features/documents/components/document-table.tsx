@@ -89,10 +89,11 @@ export function DocumentTable({
 
               <tr className="text-left text-xs uppercase tracking-[0.22em] text-slate-500">
                                 <th className="px-4 py-4">Arquivo</th>
-                                <th className="px-4 py-4">Tipo</th>
-                                <th className="px-4 py-4">Criado em</th>
-                                <th className="px-4 py-4">Chunks</th>
+                                <th className="px-4 py-4">Channel</th>
                                 <th className="px-4 py-4">Status</th>
+                                <th className="px-4 py-4">Step</th>
+                                <th className="px-4 py-4">Updated At</th>
+                                <th className="px-4 py-4">Error</th>
                                 <th className="px-4 py-4 text-right">Acoes</th>
 
               </tr>

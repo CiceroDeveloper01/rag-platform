@@ -4,7 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { FeatureFlagsService } from '../../../../common/feature-flags/feature-flags.service';
 import { MetricTimer } from '../../../../common/observability/decorators/metric-timer.decorator';
 import { Trace } from '../../../../common/observability/decorators/trace.decorator';
-import { EmailInboundDevDto } from '../dto/email-inbound-dev.dto';
+import { EmailInboundDevRequest } from '../dtos/request/email-inbound-dev.request';
 import { MessageChannel } from '../../domain/enums/message-channel.enum';
 import { DevEmailInboundProvider } from '../../infra/providers/dev-email-inbound-provider.service';
 import { EmailInboundProcessingService } from './email-inbound-processing.service';
@@ -28,7 +28,7 @@ export class EmailInboundDevService {
     metricName: 'omnichannel_email_inbound_duration_ms',
     labels: { channel: MessageChannel.EMAIL },
   })
-  async handleInbound(dto: EmailInboundDevDto) {
+  async handleInbound(dto: EmailInboundDevRequest) {
     this.runtimePolicyService.assertApiRuntimeEnabled('email.inbound-dev');
 
     if (!this.featureFlagsService.isEmailEnabled()) {

@@ -12,7 +12,7 @@ import { MetricTimer } from '../../../common/observability/decorators/metric-tim
 import { Trace } from '../../../common/observability/decorators/trace.decorator';
 import { EMBEDDING_SERVICE } from '../../../infra/ai/embeddings/embedding.interface';
 import type { EmbeddingServiceInterface } from '../../../infra/ai/embeddings/embedding.interface';
-import { SearchDto } from '../dto/search.dto';
+import { SearchRequest } from '../dtos/request/search.request';
 import { SearchResult } from '../interfaces/search-result.interface';
 import { SEARCH_REPOSITORY } from '../interfaces/search-repository.interface';
 import type { SearchRepositoryInterface } from '../interfaces/search-repository.interface';
@@ -37,7 +37,7 @@ export class SearchService {
     labels: { module: 'search' },
   })
   async search(
-    dto: SearchDto,
+    dto: SearchRequest,
     tenantId = 'default-tenant',
   ): Promise<{ results: SearchResult[] }> {
     try {

@@ -1,28 +1,21 @@
 import { Global, Module } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ObservabilityModule } from '../../infra/observability/observability.module';
+import { AuthApplicationModule } from './application/auth-application.module';
 import { AuthController } from './controllers/auth.controller';
-import { AUTH_REPOSITORY } from './interfaces/auth-repository.interface';
-import { AuthPostgresRepository } from './repositories/auth-postgres.repository';
 import { RolesGuard } from './guards/roles.guard';
 import { SessionAuthGuard } from './guards/session-auth.guard';
-import { AuthService } from './services/auth.service';
+import { AuthInfrastructureModule } from './infrastructure/auth-infrastructure.module';
 
 @Global()
 @Module({
-  imports: [ObservabilityModule],
+  imports: [AuthApplicationModule, AuthInfrastructureModule],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    AuthPostgresRepository,
+  providers: [SessionAuthGuard, RolesGuard, Reflector],
+  exports: [
+    AuthApplicationModule,
+    AuthInfrastructureModule,
     SessionAuthGuard,
     RolesGuard,
-    Reflector,
-    {
-      provide: AUTH_REPOSITORY,
-      useExisting: AuthPostgresRepository,
-    },
   ],
-  exports: [AuthService, SessionAuthGuard, RolesGuard, AUTH_REPOSITORY],
 })
 export class AuthModule {}

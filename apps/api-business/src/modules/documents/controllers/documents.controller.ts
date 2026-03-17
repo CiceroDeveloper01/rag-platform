@@ -24,10 +24,11 @@ import {
 } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
 import { DocumentsService } from '../services/documents.service';
-import { CreateDocumentDto } from '../dto/create-document.dto';
-import { ListDocumentsDto } from '../dto/list-documents.dto';
-import { UpdateDocumentDto } from '../dto/update-document.dto';
+import { CreateDocumentRequest } from '../dtos/request/create-document.request';
+import { ListDocumentsRequest } from '../dtos/request/list-documents.request';
+import { UpdateDocumentRequest } from '../dtos/request/update-document.request';
 import { TenantContextService } from '../../../common/tenancy/tenant-context.service';
+import { DocumentResponseMapper } from '../mappers/document-response.mapper';
 
 @ApiTags('Documents')
 @ApiCookieAuth('rag_platform_session')
@@ -37,14 +38,15 @@ export class DocumentsController {
   constructor(
     private readonly documentsService: DocumentsService,
     private readonly tenantContextService: TenantContextService,
+    private readonly documentResponseMapper: DocumentResponseMapper,
   ) {}
 
   @Get()
   @ApiOperation({ summary: 'Returns paginated document records.' })
   @ApiOkResponse({ description: 'Document list returned successfully.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
-  list(
-    @Query() query: ListDocumentsDto,
+  async list(
+    @Query() query: ListDocumentsRequest,
     @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
     const tenantId = this.tenantContextService.resolveTenant({
@@ -52,10 +54,12 @@ export class DocumentsController {
       explicitTenantId: query.tenantId,
     });
 
-    return this.documentsService.listDocuments({
-      ...query,
-      tenantId,
-    });
+    return this.documentResponseMapper.toResponseList(
+      await this.documentsService.listDocuments({
+        ...query,
+        tenantId,
+      }),
+    );
   }
 
   @Get(':id')
@@ -64,7 +68,7 @@ export class DocumentsController {
   @ApiOkResponse({ description: 'Document returned successfully.' })
   @ApiNotFoundResponse({ description: 'Document not found.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
-  getById(
+  async getById(
     @Param('id', ParseIntPipe) documentId: number,
     @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
@@ -72,17 +76,19 @@ export class DocumentsController {
       headerTenantId: tenantIdHeader,
     });
 
-    return this.documentsService.getDocument(documentId, tenantId);
+    return this.documentResponseMapper.toResponse(
+      await this.documentsService.getDocument(documentId, tenantId),
+    );
   }
 
   @Post()
   @ApiOperation({ summary: 'Creates a document entry manually.' })
-  @ApiBody({ type: CreateDocumentDto })
+  @ApiBody({ type: CreateDocumentRequest })
   @ApiOkResponse({ description: 'Document created successfully.' })
   @ApiBadRequestResponse({ description: 'Invalid document payload.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
-  create(
-    @Body() dto: CreateDocumentDto,
+  async create(
+    @Body() dto: CreateDocumentRequest,
     @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
     const tenantId = this.tenantContextService.resolveTenant({
@@ -91,22 +97,24 @@ export class DocumentsController {
       metadata: dto.metadata,
     });
 
-    return this.documentsService.createDocument({
-      ...dto,
-      tenantId,
-    });
+    return this.documentResponseMapper.toResponse(
+      await this.documentsService.createDocument({
+        ...dto,
+        tenantId,
+      }),
+    );
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Updates document content or metadata.' })
   @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiBody({ type: UpdateDocumentDto })
+  @ApiBody({ type: UpdateDocumentRequest })
   @ApiOkResponse({ description: 'Document updated successfully.' })
   @ApiNotFoundResponse({ description: 'Document not found.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
-  update(
+  async update(
     @Param('id', ParseIntPipe) documentId: number,
-    @Body() dto: UpdateDocumentDto,
+    @Body() dto: UpdateDocumentRequest,
     @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
     const tenantId = this.tenantContextService.resolveTenant({
@@ -115,10 +123,12 @@ export class DocumentsController {
       metadata: dto.metadata,
     });
 
-    return this.documentsService.updateDocument(documentId, {
-      ...dto,
-      tenantId,
-    });
+    return this.documentResponseMapper.toResponse(
+      await this.documentsService.updateDocument(documentId, {
+        ...dto,
+        tenantId,
+      }),
+    );
   }
 
   @Delete(':id')

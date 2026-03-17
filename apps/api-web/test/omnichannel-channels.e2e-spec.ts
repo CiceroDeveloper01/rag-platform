@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { EmailInboundDevDto } from '../src/modules/omnichannel/application/dto/email-inbound-dev.dto';
-import { TelegramWebhookDto } from '../src/modules/omnichannel/application/dto/telegram-webhook.dto';
+import { EmailInboundDevRequest } from '../src/modules/omnichannel/application/dtos/request/email-inbound-dev.request';
+import { TelegramWebhookRequest } from '../src/modules/omnichannel/application/dtos/request/telegram-webhook.request';
 import { EmailInboundDevService } from '../src/modules/omnichannel/application/services/email-inbound-dev.service';
 import { TelegramWebhookService } from '../src/modules/omnichannel/application/services/telegram-webhook.service';
 import { EmailInboundDevController } from '../src/modules/omnichannel/presentation/controllers/email-inbound-dev.controller';
@@ -146,7 +146,7 @@ describe('Omnichannel channel endpoints integration', () => {
         },
         {
           type: 'body',
-          metatype: TelegramWebhookDto,
+          metatype: TelegramWebhookRequest,
         },
       ),
     ).rejects.toBeDefined();
@@ -171,7 +171,7 @@ describe('Omnichannel channel endpoints integration', () => {
         },
         {
           type: 'body',
-          metatype: EmailInboundDevDto,
+          metatype: EmailInboundDevRequest,
         },
       ),
     ).rejects.toBeDefined();

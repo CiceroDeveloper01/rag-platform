@@ -1,17 +1,20 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { DocumentStatusQueryRequest } from '../dtos/request/document-status-query.request';
+import { ListSourcesRequest } from '../dtos/request/list-sources.request';
+import { UpdateSourceRequest } from '../dtos/request/update-source.request';
 import { SOURCE_REPOSITORY } from '../interfaces/source-repository.interface';
 import type { SourceRepositoryInterface } from '../interfaces/source-repository.interface';
-import { ListSourcesDto } from '../dto/list-sources.dto';
-import { UpdateSourceDto } from '../dto/update-source.dto';
+import { DocumentStatusMapper } from '../mappers/document-status.mapper';
 
 @Injectable()
 export class SourcesService {
   constructor(
     @Inject(SOURCE_REPOSITORY)
     private readonly sourceRepository: SourceRepositoryInterface,
+    private readonly documentStatusMapper: DocumentStatusMapper,
   ) {}
 
-  async list(dto: ListSourcesDto) {
+  async list(dto: ListSourcesRequest) {
     return this.sourceRepository.list({
       limit: dto.limit ?? 25,
       offset: dto.offset ?? 0,
@@ -21,7 +24,29 @@ export class SourcesService {
     });
   }
 
-  async update(sourceId: number, dto: UpdateSourceDto) {
+  async listDocumentStatuses(dto: DocumentStatusQueryRequest) {
+    const sources = await this.sourceRepository.list({
+      limit: dto.limit ?? 25,
+      offset: dto.offset ?? 0,
+      query: dto.q,
+      type: dto.type,
+      order: dto.order ?? 'desc',
+    });
+
+    return this.documentStatusMapper.toResponseList(sources);
+  }
+
+  async getDocumentStatus(sourceId: number) {
+    const source = await this.sourceRepository.findById(sourceId);
+
+    if (!source) {
+      throw new NotFoundException(`Source ${sourceId} not found`);
+    }
+
+    return this.documentStatusMapper.toResponse(source);
+  }
+
+  async update(sourceId: number, dto: UpdateSourceRequest) {
     const source = await this.sourceRepository.update(sourceId, dto);
 
     if (!source) {

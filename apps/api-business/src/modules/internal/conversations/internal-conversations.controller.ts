@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { InternalConversationsService } from './internal-conversations.service';
-import { ReplyConversationDto } from './reply-conversation.dto';
+import { ReplyConversationRequest } from './dtos/request/reply-conversation.request';
 
 @ApiExcludeController()
 @Controller(['conversations', 'api/v1/internal/conversations'])
@@ -11,7 +11,7 @@ export class InternalConversationsController {
   ) {}
 
   @Post('reply')
-  reply(@Body() dto: ReplyConversationDto) {
+  reply(@Body() dto: ReplyConversationRequest) {
     return this.internalConversationsService.reply(dto);
   }
 }

@@ -1,8 +1,10 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { CompleteDocumentIngestionDto } from './complete-document-ingestion.dto';
-import { FailDocumentIngestionDto } from './fail-document-ingestion.dto';
+import { CompleteDocumentIngestionRequest } from './dtos/request/complete-document-ingestion.request';
+import { FailDocumentIngestionRequest } from './dtos/request/fail-document-ingestion.request';
 import { InternalIngestionService } from './internal-ingestion.service';
+import { RequestDocumentIngestionRequest } from './dtos/request/request-document-ingestion.request';
+import { UpdateDocumentIngestionStatusRequest } from './dtos/request/update-document-ingestion-status.request';
 
 @ApiExcludeController()
 @Controller(['ingestion', 'api/v1/internal/ingestion'])
@@ -12,12 +14,22 @@ export class InternalIngestionController {
   ) {}
 
   @Post('complete')
-  complete(@Body() dto: CompleteDocumentIngestionDto) {
+  complete(@Body() dto: CompleteDocumentIngestionRequest) {
     return this.internalIngestionService.complete(dto);
   }
 
   @Post('fail')
-  fail(@Body() dto: FailDocumentIngestionDto) {
+  fail(@Body() dto: FailDocumentIngestionRequest) {
     return this.internalIngestionService.fail(dto);
+  }
+
+  @Post('status')
+  updateStatus(@Body() dto: UpdateDocumentIngestionStatusRequest) {
+    return this.internalIngestionService.updateStatus(dto);
+  }
+
+  @Post('request')
+  request(@Body() dto: RequestDocumentIngestionRequest) {
+    return this.internalIngestionService.request(dto);
   }
 }

@@ -10,6 +10,12 @@ import { DocumentChunkingService } from "./document-chunking.service";
 import { DocumentEmbeddingService } from "./document-embedding.service";
 import { DocumentParserService } from "./document-parser.service";
 
+type DocumentIngestionStep =
+  | "PARSING"
+  | "CHUNKING"
+  | "EMBEDDING"
+  | "INDEXING";
+
 @Injectable()
 export class DocumentIngestionWorkerService {
   constructor(
@@ -23,6 +29,7 @@ export class DocumentIngestionWorkerService {
   ) {}
 
   async process(payload: DocumentIngestionRequestedEvent): Promise<void> {
+    const startedAt = Date.now();
     const span = this.tracingService.startSpan("document_ingestion_worker");
 
     this.logger.log(
@@ -36,18 +43,25 @@ export class DocumentIngestionWorkerService {
     );
 
     try {
+      await this.updateStep(payload, "PARSING");
+
       const fileBuffer = Buffer.from(payload.fileContentBase64, "base64");
       const parsedText = await this.parserService.parse({
         fileBuffer,
         filename: payload.filename,
         mimeType: payload.mimeType,
       });
+
+      await this.updateStep(payload, "CHUNKING");
       const chunks = this.chunkingService.splitText(parsedText, {
         chunkSize: payload.chunkSize,
         chunkOverlap: payload.chunkOverlap,
       });
+
+      await this.updateStep(payload, "EMBEDDING");
       const embeddings = await this.embeddingService.generateEmbeddings(chunks);
 
+      await this.updateStep(payload, "INDEXING");
       await this.ingestionInternalClient.completeIngestion({
         sourceId: payload.sourceId,
         tenantId: payload.tenantId,
@@ -66,6 +80,11 @@ export class DocumentIngestionWorkerService {
       });
 
       this.metricsService.increment("document_ingestion_consumer_success_total");
+      this.metricsService.increment("documents_ingestion_completed_total");
+      this.metricsService.record(
+        "documents_ingestion_duration_ms",
+        Date.now() - startedAt,
+      );
       this.logger.log(
         "Async document ingestion completed",
         DocumentIngestionWorkerService.name,
@@ -73,10 +92,16 @@ export class DocumentIngestionWorkerService {
           sourceId: payload.sourceId,
           tenantId: payload.tenantId,
           chunkCount: chunks.length,
+          durationMs: Date.now() - startedAt,
         },
       );
     } catch (error) {
       this.metricsService.increment("document_ingestion_consumer_failure_total");
+      this.metricsService.increment("documents_ingestion_failed_total");
+      this.metricsService.record(
+        "documents_ingestion_duration_ms",
+        Date.now() - startedAt,
+      );
       await this.ingestionInternalClient.failIngestion({
         sourceId: payload.sourceId,
         reason:
@@ -89,10 +114,32 @@ export class DocumentIngestionWorkerService {
         {
           sourceId: payload.sourceId,
           tenantId: payload.tenantId,
+          durationMs: Date.now() - startedAt,
         },
       );
     } finally {
       this.tracingService.endSpan(span);
     }
+  }
+
+  private async updateStep(
+    payload: DocumentIngestionRequestedEvent,
+    currentStep: DocumentIngestionStep,
+  ): Promise<void> {
+    this.logger.log(
+      "Advancing async document ingestion step",
+      DocumentIngestionWorkerService.name,
+      {
+        sourceId: payload.sourceId,
+        tenantId: payload.tenantId,
+        currentStep,
+      },
+    );
+
+    await this.ingestionInternalClient.updateIngestionStatus({
+      sourceId: payload.sourceId,
+      status: "PROCESSING",
+      currentStep,
+    });
   }
 }

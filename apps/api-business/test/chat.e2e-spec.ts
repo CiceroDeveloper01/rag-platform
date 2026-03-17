@@ -7,6 +7,7 @@ import { GlobalExceptionFilter } from '../src/common/filters/global-exception.fi
 import { TenantContextService } from '../src/common/tenancy/tenant-context.service';
 import { ChatController } from '../src/modules/chat/controllers/chat.controller';
 import { SessionAuthGuard } from '../src/modules/auth/guards/session-auth.guard';
+import { ChatResponseMapper } from '../src/modules/chat/mappers/chat-response.mapper';
 import { ChatService } from '../src/modules/chat/services/chat.service';
 
 describe('Chat API (e2e)', () => {
@@ -105,6 +106,7 @@ describe('Chat API (e2e)', () => {
             resolveTenant: jest.fn().mockReturnValue('default-tenant'),
           },
         },
+        ChatResponseMapper,
       ],
     })
       .overrideGuard(SessionAuthGuard)

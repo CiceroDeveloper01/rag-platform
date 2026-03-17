@@ -1,0 +1,45 @@
+# Orchestrator
+
+`apps/orchestrator` is the asynchronous runtime of the platform.
+
+## Responsibilities
+
+This app owns:
+
+- channel listeners and adapters
+- BullMQ processors
+- agent graph and specialized agents
+- runtime tools
+- outbound routing
+- RabbitMQ-backed document ingestion consumers and workers
+
+## Runtime Scope
+
+The orchestrator is responsible for:
+
+- reacting to inbound channel events
+- planning work through agents
+- replying through outbound channels
+- coordinating heavy asynchronous document ingestion
+
+It is not the portal API and it is not the primary business persistence boundary.
+
+## Queues
+
+### BullMQ
+
+- `inbound-messages`
+- `flow-execution`
+
+### RabbitMQ
+
+- `document.ingestion.requested`
+
+## Typical Local Commands
+
+```bash
+npm --prefix apps/orchestrator run lint
+npm --prefix apps/orchestrator run test -- --runInBand
+npm --prefix apps/orchestrator run build
+npm --prefix apps/orchestrator run start:dev
+```

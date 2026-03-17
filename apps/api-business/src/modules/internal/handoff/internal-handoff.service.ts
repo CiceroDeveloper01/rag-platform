@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { CreateHandoffDto } from './create-handoff.dto';
+import { CreateHandoffRequest } from './dtos/request/create-handoff.request';
 
 @Injectable()
 export class InternalHandoffService {
@@ -8,7 +8,7 @@ export class InternalHandoffService {
     this.logger.setContext(InternalHandoffService.name);
   }
 
-  async createHandoff(dto: CreateHandoffDto) {
+  async createHandoff(dto: CreateHandoffRequest) {
     this.logger.warn(
       {
         channel: dto.channel,

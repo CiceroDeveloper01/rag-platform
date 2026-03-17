@@ -5,8 +5,11 @@ import { DOCUMENTS_REPOSITORY } from '../../documents/interfaces/documents-repos
 import type { DocumentsRepositoryInterface } from '../../documents/interfaces/documents-repository.interface';
 import { SOURCE_REPOSITORY } from '../../ingestion/interfaces/source-repository.interface';
 import type { SourceRepositoryInterface } from '../../ingestion/interfaces/source-repository.interface';
-import { CompleteDocumentIngestionDto } from './complete-document-ingestion.dto';
-import { FailDocumentIngestionDto } from './fail-document-ingestion.dto';
+import { CompleteDocumentIngestionRequest } from './dtos/request/complete-document-ingestion.request';
+import { FailDocumentIngestionRequest } from './dtos/request/fail-document-ingestion.request';
+import { IngestionService } from '../../ingestion/services/ingestion.service';
+import { RequestDocumentIngestionRequest } from './dtos/request/request-document-ingestion.request';
+import { UpdateDocumentIngestionStatusRequest } from './dtos/request/update-document-ingestion-status.request';
 
 @Injectable()
 export class InternalIngestionService {
@@ -16,12 +19,13 @@ export class InternalIngestionService {
     @Inject(SOURCE_REPOSITORY)
     private readonly sourceRepository: SourceRepositoryInterface,
     private readonly appCacheService: AppCacheService,
+    private readonly ingestionService: IngestionService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(InternalIngestionService.name);
   }
 
-  async complete(dto: CompleteDocumentIngestionDto) {
+  async complete(dto: CompleteDocumentIngestionRequest) {
     const documents = await this.documentsRepository.createMany(
       dto.chunks.map((chunk, index) => ({
         tenantId: dto.tenantId,
@@ -41,7 +45,9 @@ export class InternalIngestionService {
 
     await this.sourceRepository.update(dto.sourceId, {
       ingestionStatus: 'COMPLETED',
+      ingestionCurrentStep: null,
       ingestionFailureReason: null,
+      completedAt: new Date(),
     });
     await Promise.all([
       this.appCacheService.invalidateByPrefix('rag:retrieval'),
@@ -64,10 +70,12 @@ export class InternalIngestionService {
     };
   }
 
-  async fail(dto: FailDocumentIngestionDto) {
+  async fail(dto: FailDocumentIngestionRequest) {
     await this.sourceRepository.update(dto.sourceId, {
       ingestionStatus: 'FAILED',
+      ingestionCurrentStep: null,
       ingestionFailureReason: dto.reason ?? 'document_ingestion_failed',
+      completedAt: null,
     });
 
     this.logger.warn(
@@ -83,5 +91,56 @@ export class InternalIngestionService {
       sourceId: dto.sourceId,
       status: 'FAILED' as const,
     };
+  }
+
+  async updateStatus(dto: UpdateDocumentIngestionStatusRequest) {
+    const nextStatus = await this.sourceRepository.update(dto.sourceId, {
+      ingestionStatus: dto.status,
+      ingestionCurrentStep: dto.currentStep ?? null,
+      ingestionFailureReason:
+        dto.status === 'FAILED'
+          ? (dto.errorMessage ?? 'document_ingestion_failed')
+          : null,
+      processingStartedAt:
+        dto.status === 'PROCESSING' ? new Date() : undefined,
+      completedAt: dto.status === 'COMPLETED' ? new Date() : null,
+    });
+
+    if (!nextStatus) {
+      return {
+        success: false as const,
+        sourceId: dto.sourceId,
+      };
+    }
+
+    this.logger.info(
+      {
+        sourceId: dto.sourceId,
+        status: dto.status,
+        currentStep: dto.currentStep ?? null,
+      },
+      'Updated async document ingestion status',
+    );
+
+    return {
+      success: true as const,
+      sourceId: dto.sourceId,
+      status: nextStatus.ingestionStatus,
+      currentStep: nextStatus.ingestionCurrentStep ?? null,
+    };
+  }
+
+  async request(dto: RequestDocumentIngestionRequest) {
+    return this.ingestionService.requestBufferedIngestion({
+      buffer: Buffer.from(dto.fileContentBase64, 'base64'),
+      filename: dto.filename,
+      mimeType: dto.mimeType,
+      tenantId: dto.tenantId,
+      sourceChannel: dto.sourceChannel,
+      conversationId: dto.conversationId,
+      chunkSize: dto.chunkSize,
+      chunkOverlap: dto.chunkOverlap,
+      metadata: dto.metadata,
+    });
   }
 }

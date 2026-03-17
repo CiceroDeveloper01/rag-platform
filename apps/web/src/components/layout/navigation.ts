@@ -63,6 +63,11 @@ export const navigationItems: NavigationItem[] = [
     description: "Upload e ingestao",
   },
   {
+    href: "/documents/status",
+    label: "Documents Status",
+    description: "Fila e processamento assincrono",
+  },
+  {
     href: "/observability",
     label: "Observability",
     description: "Health e links operacionais",

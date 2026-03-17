@@ -3,6 +3,8 @@ import {
   CompleteDocumentIngestionRequest,
   DocumentIngestionClient,
   FailDocumentIngestionRequest,
+  RequestDocumentIngestionRequest,
+  UpdateDocumentIngestionStatusRequest,
 } from "../clients/document-ingestion.client";
 
 export class DocumentIngestionInternalClient {
@@ -10,10 +12,24 @@ export class DocumentIngestionInternalClient {
 
   constructor(
     apiClient: InternalApiClient,
+    requestPath = "/ingestion/request",
     completePath = "/ingestion/complete",
     failPath = "/ingestion/fail",
+    statusPath = "/ingestion/status",
   ) {
-    this.client = new DocumentIngestionClient(apiClient, completePath, failPath);
+    this.client = new DocumentIngestionClient(
+      apiClient,
+      requestPath,
+      completePath,
+      failPath,
+      statusPath,
+    );
+  }
+
+  requestIngestion<TResponse = unknown>(
+    payload: RequestDocumentIngestionRequest,
+  ): Promise<TResponse> {
+    return this.client.request<TResponse>(payload);
   }
 
   completeIngestion<TResponse = unknown>(
@@ -26,5 +42,11 @@ export class DocumentIngestionInternalClient {
     payload: FailDocumentIngestionRequest,
   ): Promise<TResponse> {
     return this.client.fail<TResponse>(payload);
+  }
+
+  updateIngestionStatus<TResponse = unknown>(
+    payload: UpdateDocumentIngestionStatusRequest,
+  ): Promise<TResponse> {
+    return this.client.updateStatus<TResponse>(payload);
   }
 }

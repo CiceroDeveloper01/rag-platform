@@ -55,7 +55,15 @@ class EnvironmentVariables {
 
   @IsOptional()
   @IsString()
+  RABBITMQ_USER?: string;
+
+  @IsOptional()
+  @IsString()
   RABBITMQ_USERNAME?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_PASS?: string;
 
   @IsOptional()
   @IsString()
@@ -64,6 +72,10 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   RABBITMQ_VHOST?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_QUEUE_DOCUMENT_INGESTION?: string;
 
   @IsOptional()
   @IsString()

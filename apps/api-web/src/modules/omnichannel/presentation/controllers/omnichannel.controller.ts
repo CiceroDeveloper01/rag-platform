@@ -9,7 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../../../auth/guards/session-auth.guard';
-import { ProcessOmnichannelMessageDto } from '../../application/dto/process-omnichannel-message.dto';
+import { ProcessOmnichannelMessageRequest } from '../../application/dtos/request/process-omnichannel-message.request';
 import { OmnichannelOrchestratorService } from '../../application/services/omnichannel-orchestrator.service';
 
 @ApiTags('Omnichannel')
@@ -26,7 +26,7 @@ export class OmnichannelController {
     summary:
       'Processes a normalized omnichannel payload through the orchestrator for development and testing.',
   })
-  @ApiBody({ type: ProcessOmnichannelMessageDto })
+  @ApiBody({ type: ProcessOmnichannelMessageRequest })
   @ApiOkResponse({
     description: 'Normalized inbound message processed successfully.',
   })
@@ -34,7 +34,7 @@ export class OmnichannelController {
     description: 'Invalid omnichannel development payload.',
   })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
-  process(@Body() dto: ProcessOmnichannelMessageDto) {
+  process(@Body() dto: ProcessOmnichannelMessageRequest) {
     return this.orchestratorService.process(dto);
   }
 }

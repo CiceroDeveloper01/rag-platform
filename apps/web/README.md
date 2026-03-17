@@ -1,80 +1,52 @@
-# RAG Platform Web
+# Web
 
-Frontend application for the monorepo, implemented in `apps/web` with Next.js App Router, TypeScript, and Tailwind CSS.
+`apps/web` is the Next.js user interface for the platform.
 
-## Main Routes
+## Responsibilities
 
-- `/dashboard`: operational overview
-- `/dashboard/omnichannel`: omnichannel command center
-- `/dashboard/omnichannel/requests`: paginated request list
-- `/dashboard/omnichannel/requests/[id]`: request and execution details
-- `/dashboard/omnichannel/connectors`: connector status and toggle view
-- `/chat`: conversational RAG experience
-- `/documents`: document upload and management
-- `/observability`: health and operational links
+The web app currently provides:
 
-## Frontend Topology
+- dashboard and observability views
+- omnichannel operator screens
+- chat screens
+- document upload and document status views
 
-```mermaid
-flowchart LR
-    Browser[Browser] --> Web[Next.js web app]
-    Web --> API[apps/api-business]
-    API --> Postgres[(PostgreSQL)]
-    API --> Redis[(Redis)]
-```
+## Document Status Page
 
-## Getting Started
+The repository now includes a persisted document status view:
 
-Install dependencies at the repository root and start the development server:
+- route: `/documents/status`
 
-```bash
-npm run dev
-```
+The UI polls API endpoints for:
 
-Open [http://localhost:3000](http://localhost:3000).
+- file name
+- source channel when available
+- status
+- current step
+- timestamps
+- safe error information
 
-## Backend Integration
+The UI does not talk to RabbitMQ directly.
 
-The frontend consumes the NestJS API exposed by the monorepo, including:
+## Architectural Boundaries
 
-- `/health`
-- `/metrics`
-- `/chat`
-- `/documents`
-- `/sources`
-- `/conversations`
-- `/api/v1/omnichannel/*`
+- the web app is UI-only
+- it should not hold domain logic that belongs in `api-business`
+- it should prefer `api-web` for presentation/BFF use cases
 
-Main environment variable:
+## Typical Local Commands
 
 ```bash
+npm --prefix apps/web run lint
+npm --prefix apps/web run test
+npm --prefix apps/web run build
+npm --prefix apps/web run dev
+```
+
+## Environment
+
+```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 ```
 
-## Omnichannel Dashboard
-
-The omnichannel UI currently includes:
-
-- overview summary cards
-- channel distribution chart
-- average and p95 latency chart
-- RAG usage widget
-- error-rate widget
-- recent requests
-- paginated request table with filters
-- request detail view with execution timeline
-- connector list and toggle view
-- auto-refresh every 15 seconds
-
-## Scripts
-
-- `npm run dev`
-- `npm run build`
-- `npm run lint`
-- `npm run test`
-
-## Notes
-
-- the backend uses PostgreSQL on port `5433`
-- the omnichannel dashboard expects the REST endpoints under `/api/v1/omnichannel`
-- the charts use `Recharts`
+Adjust this to the boundary you want to exercise locally.

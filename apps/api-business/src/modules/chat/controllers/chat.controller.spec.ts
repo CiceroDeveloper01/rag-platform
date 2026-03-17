@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { TenantContextService } from '../../../common/tenancy/tenant-context.service';
 import { ChatController } from './chat.controller';
+import { ChatResponseMapper } from '../mappers/chat-response.mapper';
 
 describe('ChatController', () => {
   it('resolves tenant context before delegating to the chat service', async () => {
@@ -13,6 +14,7 @@ describe('ChatController', () => {
     const controller = new ChatController(
       chatService as never,
       tenantContextService,
+      new ChatResponseMapper(),
     );
     const response = {
       json: jest.fn(),
@@ -48,6 +50,8 @@ describe('ChatController', () => {
         id: 10,
       }),
     );
-    expect(response.json).toHaveBeenCalledWith({ answer: 'ok' });
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining({ answer: 'ok' }),
+    );
   });
 });

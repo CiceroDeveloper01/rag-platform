@@ -6,47 +6,56 @@ Accepted
 
 ## Context
 
-RAG-PLATAFORM contains a backend API, a frontend dashboard, shared architectural concepts, infrastructure assets, and increasingly shared contracts and types. As the platform evolved, it became important to avoid duplicated request/response contracts, status enums, and utility functions between applications.
+The platform now contains multiple application boundaries with different responsibilities:
 
-The project therefore needed a repository structure that could:
+- `apps/web`
+- `apps/api-web`
+- `apps/api-business`
+- `apps/orchestrator`
 
-- keep backend and frontend together
-- support shared TypeScript contracts and utilities
-- simplify local development and CI
-- preserve architectural consistency across applications
+The repository also contains shared contracts, SDK clients, observability helpers, and configuration packages.
+
+The monorepo structure must therefore:
+
+- preserve strict application ownership
+- keep shared code truly shared
+- avoid moving app-specific logic into generic packages
+- support local development, CI, Docker, and documentation in one place
 
 ## Decision
 
-Adopt a **monorepo structure** with the following top-level organization:
+Adopt a monorepo structure with explicit application boundaries:
 
 ```text
 apps/
-  api
   web
+  api-web
+  api-business
+  orchestrator
 
 packages/
   contracts
+  shared
+  sdk
+  config
+  observability
   types
   utils
 ```
 
-The backend and frontend remain independently deployable applications, while `packages/` contains framework-agnostic shared artifacts used by both apps.
-
-The monorepo also keeps documentation, infrastructure, and CI assets close to the code they support.
+Only framework-agnostic, truly cross-application code belongs in `packages/`.
 
 ## Consequences
 
 ### Positive
 
-- Reduces duplication between frontend and backend for shared contracts and types.
-- Improves consistency for API payloads and dashboard data models.
-- Makes CI, Docker, and documentation easier to manage in one repository.
-- Supports incremental architecture evolution without splitting platform context across repositories.
-- Improves developer experience through shared tooling and aligned TypeScript configuration.
+- clearer ownership for UI, BFF, business APIs, and async runtime
+- easier onboarding and code navigation
+- less architectural drift across application boundaries
+- shared contracts remain explicit
 
 ### Trade-offs
 
-- Requires care around workspace configuration, TypeScript paths, and package boundaries.
-- Can increase repository complexity compared with a single-app codebase.
-- Demands discipline to avoid leaking app-specific logic into shared packages.
-- The project accepts this trade-off to preserve consistency and reduce duplication over time.
+- more application boundaries require more discipline around imports and ownership
+- some transitions still need proxying or internal SDK clients
+- documentation must stay current so the split remains understandable

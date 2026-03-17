@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConversationMemoryService } from '../../memory/services/conversation-memory.service';
-import { QueryMemoryContextDto } from './query-memory-context.dto';
-import { StoreMemoryDto } from './store-memory.dto';
+import { QueryMemoryContextRequest } from './dtos/request/query-memory-context.request';
+import { StoreMemoryRequest } from './dtos/request/store-memory.request';
 
 @Injectable()
 export class InternalMemoryService {
@@ -9,7 +9,7 @@ export class InternalMemoryService {
     private readonly conversationMemoryService: ConversationMemoryService,
   ) {}
 
-  async store(dto: StoreMemoryDto) {
+  async store(dto: StoreMemoryRequest) {
     const memory = await this.conversationMemoryService.storeMessage(dto);
 
     return {
@@ -18,7 +18,7 @@ export class InternalMemoryService {
     };
   }
 
-  async queryContext(dto: QueryMemoryContextDto) {
+  async queryContext(dto: QueryMemoryContextRequest) {
     const context = await this.conversationMemoryService.queryContext(dto);
 
     return {

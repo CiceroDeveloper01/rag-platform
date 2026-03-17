@@ -2,477 +2,344 @@
 
 ## 1. System Overview
 
-This repository implements a TypeScript monorepo for orchestrating AI agents through an asynchronous runtime. External channels normalize inbound events, queues decouple intake from execution, and the orchestrator decides whether the system should answer, ingest a document, retrieve context, or hand off execution.
+This monorepo implements an AI agent platform with a clear split between UI, synchronous APIs, and the asynchronous runtime.
 
-The current implementation follows these principles:
+Current application boundaries:
 
-- `agent-first`: runtime decisions are made through agents
-- `channel-agnostic`: channels normalize transport payloads, but do not own business logic
-- `orchestrator-centered`: the asynchronous runtime lives in `apps/orchestrator`
-- `event-driven`: BullMQ queues decouple message intake from downstream execution
+- `apps/web`
+  - user interface
+- `apps/api-web`
+  - presentation and BFF concerns for the portal
+- `apps/api-business`
+  - synchronous business/domain capabilities already implemented in the repository
+- `apps/orchestrator`
+  - asynchronous runtime with queues, agents, channels, and tools
+
+The platform intentionally supports both synchronous and asynchronous execution:
+
+- chat remains synchronous for immediate responses
+- heavy document ingestion runs asynchronously through RabbitMQ
 
 ```mermaid
 flowchart LR
-    Channel[Channels] --> Adapter[Channel Adapters]
-    Adapter --> InboundQ[inbound-messages queue]
-    InboundQ --> InboundProcessor[InboundMessageProcessor]
-    InboundProcessor --> Graph[AgentGraphService]
-    Graph --> Supervisor[Supervisor Agent]
-    Supervisor --> ConversationAgent[conversation-agent]
-    Supervisor --> DocumentAgent[document-agent]
-    Supervisor --> HandoffAgent[handoff-agent]
-    ConversationAgent --> FlowQ[flow-execution queue]
-    DocumentAgent --> FlowQ
-    HandoffAgent --> FlowQ
-    FlowQ --> FlowProcessor[FlowExecutionProcessor]
-    FlowProcessor --> Tools[Tools]
-    Tools --> Context[RAG and Conversation Memory]
-    FlowProcessor --> Outbound[Outbound Channel Services]
+    Web[web] --> APIWeb[api-web]
+    APIWeb --> APIBusiness[api-business]
+    Channel[Telegram / Email / WhatsApp] --> Orchestrator[orchestrator]
+    Orchestrator --> APIBusiness
+    APIBusiness --> Postgres[(PostgreSQL)]
+    APIBusiness --> Redis[(Redis)]
+    APIBusiness --> RabbitMQ[(RabbitMQ)]
+    Orchestrator --> Redis
+    Orchestrator --> RabbitMQ
 ```
 
 ## 2. Monorepo Structure
 
+```text
+apps/
+  web
+  api-web
+  api-business
+  orchestrator
+
+packages/
+  contracts
+  shared
+  sdk
+  config
+  observability
+  types
+  utils
+```
+
 ### Applications
 
-- `apps/api-web`
-  - synchronous NestJS API for portal-facing presentation concerns
-  - auth, analytics, agent traces, health, omnichannel dashboards, and simulation surfaces
-- `apps/api-business`
-  - synchronous NestJS API
-  - chat, document, ingestion, search, memory, and internal business-facing surfaces
 - `apps/web`
-  - Next.js application
-  - dashboards, chat screens, omnichannel command center, and operator views
+  - operator dashboards, chat, documents, status pages, and observability views
+- `apps/api-web`
+  - BFF and portal-facing endpoints such as omnichannel views, analytics, traces, health, and document proxy endpoints
+- `apps/api-business`
+  - chat, documents, ingestion, search, conversations, memory, and internal ingestion callbacks
 - `apps/orchestrator`
-  - asynchronous runtime
-  - listeners, adapters, queues, processors, agents, tools, guardrails, traces, and outbound routing
+  - BullMQ workers, channel listeners, agent graph, RabbitMQ consumers, tools, and runtime coordination
 
 ### Packages
 
 - `packages/contracts`
-  - canonical contracts, DTOs, events, and queue payload types
-- `packages/shared`
-  - shared primitives used across applications
+  - shared contracts and events
 - `packages/sdk`
-  - internal API clients used mainly by the orchestrator
+  - internal clients used by the orchestrator and other app boundaries
 - `packages/config`
-  - configuration helpers and validation utilities
+  - environment loaders and helpers
 - `packages/observability`
-  - logger, metrics, tracing, and observability helpers
-- `packages/types`
-  - shared platform types
-- `packages/utils`
-  - shared utility functions
+  - logging, metrics, and tracing primitives
+- remaining packages
+  - low-level shared utilities only
+
+## 3. Synchronous and Asynchronous Flows
+
+### Synchronous Chat Flow
+
+Chat remains synchronous because the current product still expects immediate replies.
+
+```mermaid
+sequenceDiagram
+    participant Browser as web
+    participant API as api-business
+    participant Search as retrieval/search
+    participant Memory as memory
+
+    Browser->>API: POST /chat
+    API->>Search: retrieve context
+    API->>Memory: read/write conversation state
+    API-->>Browser: answer
+```
+
+### Asynchronous Document Flow
+
+Document ingestion moves to RabbitMQ because parsing, chunking, embeddings, and indexing are heavier operations.
 
 ```mermaid
 flowchart TD
-    subgraph Apps
-        APIWEB[apps/api-web]
-        API[apps/api-business]
-        ORCH[apps/orchestrator]
-        WEB[apps/web]
-    end
-
-    subgraph Packages
-        CONTRACTS[packages/contracts]
-        SHARED[packages/shared]
-        SDK[packages/sdk]
-        CONFIG[packages/config]
-        OBS[packages/observability]
-        TYPES[packages/types]
-        UTILS[packages/utils]
-    end
-
-    WEB --> CONTRACTS
-    WEB --> TYPES
-    WEB --> UTILS
-    APIWEB --> CONTRACTS
-    APIWEB --> CONFIG
-    APIWEB --> OBS
-    ORCH --> CONTRACTS
-    ORCH --> SDK
-    ORCH --> CONFIG
-    ORCH --> OBS
-    API --> CONTRACTS
-    API --> CONFIG
-    API --> OBS
+    WebUpload[Web upload] --> APIWeb[api-web]
+    APIWeb --> APIBusiness[api-business]
+    ChannelDoc[Channel-origin document] --> Orchestrator[orchestrator]
+    Orchestrator --> APIBusiness
+    APIBusiness --> Persist[Persist PENDING status]
+    Persist --> Rabbit[document.ingestion.requested]
+    Rabbit --> Worker[orchestrator document worker]
+    Worker --> Update[Update PROCESSING / steps / final state]
 ```
-
-## 3. Core Architecture
-
-The runtime path implemented in the repository is:
-
-`Channels -> Channel Adapter -> Inbound Queue -> Orchestrator Runtime -> Supervisor Agent -> Specialized Agents -> Tools -> RAG / Memory -> Response Generation -> Outbound Channel`
-
-Layer responsibilities:
-
-- `Channels`
-  - receive external events
-- `Channel Adapter`
-  - convert provider payloads into canonical internal payloads
-- `Inbound Queue`
-  - decouple channel intake from runtime execution
-- `Orchestrator Runtime`
-  - resolve tenant context, enforce guardrails, emit traces, and run the agent graph
-- `Supervisor Agent`
-  - choose the specialized agent
-- `Specialized Agents`
-  - plan document, conversation, or handoff execution
-- `Tools`
-  - execute technical work such as parsing, chunking, embedding generation, retrieval, and storage
-- `RAG / Memory`
-  - provide additional context when enabled
-- `Response Generation`
-  - materialize the downstream execution request and compose the response
-- `Outbound Channel`
-  - deliver the final response through the right transport service
 
 ## 4. Queue Topology
 
-The orchestrator uses two BullMQ queues in the main runtime path.
+The repository currently uses two queue systems for different purposes.
 
-### `inbound-messages`
+### BullMQ
 
-- queue constants live in `apps/orchestrator/src/modules/queue/queue.constants.ts`
-- receives canonical inbound payloads from channel listeners
-- `jobId` is derived from `channel:externalMessageId`
-- uses configurable concurrency, attempts, backoff, and retention
+BullMQ remains the main runtime queue system inside the orchestrator:
 
-### `flow-execution`
+- `inbound-messages`
+- `flow-execution`
 
-- receives the downstream execution request after agent planning
-- `jobId` is derived from `jobName:channel:externalMessageId`
-- also uses configurable attempts, backoff, and retention
+These queues support message intake, agent planning, and downstream response execution.
 
-### Retry and DLQ
+### RabbitMQ
 
-- both queues use BullMQ retry policies with exponential backoff
-- non-final failures remain in the retry path
-- final failures are packaged and sent to the Dead Letter Queue service
+RabbitMQ is currently introduced only for document ingestion.
+
+- queue: `document.ingestion.requested`
+
+This queue is intentionally narrow in scope. Chat does not use RabbitMQ.
 
 ```mermaid
 flowchart TD
-    ChannelListener[Channel Listener] --> InboundQueue[inbound-messages]
-    InboundQueue -->|success| InboundProcessor[InboundMessageProcessor]
-    InboundQueue -->|retry with exponential backoff| InboundQueue
-    InboundProcessor --> FlowQueue[flow-execution]
-    FlowQueue -->|success| FlowProcessor[FlowExecutionProcessor]
-    FlowQueue -->|retry with exponential backoff| FlowQueue
-    InboundProcessor -->|final failure| InboundDLQ[inbound-messages-dlq]
-    FlowProcessor -->|final failure| FlowDLQ[flow-execution-dlq]
+    Channel[Channel input] --> InboundQ[inbound-messages]
+    InboundQ --> InboundProcessor[InboundMessageProcessor]
+    InboundProcessor --> FlowQ[flow-execution]
+    FlowQ --> FlowProcessor[FlowExecutionProcessor]
+    FlowProcessor --> InternalRequest[api-business internal ingestion request]
+    InternalRequest --> Rabbit[document.ingestion.requested]
+    Rabbit --> DocumentWorker[DocumentIngestionConsumer / Worker]
 ```
 
 ## 5. Orchestrator Runtime
 
-### `InboundMessageProcessor`
+The orchestrator remains the asynchronous runtime boundary.
 
-`apps/orchestrator/src/modules/processors/inbound-message.processor.ts`
+### Core runtime components
 
-Current responsibilities:
-
-- validate supported inbound job names
-- resolve tenant context through `TenantContextMiddleware`
-- increment inbound metrics
-- run prompt-injection protection
-- publish agent trace events
-- call `AgentGraphService`
-- publish analytics events
-- validate policy and action payloads
-- optionally run evaluation and cost monitoring
-- enqueue the `flow-execution` stage
-- package final failures for the inbound DLQ
-
-This worker is operationally effective, but it still concentrates a large amount of orchestration work.
-
-### `FlowExecutionProcessor`
-
-`apps/orchestrator/src/modules/processors/flow-execution.processor.ts`
-
-Current responsibilities:
-
-- handle downstream flow jobs after agent planning
-- call response composition logic
-- register documents
-- route outbound messages
-- respect outbound feature toggles
-- package final failures for the flow DLQ
-
-### Runtime Message Flow
-
-```mermaid
-sequenceDiagram
-    participant Channel as Channel Listener
-    participant InboundQ as inbound-messages
-    participant Inbound as InboundMessageProcessor
-    participant Graph as AgentGraphService
-    participant FlowQ as flow-execution
-    participant Flow as FlowExecutionProcessor
-    participant Outbound as Outbound Service
-
-    Channel->>InboundQ: enqueue canonical inbound payload
-    InboundQ->>Inbound: deliver inbound job
-    Inbound->>Inbound: resolve tenant + guardrails + traces
-    Inbound->>Graph: execute(inboundMessage)
-    Graph-->>Inbound: decision + executionRequest
-    Inbound->>FlowQ: enqueue executionRequest
-    FlowQ->>Flow: deliver flow job
-    Flow->>Outbound: send response if enabled
-```
-
-## 6. Agent Graph
-
-`apps/orchestrator/src/modules/agents/agent.graph.ts`
-
-`AgentGraphService` is the coordination layer that turns a canonical inbound message into a downstream execution request.
-
-Execution model:
-
-1. the inbound processor sends the canonical payload to the graph
-2. the supervisor selects the target agent
-3. the selected agent plans the action and context
-4. the graph returns an `executionRequest`
-5. the runtime enqueues `flow-execution`
-
-Current specialized agents:
-
+- `InboundMessageProcessor`
+- `FlowExecutionProcessor`
+- `AgentGraphService`
 - `SupervisorAgent`
 - `conversation-agent`
 - `document-agent`
 - `handoff-agent`
 
-```mermaid
-flowchart TD
-    Start[Canonical inbound payload] --> Supervisor[SupervisorAgent]
-    Supervisor -->|text and conversational intent| Conversation[conversation-agent]
-    Supervisor -->|document payload| Document[document-agent]
-    Supervisor -->|handoff scenario| Handoff[handoff-agent]
-    Conversation --> Request[executionRequest]
-    Document --> Request
-    Handoff --> Request
-    Request --> FlowQueue[flow-execution queue]
-```
+### Document-specific asynchronous components
+
+- `DocumentIngestionConsumer`
+- `DocumentIngestionWorker`
+- `DocumentParserService`
+- `DocumentChunkingService`
+- `DocumentEmbeddingService`
+
+### Runtime responsibilities
+
+- consume canonical inbound messages
+- plan execution through agents
+- enqueue flow execution
+- route outbound responses
+- hand off heavy document work to RabbitMQ-backed processing
+- update processing status through internal API callbacks
+
+## 6. API Boundaries
+
+### `api-web`
+
+This app owns presentation-oriented APIs, including:
+
+- analytics
+- agent traces
+- health
+- omnichannel monitoring
+- simulation
+- document upload and status proxy endpoints for the portal
+
+### `api-business`
+
+This app owns the actual repository-backed business capabilities, including:
+
+- chat
+- documents
+- ingestion
+- search
+- conversations
+- memory
+- internal ingestion callbacks used by the orchestrator
+
+### `orchestrator`
+
+This app is not a public HTTP controller surface for end users. It remains the worker/runtime boundary.
 
 ## 7. Channel Integrations
 
-Telegram is the most mature channel in the repository.
-
-Key Telegram components:
-
-- `TelegramInboundAdapter`
-- `TelegramPollingService`
-- `TelegramListener`
-- `TelegramOutboundService`
+Channel integrations remain transport-focused.
 
 Current principle:
 
-- channels normalize and publish
-- channels do not decide agents
-- channels do not perform document ingestion or retrieval
-- outbound delivery stays separated from decision logic
+- channels normalize inbound events
+- channels do not decide business behavior
+- documents from channels can still be handed off asynchronously after runtime planning
 
-```mermaid
-flowchart LR
-    TelegramAPI[Telegram API] --> Polling[TelegramPollingService]
-    Polling --> Adapter[TelegramInboundAdapter]
-    Adapter --> Listener[TelegramListener]
-    Listener --> InboundQ[inbound-messages]
-    FlowProcessor[FlowExecutionProcessor] --> TelegramOutbound[TelegramOutboundService]
-    TelegramOutbound --> TelegramAPI
-```
+Telegram remains the most mature channel. Email and WhatsApp exist but are still less mature operationally.
 
-Email and WhatsApp exist in the current architecture, but they are still less mature operationally than Telegram.
+## 8. Document Ingestion Pipeline
 
-## 8. Document Processing Pipeline
+Document ingestion can start from two origins:
 
-Document ingestion is planned by `document-agent` and executed through reusable tools.
+- web uploads
+- channel-origin document messages
 
-What the repository clearly implements today:
+Both converge on persisted status and asynchronous worker processing.
 
-- reception of document metadata in canonical inbound payloads
-- document-oriented planning through `document-agent`
-- download and parsing tools
-- chunking and embedding generation
-- storage and index registration
+### Persisted status model
 
-What is still evolving:
+Current status values:
 
-- full enterprise-grade binary lifecycle management
-- stronger reconciliation for partial failures
-- broader provider-specific storage hardening
+- `PENDING`
+- `PROCESSING`
+- `COMPLETED`
+- `FAILED`
+
+Current step values:
+
+- `RECEIVED`
+- `PARSING`
+- `CHUNKING`
+- `EMBEDDING`
+- `INDEXING`
+- `COMPLETED`
+- `FAILED`
 
 ```mermaid
 flowchart TD
-    InboundDoc[Inbound document payload] --> Supervisor[SupervisorAgent]
-    Supervisor --> DocumentAgent[document-agent]
-    DocumentAgent --> RegisterJob[flow-execution register-document job]
-    RegisterJob --> Download[Download tool]
-    Download --> Parse[Parsing tool]
-    Parse --> Chunk[Chunking]
-    Chunk --> Embed[Embedding generation]
-    Embed --> Store[Document storage and registration]
-    Store --> Index[RAG index update]
+    Upload[Web upload or channel-origin document] --> Persist[Persist metadata and PENDING status]
+    Persist --> Publish[Publish RabbitMQ message]
+    Publish --> Worker[Document ingestion worker]
+    Worker --> Parsing[PARSING]
+    Parsing --> Chunking[CHUNKING]
+    Chunking --> Embedding[EMBEDDING]
+    Embedding --> Indexing[INDEXING]
+    Indexing --> Completed[COMPLETED]
+    Worker --> Failed[FAILED]
 ```
+
+### Current implementation note
+
+For channel-origin documents, the asynchronous handoff currently uses the text or extracted content already available in the runtime. The repository does not yet implement a brand-new raw-binary channel download subsystem for every provider.
 
 ## 9. RAG Architecture
 
-The repository currently supports:
+The repository still supports synchronous retrieval and context assembly in the business API and retrieval-oriented execution in the orchestrator.
 
-- chunked document storage in PostgreSQL with `pgvector`
-- a `documents` table with `VECTOR(1536)` embeddings
-- a `rag_documents` table used by the orchestrator-side retrieval path
-- retrieval context assembly in the orchestrator
-- safe fallback behavior when retrieval is disabled
+What exists:
 
-The vector persistence layer is functional, but still evolving for larger-scale production scenarios.
+- document parsing and chunking
+- embedding generation
+- persisted chunks and document metadata
+- retrieval/search endpoints
+- orchestrator retrieval usage through agents
 
-```mermaid
-flowchart LR
-    UserQuestion[User question] --> ConversationAgent[conversation-agent]
-    ConversationAgent --> Retrieval[Retrieval service]
-    Retrieval --> APISearch[API search path]
-    Retrieval --> LocalFallback[Local fallback repository]
-    APISearch --> Context[retrievedDocuments]
-    LocalFallback --> Context
-    Context --> ConversationAgent
-    ConversationAgent --> Response[LLM context and response plan]
-```
+What is still evolving:
 
-## 10. Conversation Memory
+- complete unification of RAG paths
+- larger-scale retrieval hardening
+- clearer single reference path for all user-facing entry points
 
-Conversation memory exists as a tenant-aware context store used by the orchestrator when the capability is enabled.
+## 10. Document Status UI
 
-Current state:
+The web application now includes a document status page:
 
-- retrieval and persistence logic exist
-- memory is integrated into the orchestrator runtime
-- memory can be disabled by feature toggle
-- the subsystem is still less mature than the core Telegram and queue flows
+- route: `/documents/status`
 
-```mermaid
-flowchart LR
-    Inbound[Inbound message] --> TenantScope[Tenant resolution]
-    TenantScope --> MemoryService[Conversation memory service]
-    MemoryService --> MemoryStore[(conversation_memory)]
-    MemoryStore --> MemoryContext[Recent and semantic memory]
-    MemoryContext --> Agent[conversation-agent]
-```
+The UI polls persisted status through API endpoints. It does not query RabbitMQ directly.
 
-## 11. Feature Toggles
+Why:
 
-The current runtime supports explicit production-oriented toggles, including:
+- RabbitMQ is a transport mechanism, not the source of truth for UI state
+- the UI should render persisted status, current step, timestamps, and safe error messages
 
-- `TELEGRAM_ENABLED` / listener-level Telegram settings
-- `DOCUMENT_INGESTION_ENABLED`
-- `DOCUMENT_PARSING_ENABLED`
-- `RAG_RETRIEVAL_ENABLED`
-- `CONVERSATION_MEMORY_ENABLED`
-- `EVALUATION_ENABLED`
-- `OUTBOUND_SENDING_ENABLED`
-- `TRAINING_PIPELINE_ENABLED`
+## 11. Observability
 
-Safe degradation behavior already implemented:
+Current observability patterns include:
 
-- disabled ingestion skips document side effects
-- disabled parsing falls back safely
-- disabled retrieval returns no retrieved documents
-- disabled memory returns empty context
-- disabled evaluation skips evaluation side effects
-- disabled outbound sending logs and skips delivery
+- structured logs through shared logging services
+- metrics through the shared observability package
+- tracing through OpenTelemetry
 
-```mermaid
-flowchart TD
-    Job[Inbound or flow job] --> ToggleCheck{Feature enabled?}
-    ToggleCheck -->|Yes| NormalPath[Run capability normally]
-    ToggleCheck -->|No| SafeSkip[Skip capability safely]
-    SafeSkip --> Trace[Publish trace and metrics]
-    SafeSkip --> Continue[Continue predictable control flow]
-```
+Document ingestion now adds instrumentation around:
 
-## 12. Observability
+- publish request
+- message consumption
+- processing start and step transitions
+- completion
+- failure
 
-The repository includes:
+Observed metric names in the current repository include:
 
-- structured application logging
-- Prometheus-style metrics
-- OpenTelemetry tracing
-- dedicated agent trace events
-- queue-related failure and throughput metrics
-- cost and evaluation analytics in the orchestrator path
+- `documents_ingestion_requested_total`
+- `document_ingestion_consumer_received_total`
+- `documents_ingestion_completed_total`
+- `documents_ingestion_failed_total`
+- `documents_ingestion_duration_ms`
 
-The main observability stack referenced by the repository is:
+## 12. Testing Strategy
 
-- OpenTelemetry
-- Prometheus
-- Grafana
-- Tempo
-- Loki
+Current useful validation points:
 
-```mermaid
-flowchart LR
-    Runtime[API and Orchestrator Runtime] --> Logs[Structured Logs]
-    Runtime --> Metrics[Metrics]
-    Runtime --> Traces[Distributed Traces]
-    Runtime --> AgentTraces[Agent Trace Events]
-    Logs --> Loki[Loki]
-    Metrics --> Prometheus[Prometheus]
-    Traces --> Tempo[Tempo]
-    Prometheus --> Grafana[Grafana]
-    Loki --> Grafana
-    Tempo --> Grafana
-```
+- `apps/api-business`
+  - controller/service tests for synchronous business flows
+- `apps/api-web`
+  - BFF/controller tests
+- `apps/orchestrator`
+  - runtime, worker, and document-ingestion tests
+- `apps/web`
+  - UI and feature tests
 
-## 13. Testing Strategy
+## 13. Current Project Status
 
-The project includes:
+Stable enough to discuss confidently:
 
-- unit tests
-- integration tests
-- end-to-end tests for critical flows
-
-Highest-confidence areas today:
-
-- orchestrator critical runtime path
-- Telegram-centric runtime behavior
-- agent routing
-- document ingestion
-- RAG retrieval
-- feature toggle ON/OFF behavior
+- app boundary split
+- orchestrator-centered runtime
+- BullMQ runtime flow
+- RabbitMQ-backed document ingestion worker
+- persisted document status query flow
 
 Still evolving:
 
-- deeper end-to-end idempotency coverage
-- stronger tenant-isolation coverage across all surfaces
-- broader API hardening outside the most critical flows
-
-```mermaid
-flowchart TD
-    Unit[Unit tests] --> Integration[Integration tests]
-    Integration --> E2E[End-to-end tests]
-    E2E --> CriticalPaths[Telegram flows, routing, ingestion, retrieval, toggles]
-```
-
-## 14. Current Project Status
-
-### Stable enough for demos and serious pilots
-
-- orchestrator-centered asynchronous runtime
-- main queue topology
-- Telegram integration
-- agent graph and core agents
-- observability on the critical path
-- feature toggles with safe degradation
-
-### Acceptable but still evolving
-
-- Email and WhatsApp maturity
-- conversation memory depth
-- document lifecycle hardening
-- vector persistence strategy at larger scale
-- some synchronous API boundaries
-
-### Not yet enterprise-complete
-
-- centralized end-to-end idempotency
-- uniformly hardened tenant isolation across every surface
-- full enterprise-grade document lifecycle and reconciliation
-- larger-scale retrieval and vector operational hardening
+- cleaner end-to-end alignment of all web flows with `api-web`
+- stronger unification of RAG execution paths
+- multi-tenant and idempotency hardening

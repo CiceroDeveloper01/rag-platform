@@ -16,7 +16,7 @@ import type { LlmServiceInterface } from '../../../infra/ai/llm/llm.interface';
 import { SearchService } from '../../search/services/search.service';
 import { EMBEDDING_SERVICE } from '../../../infra/ai/embeddings/embedding.interface';
 import type { EmbeddingServiceInterface } from '../../../infra/ai/embeddings/embedding.interface';
-import { ChatDto } from '../dto/chat.dto';
+import { ChatRequest } from '../dtos/request/chat.request';
 import { CONVERSATIONS_REPOSITORY } from '../../conversations/interfaces/conversations-repository.interface';
 import type { ConversationsRepositoryInterface } from '../../conversations/interfaces/conversations-repository.interface';
 import { QUERY_REPOSITORY } from '../interfaces/query-repository.interface';
@@ -55,7 +55,7 @@ export class ChatService {
     );
   }
 
-  async chat(dto: ChatDto, user: AuthenticatedUser) {
+  async chat(dto: ChatRequest, user: AuthenticatedUser) {
     try {
       const conversation = await this.ensureConversation(dto, user);
       await this.conversationsRepository.appendMessage({
@@ -107,7 +107,7 @@ export class ChatService {
   }
 
   async *streamChat(
-    dto: ChatDto,
+    dto: ChatRequest,
     user: AuthenticatedUser,
   ): AsyncGenerator<{
     event: 'context' | 'token' | 'done' | 'error';
@@ -244,7 +244,7 @@ export class ChatService {
     );
   }
 
-  private async runPipeline(dto: ChatDto): Promise<{
+  private async runPipeline(dto: ChatRequest): Promise<{
     prompt: string;
     context: SearchResult[];
     mode: 'semantic' | 'keyword_fallback';
@@ -309,7 +309,7 @@ export class ChatService {
   }
 
   private async generateAnswer(
-    dto: ChatDto,
+    dto: ChatRequest,
     context: SearchResult[],
   ): Promise<string> {
     try {
@@ -339,7 +339,7 @@ export class ChatService {
   }
 
   private async *generateStreamingAnswer(
-    dto: ChatDto,
+    dto: ChatRequest,
     context: SearchResult[],
   ): AsyncGenerator<string> {
     const llmStartedAt = process.hrtime.bigint();
@@ -389,7 +389,7 @@ export class ChatService {
   }
 
   private async buildKeywordFallbackContext(
-    dto: ChatDto,
+    dto: ChatRequest,
   ): Promise<SearchResult[]> {
     const terms = this.extractKeywordFallbackTerms(dto.question);
     const maxContextCharacters =
@@ -560,7 +560,7 @@ export class ChatService {
     }
   }
 
-  private async ensureConversation(dto: ChatDto, user: AuthenticatedUser) {
+  private async ensureConversation(dto: ChatRequest, user: AuthenticatedUser) {
     if (dto.conversationId) {
       const existingConversation = await this.conversationsRepository.findById(
         dto.conversationId,

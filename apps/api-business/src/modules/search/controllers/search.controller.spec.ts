@@ -1,6 +1,7 @@
 import { SearchController } from './search.controller';
 import { TenantContextService } from '../../../common/tenancy/tenant-context.service';
 import { SearchService } from '../services/search.service';
+import { SearchResponseMapper } from '../mappers/search-response.mapper';
 
 describe('SearchController', () => {
   it('returns semantic search results with source and createdAt fields', async () => {
@@ -25,6 +26,7 @@ describe('SearchController', () => {
     const controller = new SearchController(
       searchService,
       tenantContextService,
+      new SearchResponseMapper(),
     );
 
     const result = await controller.search(

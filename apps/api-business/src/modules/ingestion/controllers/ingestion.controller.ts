@@ -1,4 +1,6 @@
 import {
+  HttpCode,
+  HttpStatus,
   Body,
   Controller,
   Post,
@@ -11,17 +13,17 @@ import { memoryStorage } from 'multer';
 import { Throttle } from '@nestjs/throttler';
 import {
   ApiBadRequestResponse,
+  ApiAcceptedResponse,
   ApiBody,
   ApiConsumes,
   ApiCookieAuth,
-  ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
 import { IngestionService } from '../services/ingestion.service';
-import { UploadDocumentDto } from '../dto/upload-document.dto';
+import { UploadDocumentRequest } from '../dtos/request/upload-document.request';
 
 @ApiTags('Documents', 'RAG')
 @ApiCookieAuth('rag_platform_session')
@@ -49,13 +51,14 @@ export class IngestionController {
       required: ['file'],
     },
   })
-  @ApiOkResponse({
+  @ApiAcceptedResponse({
     description: 'Document upload accepted and queued for asynchronous ingestion.',
   })
   @ApiBadRequestResponse({
     description: 'Invalid upload payload or unsupported file type.',
   })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
+  @HttpCode(HttpStatus.ACCEPTED)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -63,7 +66,7 @@ export class IngestionController {
   )
   upload(
     @UploadedFile() file: Express.Multer.File,
-    @Body() dto: UploadDocumentDto,
+    @Body() dto: UploadDocumentRequest,
   ) {
     return this.ingestionService.ingestUploadedFile(file, dto);
   }

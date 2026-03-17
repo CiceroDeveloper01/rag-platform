@@ -1,21 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TenantContextService } from '../../common/tenancy/tenant-context.service';
+import { DocumentsApplicationModule } from './application/documents-application.module';
 import { DocumentsController } from './controllers/documents.controller';
-import { DocumentsPostgresRepository } from './repositories/documents-postgres.repository';
-import { DocumentsService } from './services/documents.service';
-import { DOCUMENTS_REPOSITORY } from './interfaces/documents-repository.interface';
+import { DocumentsInfrastructureModule } from './infrastructure/documents-infrastructure.module';
 
 @Module({
+  imports: [DocumentsApplicationModule, DocumentsInfrastructureModule],
   controllers: [DocumentsController],
-  providers: [
-    DocumentsService,
-    TenantContextService,
-    DocumentsPostgresRepository,
-    {
-      provide: DOCUMENTS_REPOSITORY,
-      useExisting: DocumentsPostgresRepository,
-    },
-  ],
-  exports: [DocumentsService, DOCUMENTS_REPOSITORY],
+  exports: [DocumentsApplicationModule, DocumentsInfrastructureModule],
 })
 export class DocumentsModule {}

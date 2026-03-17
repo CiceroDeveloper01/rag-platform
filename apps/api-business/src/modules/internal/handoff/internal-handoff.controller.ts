@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { CreateHandoffDto } from './create-handoff.dto';
+import { CreateHandoffRequest } from './dtos/request/create-handoff.request';
 import { InternalHandoffService } from './internal-handoff.service';
 
 @ApiExcludeController()
@@ -11,7 +11,7 @@ export class InternalHandoffController {
   ) {}
 
   @Post()
-  create(@Body() dto: CreateHandoffDto) {
+  create(@Body() dto: CreateHandoffRequest) {
     return this.internalHandoffService.createHandoff(dto);
   }
 }

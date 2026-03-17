@@ -11,9 +11,9 @@ import type { EmbeddingServiceInterface } from '../../../infra/ai/embeddings/emb
 import { DOCUMENTS_REPOSITORY } from '../interfaces/documents-repository.interface';
 import type { DocumentsRepositoryInterface } from '../interfaces/documents-repository.interface';
 import { DocumentRecord } from '../interfaces/document-record.interface';
-import { CreateDocumentDto } from '../dto/create-document.dto';
-import { ListDocumentsDto } from '../dto/list-documents.dto';
-import { UpdateDocumentDto } from '../dto/update-document.dto';
+import { CreateDocumentRequest } from '../dtos/request/create-document.request';
+import { ListDocumentsRequest } from '../dtos/request/list-documents.request';
+import { UpdateDocumentRequest } from '../dtos/request/update-document.request';
 
 @Injectable()
 export class DocumentsService {
@@ -28,7 +28,7 @@ export class DocumentsService {
     this.logger.setContext(DocumentsService.name);
   }
 
-  async createDocument(dto: CreateDocumentDto): Promise<DocumentRecord> {
+  async createDocument(dto: CreateDocumentRequest): Promise<DocumentRecord> {
     try {
       const embedding = await this.embeddingService.generateEmbedding(
         dto.content,
@@ -55,7 +55,7 @@ export class DocumentsService {
     }
   }
 
-  async listDocuments(dto: ListDocumentsDto): Promise<DocumentRecord[]> {
+  async listDocuments(dto: ListDocumentsRequest): Promise<DocumentRecord[]> {
     return this.documentsRepository.list({
       tenantId: dto.tenantId?.trim() || 'default-tenant',
       limit: dto.limit ?? 25,
@@ -83,7 +83,7 @@ export class DocumentsService {
 
   async updateDocument(
     documentId: number,
-    dto: UpdateDocumentDto,
+    dto: UpdateDocumentRequest,
   ): Promise<DocumentRecord> {
     try {
       const nextContent = dto.content;

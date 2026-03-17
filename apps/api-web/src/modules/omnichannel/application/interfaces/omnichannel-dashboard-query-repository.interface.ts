@@ -8,7 +8,7 @@ import {
   OmnichannelRequestDetailsDto,
   OmnichannelRequestListItemDto,
   RagUsageMetricsDto,
-} from '../dto/omnichannel-dashboard-response.dto';
+} from '../dtos/response/omnichannel-dashboard.response';
 import { GetChannelMetricsQuery } from '../queries/get-channel-metrics.query';
 import { GetLatencyMetricsQuery } from '../queries/get-latency-metrics.query';
 import { GetOverviewQuery } from '../queries/get-overview.query';

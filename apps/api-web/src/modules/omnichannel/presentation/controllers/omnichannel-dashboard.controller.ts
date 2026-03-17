@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../../../auth/guards/session-auth.guard';
 import { TenantContextService } from '../../../../common/tenancy/tenant-context.service';
-import { ToggleConnectorDto } from '../../application/dto/toggle-connector.dto';
+import { ToggleConnectorRequest } from '../../application/dtos/request/toggle-connector.request';
 import { OmnichannelConnectorService } from '../../application/services/omnichannel-connector.service';
 import { OmnichannelQueryService } from '../../application/services/omnichannel-query.service';
 import {
@@ -35,7 +35,7 @@ import {
   PaginatedOmnichannelExecutionListDto,
   PaginatedOmnichannelRequestListDto,
   RagUsageMetricsDto,
-} from '../../application/dto/omnichannel-dashboard-response.dto';
+} from '../../application/dtos/response/omnichannel-dashboard.response';
 import { GetChannelMetricsQuery } from '../../application/queries/get-channel-metrics.query';
 import { GetLatencyMetricsQuery } from '../../application/queries/get-latency-metrics.query';
 import { GetOverviewQuery } from '../../application/queries/get-overview.query';
@@ -214,14 +214,14 @@ export class OmnichannelDashboardController {
     summary: 'Enables or disables an omnichannel connector.',
   })
   @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiBody({ type: ToggleConnectorDto })
+  @ApiBody({ type: ToggleConnectorRequest })
   @ApiOkResponse({ type: ConnectorDto })
   @ApiBadRequestResponse({ description: 'Invalid toggle payload.' })
   @ApiNotFoundResponse({ description: 'Connector not found.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   toggleConnector(
     @Param('id', ParseIntPipe) connectorId: number,
-    @Body() dto: ToggleConnectorDto,
+    @Body() dto: ToggleConnectorRequest,
   ) {
     return this.connectorService.toggle(connectorId, dto);
   }

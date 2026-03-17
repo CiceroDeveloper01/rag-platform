@@ -1,105 +1,109 @@
 # Testing Guide
 
-This guide summarizes the current test strategy and the most useful validation commands in the repository.
+This guide summarizes the current testing approach and the most relevant commands after the repository reorganization.
 
-## Current Testing Shape
+## Current Test Shape
 
 - unit tests
-- integration tests
-- end-to-end tests for critical runtime paths
+- integration-style module tests
+- API e2e tests
+- orchestrator runtime tests
+- frontend feature tests
 
-## Test Confidence by Area
+## Confidence by Boundary
 
-Highest confidence currently exists in:
+Highest confidence:
 
 - `apps/orchestrator`
-- Telegram-centric runtime behavior
-- `AgentGraphService`
-- document ingestion
-- RAG retrieval
-- feature toggle ON/OFF behavior in the orchestrator
+- document ingestion worker flow
+- BullMQ runtime behavior
+- web document UI and status polling behavior
 
-Areas still evolving:
+Good but still evolving:
 
-- broader API hardening
-- stronger end-to-end duplicate event coverage
-- stronger tenant-isolation coverage across all surfaces
+- `apps/api-business`
+- `apps/api-web`
 
-## Testing Flow
+Still worth strengthening further:
 
-```mermaid
-flowchart TD
-    Unit[Unit tests] --> Integration[Integration tests]
-    Integration --> E2E[End-to-end tests]
-    E2E --> Critical[Critical runtime scenarios]
-    Critical --> Routing[Agent routing]
-    Critical --> Ingestion[Document ingestion]
-    Critical --> Retrieval[RAG retrieval]
-    Critical --> Toggles[Feature toggle behavior]
-```
+- end-to-end tenant isolation
+- duplicate event handling and idempotency
+- complete web alignment with `api-web`
 
-## Useful Commands
+## Recommended Validation Commands
 
-From the repository root:
-
-### Coverage
+### Root
 
 ```bash
-npm run coverage:api
-npm run coverage:orchestrator
-npm run coverage:web
+npm run ci
 ```
 
-### Orchestrator
+### api-business
 
 ```bash
-npm --prefix apps/orchestrator run test -- --runInBand
-npm --prefix apps/orchestrator run test:cov:ci
-```
-
-### API
-
-```bash
+npm --prefix apps/api-business run lint
+npm --prefix apps/api-business run build
 npm --prefix apps/api-business run test -- --runInBand
 npm --prefix apps/api-business run test:e2e -- --runInBand
-npm --prefix apps/api-business run test:cov:ci
 ```
 
-### Web
+### api-web
+
+```bash
+npm --prefix apps/api-web run lint
+npm --prefix apps/api-web run build
+npm --prefix apps/api-web run test -- --runInBand
+```
+
+### orchestrator
+
+```bash
+npm --prefix apps/orchestrator run lint
+npm --prefix apps/orchestrator run build
+npm --prefix apps/orchestrator run test -- --runInBand
+```
+
+### web
 
 ```bash
 npm --prefix apps/web run lint
 npm --prefix apps/web run test
-npm --prefix apps/web run test:coverage
+npm --prefix apps/web run build
 ```
 
-## Critical Path Scenarios
+## Async Document Ingestion Validation
 
 ```mermaid
 sequenceDiagram
-    participant Channel as Channel input
-    participant Inbound as Inbound runtime
-    participant Agent as Agent graph
-    participant Flow as Flow execution
-    participant Outbound as Outbound delivery
+    participant Upload as Upload request
+    participant API as api-business
+    participant Rabbit as RabbitMQ
+    participant Worker as orchestrator worker
+    participant Status as status API
 
-    Channel->>Inbound: canonical inbound payload
-    Inbound->>Agent: runtime planning
-    Agent->>Flow: executionRequest
-    Flow->>Outbound: response or document action
+    Upload->>API: POST /ingestion/upload
+    API-->>Upload: 202 Accepted
+    API->>Rabbit: publish document.ingestion.requested
+    Rabbit->>Worker: consume event
+    Worker->>Status: update step and final status
 ```
 
-Prioritize validation of:
+Validate at least:
 
-- Telegram inbound mapping
-- supervisor routing
-- document ingestion
-- indexed-document retrieval
-- flow execution
-- feature toggle behavior with both enabled and disabled states
+- upload returns `202 Accepted`
+- initial persisted status is `PENDING`
+- worker transitions to `PROCESSING`
+- `currentStep` progresses when applicable
+- final state becomes `COMPLETED` or `FAILED`
 
-## Honest Reading of the Current State
+## Manual Regression Checklist
 
-- confidence is high in the critical orchestrator runtime path
-- the API is improving, but remains less mature than the orchestrator in overall confidence
-- duplicate event handling and tenant isolation still deserve stronger end-to-end validation
+- upload a document from the web
+- verify `/documents/status`
+- verify RabbitMQ consumer logs
+- verify channel-origin document handoff still acknowledges without blocking
+- verify chat still works synchronously
+
+## Honest Note
+
+The repository is strong on runtime and structural validation. The biggest remaining gaps are around broader cross-boundary e2e coverage, not around the basic build/testability of the current architecture.

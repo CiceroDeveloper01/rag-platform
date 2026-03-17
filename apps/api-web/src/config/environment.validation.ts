@@ -34,6 +34,14 @@ class EnvironmentVariables {
   FRONTEND_ORIGINS?: string;
 
   @IsOptional()
+  @IsString()
+  API_BUSINESS_BASE_URL?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  API_BUSINESS_TIMEOUT_MS?: string;
+
+  @IsOptional()
   @IsBooleanString()
   REDIS_ENABLED?: string;
 

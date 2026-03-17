@@ -29,7 +29,7 @@ import { OMNICHANNEL_RAG_GATEWAY } from '../interfaces/rag-gateway.interface';
 import type { IRagGateway } from '../interfaces/rag-gateway.interface';
 import { OMNICHANNEL_TRACE_SERVICE } from '../interfaces/trace-service.interface';
 import type { ITraceService } from '../interfaces/trace-service.interface';
-import { ProcessOmnichannelMessageDto } from '../dto/process-omnichannel-message.dto';
+import { ProcessOmnichannelMessageRequest } from '../dtos/request/process-omnichannel-message.request';
 import { AiUsagePolicyService } from './ai-usage-policy.service';
 import { ExecutionService } from './execution.service';
 import { OmnichannelRuntimePolicyService } from './omnichannel-runtime-policy.service';
@@ -91,7 +91,7 @@ export class OmnichannelOrchestratorService {
     metricName: 'omnichannel_orchestrator_duration_ms',
     labels: { module: 'omnichannel' },
   })
-  async process(dto: ProcessOmnichannelMessageDto) {
+  async process(dto: ProcessOmnichannelMessageRequest) {
     this.runtimePolicyService.assertApiRuntimeEnabled('omnichannel.process');
 
     if (!this.configService.get<boolean>('omnichannel.enabled', true)) {

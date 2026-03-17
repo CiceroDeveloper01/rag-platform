@@ -1,21 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TenantContextService } from '../../common/tenancy/tenant-context.service';
+import { SearchApplicationModule } from './application/search-application.module';
 import { SearchController } from './controllers/search.controller';
-import { SearchPostgresRepository } from './repositories/search-postgres.repository';
-import { SearchService } from './services/search.service';
-import { SEARCH_REPOSITORY } from './interfaces/search-repository.interface';
+import { SearchInfrastructureModule } from './infrastructure/search-infrastructure.module';
 
 @Module({
+  imports: [SearchApplicationModule, SearchInfrastructureModule],
   controllers: [SearchController],
-  providers: [
-    SearchService,
-    TenantContextService,
-    SearchPostgresRepository,
-    {
-      provide: SEARCH_REPOSITORY,
-      useExisting: SearchPostgresRepository,
-    },
-  ],
-  exports: [SearchService, SEARCH_REPOSITORY],
+  exports: [SearchApplicationModule, SearchInfrastructureModule],
 })
 export class SearchModule {}
