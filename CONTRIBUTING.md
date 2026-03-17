@@ -102,6 +102,16 @@ Current app boundaries:
 
 RabbitMQ is used only for asynchronous document ingestion. Chat remains synchronous.
 
+Deployment assets are split intentionally:
+
+- `docker-compose.yml`
+  - local infrastructure and optional full local stack
+- `k8s/`
+  - Kubernetes manifests for deployable app services
+
+Do not replace the Docker local workflow with Kubernetes-only instructions in
+documentation or scripts.
+
 ## Testing
 
 Recommended validation flow:
@@ -137,6 +147,8 @@ Before making structural changes, review the canonical documentation:
 - `docs/ARCHITECTURE_DECISIONS.md`
 - `docs/RUNNING_LOCALLY.md`
 - `docs/TESTING_GUIDE.md`
+- `docs/deployment/DEPLOYMENT.md`
+- `docs/deployment/KUBERNETES.md`
 
 When changing boundaries between apps, queue topology, or asynchronous document ingestion behavior, update the relevant docs and ADRs in the same change.
 

@@ -82,6 +82,46 @@ class EnvironmentVariables {
   RABBITMQ_DOCUMENT_INGESTION_QUEUE?: string;
 
   @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_EXCHANGE?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  RABBITMQ_DOCUMENT_INGESTION_RETRY_DELAY_MS?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_DLX?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_DLQ?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY?: string;
+
+  @IsOptional()
   @IsNumberString()
   RABBITMQ_DOCUMENT_INGESTION_PREFETCH?: string;
 

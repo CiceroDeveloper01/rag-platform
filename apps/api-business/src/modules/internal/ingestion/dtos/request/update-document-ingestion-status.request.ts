@@ -25,4 +25,19 @@ export class UpdateDocumentIngestionStatusRequest {
   @IsOptional()
   @IsString()
   errorMessage?: string;
+
+  @ApiPropertyOptional({ example: '8de7b396-7f0f-4187-b53d-4789ed0f3cb7' })
+  @IsOptional()
+  @IsString()
+  eventId?: string;
+
+  @ApiPropertyOptional({ example: 'ec6a28f1-0be9-4db5-8758-877ba6e0f07f' })
+  @IsOptional()
+  @IsString()
+  correlationId?: string;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @IsInt()
+  retryCount?: number;
 }

@@ -36,7 +36,23 @@ jobs:
           context: .
           file: ./apps/api-business/Dockerfile
           push: false
-          tags: rag-platform-api:dev
+          tags: rag-platform-api-business:dev
+
+      - name: Build API Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./apps/api-web/Dockerfile
+          push: false
+          tags: rag-platform-api-web:dev
+
+      - name: Build orchestrator image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./apps/orchestrator/Dockerfile
+          push: false
+          tags: rag-platform-orchestrator:dev
 
       - name: Build web image
         uses: docker/build-push-action@v6

@@ -157,6 +157,9 @@ import {
             "internalApi.paths.failDocumentIngestion",
           ),
           configService.getOrThrow<string>(
+            "internalApi.paths.startDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
             "internalApi.paths.updateDocumentIngestionStatus",
           ),
         ),
@@ -192,6 +195,9 @@ import {
           ),
           configService.getOrThrow<string>(
             "internalApi.paths.failDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.startDocumentIngestion",
           ),
           configService.getOrThrow<string>(
             "internalApi.paths.updateDocumentIngestionStatus",

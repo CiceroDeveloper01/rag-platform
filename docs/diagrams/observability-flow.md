@@ -1,6 +1,6 @@
 # Observability Flow
 
-This diagram shows how telemetry flows through the **RAG-PLATAFORM observability stack**.
+This diagram shows how telemetry flows through the **RAG Platform observability stack**.
 
 The platform follows an **observability-first architecture**, capturing:
 
@@ -17,7 +17,9 @@ flowchart TD
 
     USER[User Request]
     WEB[Next.js Web]
-    API[NestJS API]
+    APIWEB[NestJS api-web]
+    APIBUS[NestJS api-business]
+    ORCH[NestJS orchestrator]
 
     RAG[RAG Pipeline]
     AGENT[Agent Executor]
@@ -29,26 +31,34 @@ flowchart TD
 
     PROM[Prometheus]
     LOKI[Loki]
-    JAEGER[Jaeger]
+    TEMPO[Tempo]
 
     GRAFANA[Grafana Dashboards]
 
     USER --> WEB
-    WEB --> API
+    WEB --> APIWEB
+    APIWEB --> APIBUS
 
-    API --> RAG
+    APIBUS --> RAG
     RAG --> AGENT
     AGENT --> DB
+    ORCH --> DB
 
-    API -. metrics .-> OTEL
+    APIWEB -. metrics .-> OTEL
+    APIBUS -. metrics .-> OTEL
+    ORCH -. metrics .-> OTEL
     RAG -. metrics .-> OTEL
     AGENT -. metrics .-> OTEL
 
-    API -. logs .-> OTEL
+    APIWEB -. logs .-> OTEL
+    APIBUS -. logs .-> OTEL
+    ORCH -. logs .-> OTEL
     RAG -. logs .-> OTEL
     AGENT -. logs .-> OTEL
 
-    API -. traces .-> OTEL
+    APIWEB -. traces .-> OTEL
+    APIBUS -. traces .-> OTEL
+    ORCH -. traces .-> OTEL
     RAG -. traces .-> OTEL
     AGENT -. traces .-> OTEL
 
@@ -56,11 +66,11 @@ flowchart TD
 
     COLLECTOR --> PROM
     COLLECTOR --> LOKI
-    COLLECTOR --> JAEGER
+    COLLECTOR --> TEMPO
 
     PROM --> GRAFANA
     LOKI --> GRAFANA
-    JAEGER --> GRAFANA
+    TEMPO --> GRAFANA
 ```
 
 ---
@@ -119,7 +129,7 @@ Example trace flow:
 Traces are collected through:
 
 - OpenTelemetry instrumentation
-- Jaeger tracing backend
+- Tempo tracing backend
 
 ---
 

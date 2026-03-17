@@ -15,6 +15,9 @@ export interface CompleteDocumentIngestionRequest {
 export interface FailDocumentIngestionRequest {
   sourceId: number;
   reason?: string;
+  eventId?: string;
+  correlationId?: string;
+  retryCount?: number;
 }
 
 export interface UpdateDocumentIngestionStatusRequest {
@@ -22,6 +25,27 @@ export interface UpdateDocumentIngestionStatusRequest {
   status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
   currentStep?: "PARSING" | "CHUNKING" | "EMBEDDING" | "INDEXING";
   errorMessage?: string;
+  eventId?: string;
+  correlationId?: string;
+  retryCount?: number;
+}
+
+export interface StartDocumentIngestionRequest {
+  sourceId: number;
+  eventId: string;
+  correlationId: string;
+  retryCount: number;
+}
+
+export interface StartDocumentIngestionResponse {
+  success: boolean;
+  shouldProcess: boolean;
+  status?: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+  reason?:
+    | "source_not_found"
+    | "already_completed"
+    | "already_processing_same_event";
+  attemptCount?: number;
 }
 
 export interface RequestDocumentIngestionRequest {
@@ -42,6 +66,7 @@ export class DocumentIngestionClient {
     private readonly requestPath = "/ingestion/request",
     private readonly completePath = "/ingestion/complete",
     private readonly failPath = "/ingestion/fail",
+    private readonly startPath = "/ingestion/start",
     private readonly statusPath = "/ingestion/status",
   ) {}
 
@@ -68,6 +93,15 @@ export class DocumentIngestionClient {
   ): Promise<TResponse> {
     return this.apiClient.post<FailDocumentIngestionRequest, TResponse>(
       this.failPath,
+      payload,
+    );
+  }
+
+  start<TResponse = StartDocumentIngestionResponse>(
+    payload: StartDocumentIngestionRequest,
+  ): Promise<TResponse> {
+    return this.apiClient.post<StartDocumentIngestionRequest, TResponse>(
+      this.startPath,
       payload,
     );
   }

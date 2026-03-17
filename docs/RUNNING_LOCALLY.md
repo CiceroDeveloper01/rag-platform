@@ -6,6 +6,9 @@ This guide describes the local development setup that matches the current reposi
 
 Use Docker for infrastructure only. Run the applications locally in debug mode.
 
+Kubernetes is prepared separately for shared environments, but it is not the
+default local workflow.
+
 ```mermaid
 flowchart LR
     Web[apps/web local process] --> APIWeb[apps/api-web local process]
@@ -109,6 +112,9 @@ RABBITMQ_PORT=5672
 RABBITMQ_USER=guest
 RABBITMQ_PASS=guest
 RABBITMQ_QUEUE_DOCUMENT_INGESTION=document.ingestion.requested
+RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE=document.ingestion.requested.retry
+RABBITMQ_DOCUMENT_INGESTION_DLQ=document.ingestion.requested.dlq
+RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS=3
 ```
 
 Important orchestrator-to-business API values:
@@ -116,6 +122,7 @@ Important orchestrator-to-business API values:
 ```env
 INTERNAL_API_BASE_URL=http://localhost:3001
 INTERNAL_API_INGESTION_REQUEST_PATH=/api/v1/internal/ingestion/request
+INTERNAL_API_INGESTION_START_PATH=/api/v1/internal/ingestion/start
 INTERNAL_API_INGESTION_STATUS_PATH=/api/v1/internal/ingestion/status
 INTERNAL_API_INGESTION_COMPLETE_PATH=/api/v1/internal/ingestion/complete
 INTERNAL_API_INGESTION_FAIL_PATH=/api/v1/internal/ingestion/fail
@@ -124,6 +131,7 @@ INTERNAL_API_INGESTION_FAIL_PATH=/api/v1/internal/ingestion/fail
 Telegram note:
 
 - if Telegram is enabled without valid bot credentials, the orchestrator will fail fast during startup
+- document ingestion retries are now bounded; failed messages are inspectable in the RabbitMQ DLQ instead of being dropped silently
 
 ## 6. Recommended Local Validation
 

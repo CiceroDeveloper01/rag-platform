@@ -4,6 +4,7 @@ import { CompleteDocumentIngestionRequest } from './dtos/request/complete-docume
 import { FailDocumentIngestionRequest } from './dtos/request/fail-document-ingestion.request';
 import { InternalIngestionService } from './internal-ingestion.service';
 import { RequestDocumentIngestionRequest } from './dtos/request/request-document-ingestion.request';
+import { StartDocumentIngestionRequest } from './dtos/request/start-document-ingestion.request';
 import { UpdateDocumentIngestionStatusRequest } from './dtos/request/update-document-ingestion-status.request';
 
 @ApiExcludeController()
@@ -21,6 +22,11 @@ export class InternalIngestionController {
   @Post('fail')
   fail(@Body() dto: FailDocumentIngestionRequest) {
     return this.internalIngestionService.fail(dto);
+  }
+
+  @Post('start')
+  start(@Body() dto: StartDocumentIngestionRequest) {
+    return this.internalIngestionService.start(dto);
   }
 
   @Post('status')

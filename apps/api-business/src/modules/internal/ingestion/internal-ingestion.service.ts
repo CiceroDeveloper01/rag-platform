@@ -9,6 +9,7 @@ import { CompleteDocumentIngestionRequest } from './dtos/request/complete-docume
 import { FailDocumentIngestionRequest } from './dtos/request/fail-document-ingestion.request';
 import { IngestionService } from '../../ingestion/services/ingestion.service';
 import { RequestDocumentIngestionRequest } from './dtos/request/request-document-ingestion.request';
+import { StartDocumentIngestionRequest } from './dtos/request/start-document-ingestion.request';
 import { UpdateDocumentIngestionStatusRequest } from './dtos/request/update-document-ingestion-status.request';
 
 @Injectable()
@@ -76,6 +77,9 @@ export class InternalIngestionService {
       ingestionCurrentStep: null,
       ingestionFailureReason: dto.reason ?? 'document_ingestion_failed',
       completedAt: null,
+      lastFailureAt: new Date(),
+      lastIngestionEventId: dto.eventId ?? null,
+      lastIngestionCorrelationId: dto.correlationId ?? null,
     });
 
     this.logger.warn(
@@ -93,17 +97,87 @@ export class InternalIngestionService {
     };
   }
 
+  async start(dto: StartDocumentIngestionRequest) {
+    const source = await this.sourceRepository.findById(dto.sourceId);
+
+    if (!source) {
+      return {
+        success: false as const,
+        shouldProcess: false as const,
+        reason: 'source_not_found' as const,
+      };
+    }
+
+    if (source.ingestionStatus === 'COMPLETED') {
+      return {
+        success: true as const,
+        shouldProcess: false as const,
+        status: source.ingestionStatus,
+        reason: 'already_completed' as const,
+        attemptCount: source.ingestionAttemptCount ?? 0,
+      };
+    }
+
+    if (
+      source.ingestionStatus === 'PROCESSING' &&
+      source.lastIngestionEventId === dto.eventId
+    ) {
+      return {
+        success: true as const,
+        shouldProcess: false as const,
+        status: source.ingestionStatus,
+        reason: 'already_processing_same_event' as const,
+        attemptCount: source.ingestionAttemptCount ?? 0,
+      };
+    }
+
+    const nextAttemptCount = (source.ingestionAttemptCount ?? 0) + 1;
+    await this.sourceRepository.update(dto.sourceId, {
+      ingestionStatus: 'PROCESSING',
+      ingestionCurrentStep: 'RECEIVED',
+      ingestionFailureReason: null,
+      processingStartedAt: new Date(),
+      completedAt: null,
+      ingestionAttemptCount: nextAttemptCount,
+      lastIngestionAttemptAt: new Date(),
+      lastIngestionEventId: dto.eventId,
+      lastIngestionCorrelationId: dto.correlationId,
+    });
+
+    this.logger.info(
+      {
+        sourceId: dto.sourceId,
+        eventId: dto.eventId,
+        correlationId: dto.correlationId,
+        retryCount: dto.retryCount,
+        attemptCount: nextAttemptCount,
+      },
+      'Document ingestion processing started',
+    );
+
+    return {
+      success: true as const,
+      shouldProcess: true as const,
+      status: 'PROCESSING' as const,
+      attemptCount: nextAttemptCount,
+    };
+  }
+
   async updateStatus(dto: UpdateDocumentIngestionStatusRequest) {
     const nextStatus = await this.sourceRepository.update(dto.sourceId, {
       ingestionStatus: dto.status,
       ingestionCurrentStep: dto.currentStep ?? null,
       ingestionFailureReason:
-        dto.status === 'FAILED'
-          ? (dto.errorMessage ?? 'document_ingestion_failed')
-          : null,
+        dto.status === 'COMPLETED'
+          ? null
+          : (dto.errorMessage ?? null),
       processingStartedAt:
         dto.status === 'PROCESSING' ? new Date() : undefined,
       completedAt: dto.status === 'COMPLETED' ? new Date() : null,
+      lastIngestionEventId: dto.eventId ?? null,
+      lastIngestionCorrelationId: dto.correlationId ?? null,
+      lastFailureAt:
+        dto.status === 'FAILED' || dto.errorMessage ? new Date() : undefined,
     });
 
     if (!nextStatus) {
@@ -118,6 +192,9 @@ export class InternalIngestionService {
         sourceId: dto.sourceId,
         status: dto.status,
         currentStep: dto.currentStep ?? null,
+        eventId: dto.eventId ?? null,
+        correlationId: dto.correlationId ?? null,
+        retryCount: dto.retryCount ?? null,
       },
       'Updated async document ingestion status',
     );

@@ -7,4 +7,16 @@ export class FailDocumentIngestionRequest {
   @IsString()
   @IsOptional()
   reason?: string;
+
+  @IsString()
+  @IsOptional()
+  eventId?: string;
+
+  @IsString()
+  @IsOptional()
+  correlationId?: string;
+
+  @IsInt()
+  @IsOptional()
+  retryCount?: number;
 }

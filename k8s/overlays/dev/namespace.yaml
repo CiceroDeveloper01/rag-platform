@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rag-platform-dev
+  labels:
+    app.kubernetes.io/name: rag-platform
+    app.kubernetes.io/environment: dev

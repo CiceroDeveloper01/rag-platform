@@ -5,6 +5,7 @@ import {
 import { SourceRecord } from './source-record.interface';
 
 export interface CreateSourcePayload {
+  tenantId: string;
   filename: string;
   type: string;
   sourceChannel?: string | null;
@@ -13,6 +14,11 @@ export interface CreateSourcePayload {
   ingestionStatus?: SourceIngestionStatus;
   ingestionCurrentStep?: SourceProcessingStep | null;
   ingestionFailureReason?: string | null;
+  ingestionAttemptCount?: number;
+  lastIngestionAttemptAt?: Date | null;
+  lastIngestionEventId?: string | null;
+  lastIngestionCorrelationId?: string | null;
+  lastFailureAt?: Date | null;
 }
 
 export interface ListSourcesPayload {
@@ -30,6 +36,7 @@ export interface SourceRepositoryInterface {
   update(
     sourceId: number,
     payload: {
+      tenantId?: string;
       filename?: string;
       type?: string;
       sourceChannel?: string | null;
@@ -40,6 +47,11 @@ export interface SourceRepositoryInterface {
       storageUrl?: string | null;
       processingStartedAt?: Date | null;
       completedAt?: Date | null;
+      ingestionAttemptCount?: number;
+      lastIngestionAttemptAt?: Date | null;
+      lastIngestionEventId?: string | null;
+      lastIngestionCorrelationId?: string | null;
+      lastFailureAt?: Date | null;
     },
   ): Promise<SourceRecord | null>;
   delete(sourceId: number): Promise<void>;

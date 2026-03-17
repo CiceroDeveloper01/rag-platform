@@ -8,9 +8,11 @@ This directory contains the canonical technical documentation for the current mo
 2. [Architecture Decisions](ARCHITECTURE_DECISIONS.md)
 3. [Running Locally](RUNNING_LOCALLY.md)
 4. [Testing Guide](TESTING_GUIDE.md)
-5. [Channel Integration](CHANNEL_INTEGRATION.md)
-6. [Database](DATABASE.md)
-7. [Technical Debt](TECHNICAL_DEBT.md)
+5. [Deployment Model](deployment/DEPLOYMENT.md)
+6. [Kubernetes Readiness](deployment/KUBERNETES.md)
+7. [Channel Integration](CHANNEL_INTEGRATION.md)
+8. [Database](DATABASE.md)
+9. [Technical Debt](TECHNICAL_DEBT.md)
 
 ## Current Documentation Map
 
@@ -19,6 +21,8 @@ flowchart TD
     Docs[docs/] --> Architecture[ARCHITECTURE.md]
     Docs --> Decisions[ARCHITECTURE_DECISIONS.md]
     Docs --> Local[RUNNING_LOCALLY.md]
+    Docs --> Deployment[deployment/DEPLOYMENT.md]
+    Docs --> Kubernetes[deployment/KUBERNETES.md]
     Docs --> Testing[TESTING_GUIDE.md]
     Docs --> Channels[CHANNEL_INTEGRATION.md]
     Docs --> Database[DATABASE.md]
@@ -30,6 +34,8 @@ flowchart TD
 - [Architecture](ARCHITECTURE.md)
 - [Architecture Decisions](ARCHITECTURE_DECISIONS.md)
 - [Running Locally](RUNNING_LOCALLY.md)
+- [Deployment Model](deployment/DEPLOYMENT.md)
+- [Kubernetes Readiness](deployment/KUBERNETES.md)
 - [Testing Guide](TESTING_GUIDE.md)
 - [Channel Integration](CHANNEL_INTEGRATION.md)
 - [Database](DATABASE.md)

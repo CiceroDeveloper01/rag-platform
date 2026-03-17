@@ -4,6 +4,8 @@ export type SourceIngestionStatus =
   | 'COMPLETED'
   | 'FAILED';
 
+export const TERMINAL_SOURCE_INGESTION_STATUSES = ['COMPLETED', 'FAILED'] as const;
+
 export type SourceProcessingStep =
   | 'RECEIVED'
   | 'PARSING'

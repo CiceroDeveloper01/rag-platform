@@ -129,8 +129,17 @@ These queues support message intake, agent planning, and downstream response exe
 RabbitMQ is currently introduced only for document ingestion.
 
 - queue: `document.ingestion.requested`
+- retry queue: `document.ingestion.requested.retry`
+- dead-letter queue: `document.ingestion.requested.dlq`
 
 This queue is intentionally narrow in scope. Chat does not use RabbitMQ.
+
+The current document ingestion worker is hardened with:
+
+- bounded retry attempts
+- explicit dead-letter routing after retry exhaustion
+- idempotent processing start checks using persisted source status
+- replay via persisted source metadata and republishing
 
 ```mermaid
 flowchart TD

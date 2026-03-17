@@ -1,0 +1,45 @@
+name: k8s-validation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feat/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: k8s-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  manifests:
+    name: Kubernetes Manifests Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+
+      - name: Render base manifests
+        run: kubectl kustomize k8s/base > /tmp/k8s-base.yaml
+
+      - name: Render dev overlay
+        run: kubectl kustomize k8s/overlays/dev > /tmp/k8s-dev.yaml
+
+      - name: Render staging overlay
+        run: kubectl kustomize k8s/overlays/staging > /tmp/k8s-staging.yaml
+
+      - name: Render prod overlay
+        run: kubectl kustomize k8s/overlays/prod > /tmp/k8s-prod.yaml

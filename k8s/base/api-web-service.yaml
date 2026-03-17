@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rag-api-web
+  labels:
+    app.kubernetes.io/name: rag-api-web
+    app.kubernetes.io/part-of: rag-platform
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: rag-api-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

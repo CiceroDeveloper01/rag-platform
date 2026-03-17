@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DocumentStatusQueryRequest } from '../dtos/request/document-status-query.request';
 import { ListSourcesRequest } from '../dtos/request/list-sources.request';
 import { UpdateSourceRequest } from '../dtos/request/update-source.request';
+import { IngestionService } from './ingestion.service';
 import { SOURCE_REPOSITORY } from '../interfaces/source-repository.interface';
 import type { SourceRepositoryInterface } from '../interfaces/source-repository.interface';
 import { DocumentStatusMapper } from '../mappers/document-status.mapper';
@@ -12,6 +13,7 @@ export class SourcesService {
     @Inject(SOURCE_REPOSITORY)
     private readonly sourceRepository: SourceRepositoryInterface,
     private readonly documentStatusMapper: DocumentStatusMapper,
+    private readonly ingestionService: IngestionService,
   ) {}
 
   async list(dto: ListSourcesRequest) {
@@ -65,5 +67,9 @@ export class SourcesService {
 
     await this.sourceRepository.delete(sourceId);
     return { success: true };
+  }
+
+  async replay(sourceId: number) {
+    return this.ingestionService.replayFailedIngestion(sourceId);
   }
 }

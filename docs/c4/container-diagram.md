@@ -1,6 +1,6 @@
 # Container Diagram
 
-This view describes the main runtime containers and infrastructure services that make up RAG-PLATAFORM.
+This view describes the main runtime containers and infrastructure services that make up RAG Platform.
 
 The platform is implemented as a monorepo, but at runtime it is composed of a small set of clear containers and supporting services. The local Docker environment is intentionally observability-first so engineers can inspect metrics, logs, and traces during development and demos.
 
@@ -11,30 +11,40 @@ flowchart LR
     User[User / Operator]
 
     Web[Next.js Web Dashboard\napps/web]
-    Api[NestJS API\napps/api-business]
+    ApiWeb[NestJS BFF\napps/api-web]
+    ApiBusiness[NestJS Business API\napps/api-business]
+    Orchestrator[Async Runtime\napps/orchestrator]
     Db[(PostgreSQL + pgvector)]
+    Redis[(Redis)]
+    Rabbit[(RabbitMQ)]
     OpenAI[OpenAI]
 
     Prom[Prometheus]
     Graf[Grafana]
     Loki[Loki]
-    Jaeger[Jaeger]
+    Tempo[Tempo]
     OTel[OTEL Collector]
 
     User --> Web
-    Web --> Api
-    Api --> Db
-    Api --> OpenAI
+    Web --> ApiWeb
+    ApiWeb --> ApiBusiness
+    ApiBusiness --> Db
+    ApiBusiness --> Redis
+    ApiBusiness --> Rabbit
+    ApiBusiness --> OpenAI
+    Orchestrator --> Rabbit
+    Orchestrator --> Redis
+    Orchestrator --> ApiBusiness
 
-    Api --> OTel
-    Api --> Prom
-    Api --> Loki
+    ApiWeb --> OTel
+    ApiBusiness --> OTel
+    Orchestrator --> OTel
 
-    OTel --> Jaeger
+    OTel --> Tempo
     OTel --> Prom
     Prom --> Graf
     Loki --> Graf
-    Jaeger --> Graf
+    Tempo --> Graf
 
     User --> Graf
 ```
@@ -55,20 +65,39 @@ It provides:
 
 It consumes the backend API and presents the analytics/query layer in a usable interface.
 
-### NestJS API
+### api-web
 
-The backend in `apps/api-business`.
+The portal-facing API in `apps/api-web`.
+
+It provides:
+
+- presentation-oriented endpoints for the web portal
+- operational and dashboard proxy surfaces
+- document upload and status proxy routes
+
+### api-business
+
+The synchronous business API in `apps/api-business`.
 
 It is responsible for:
 
-- authentication and sessions
-- document ingestion
-- RAG retrieval and chat flows
-- omnichannel inbound/outbound orchestration
-- analytics and dashboard endpoints
+- chat and retrieval
+- document ingestion requests and persisted status
+- conversations and memory
+- internal callbacks used by the orchestrator
 - metrics, logs, and traces
 
-This is the central application container in the runtime.
+### Orchestrator
+
+The asynchronous runtime in `apps/orchestrator`.
+
+It is responsible for:
+
+- channel listeners and adapters
+- BullMQ runtime queues and processors
+- agent execution and routing
+- RabbitMQ-backed document ingestion workers
+- outbound channel dispatch
 
 ### PostgreSQL + pgvector
 
@@ -110,9 +139,9 @@ Visualizes dashboards for API health, omnichannel metrics, logs, and traces.
 
 Stores centralized logs, especially structured logs shipped from containerized services.
 
-### Jaeger
+### Tempo
 
-Provides distributed trace visualization for request flows such as omnichannel orchestration and RAG execution.
+Provides distributed trace visualization for request flows such as channel handling, document ingestion, and RAG execution.
 
 ### OpenTelemetry Collector
 

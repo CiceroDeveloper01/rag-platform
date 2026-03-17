@@ -52,6 +52,18 @@ export class DocumentStatusResponse {
   errorMessage?: string | null;
 
   @Expose()
+  @ApiPropertyOptional({ example: 2 })
+  retryCount?: number;
+
+  @Expose()
+  @ApiPropertyOptional({ example: '2026-03-16T14:35:35.000Z' })
+  lastFailureAt?: string | null;
+
+  @Expose()
+  @ApiProperty({ example: false })
+  replayEligible!: boolean;
+
+  @Expose()
   @ApiPropertyOptional({ example: 12 })
   chunksCount?: number;
 }

@@ -127,14 +127,14 @@ End-to-end idempotency is still not centralized across the whole platform. That 
 
 ### Operational hardening
 
-The repository now has better document status tracking, but production-grade retry, replay, and reconciliation behavior still deserves continued attention.
+The repository now has bounded retry, DLQ routing, persisted retry metadata, and explicit replay for document ingestion. The remaining debt is narrower now: broader reconciliation tooling and stronger idempotency consistency across every async path in the platform.
 
 ## Prioritization
 
 ### Must address soon
 
 - continue aligning web-facing flows with the intended `api-web` and `api-business` boundaries
-- strengthen end-to-end idempotency for document and message processing
+- strengthen end-to-end idempotency for non-document async flows and channel delivery paths
 - keep documenting the current limits of channel-origin document handling honestly
 
 ### Should address next

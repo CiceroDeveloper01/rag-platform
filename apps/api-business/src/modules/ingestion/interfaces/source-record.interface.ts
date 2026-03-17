@@ -5,6 +5,7 @@ import {
 
 export interface SourceRecord {
   id: number;
+  tenantId: string;
   filename: string;
   uploadedAt: Date;
   type: string | null;
@@ -18,4 +19,9 @@ export interface SourceRecord {
   completedAt?: Date | null;
   updatedAt?: Date | null;
   chunksCount?: number;
+  ingestionAttemptCount?: number;
+  lastIngestionAttemptAt?: Date | null;
+  lastIngestionEventId?: string | null;
+  lastIngestionCorrelationId?: string | null;
+  lastFailureAt?: Date | null;
 }

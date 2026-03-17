@@ -33,6 +33,10 @@
     "docker:build:api-web": "docker build -f apps/api-web/Dockerfile -t rag-platform-api-web .",
     "docker:build:orchestrator": "docker build -f apps/orchestrator/Dockerfile -t rag-platform-orchestrator .",
     "docker:build:web": "docker build -f apps/web/Dockerfile -t rag-platform-web .",
+    "k8s:render:base": "kubectl kustomize k8s/base",
+    "k8s:render:dev": "kubectl kustomize k8s/overlays/dev",
+    "k8s:render:staging": "kubectl kustomize k8s/overlays/staging",
+    "k8s:render:prod": "kubectl kustomize k8s/overlays/prod",
     "ci": "npm run build:packages && npm run test:packages && npm run lint:api && npm run test:api && npm run test:e2e:api && npm run coverage:api && npm run build:api && npm run lint:api-web && npm run build:api-web && npm run test:orchestrator && npm run coverage:orchestrator && npm run build:orchestrator && npm run lint:web && npm run test:web && npm run coverage:web && npm run build:web"
   },
   "keywords": [

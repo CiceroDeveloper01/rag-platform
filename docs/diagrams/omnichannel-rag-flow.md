@@ -1,6 +1,6 @@
 # Omnichannel + RAG Flow
 
-This diagram shows the end-to-end execution flow of **RAG-PLATAFORM**, from inbound channel message to outbound response, including orchestration, optional RAG retrieval, persistence, and observability.
+This diagram shows the end-to-end execution flow of **RAG Platform**, from inbound channel message to outbound response, including orchestration, optional RAG retrieval, persistence, and observability.
 
 ---
 
@@ -28,7 +28,7 @@ flowchart TD
     DISP[Outbound Dispatcher]
     RESP[Response to Original Channel]
 
-    OBS[Observability Stack<br/>Prometheus / Grafana / Loki / Jaeger / OTEL]
+    OBS[Observability Stack<br/>Prometheus / Grafana / Loki / Tempo / OTEL]
 
     U --> CH
     CH --> AD
@@ -203,7 +203,7 @@ The observability stack captures:
 - metrics in Prometheus
 - dashboards in Grafana
 - logs in Loki
-- traces in Jaeger
+- traces in Tempo
 - telemetry routing through OpenTelemetry Collector
 
 This supports:

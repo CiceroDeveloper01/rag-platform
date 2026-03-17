@@ -1,6 +1,6 @@
 # Terraform Infrastructure Guide
 
-This document explains how infrastructure-as-code is organized in **RAG-PLATAFORM**, how to run Terraform locally, and how the GitHub Actions deployment flow applies infrastructure changes across environments.
+This document explains how infrastructure-as-code is organized in **RAG Platform**, how to run Terraform locally, and how the GitHub Actions deployment flow applies infrastructure changes across environments.
 
 ## Purpose
 

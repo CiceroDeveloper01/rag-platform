@@ -6,22 +6,25 @@
 
 ```mermaid
 flowchart LR
-    Web[apps/web] --> API[apps/api-business]
-    API --> Postgres[(PostgreSQL)]
-    API --> Redis[(Redis)]
+    Web[apps/web] --> APIWeb[apps/api-web]
+    APIWeb --> APIBusiness[apps/api-business]
+    APIBusiness --> Postgres[(PostgreSQL)]
+    APIBusiness --> Redis[(Redis)]
+    APIBusiness --> Rabbit[(RabbitMQ)]
     Orchestrator[apps/orchestrator] --> Redis
-    Orchestrator --> API
-    API --> OTel[OpenTelemetry Collector]
+    Orchestrator --> Rabbit
+    Orchestrator --> APIBusiness
+    APIBusiness --> OTel[OpenTelemetry Collector]
     Orchestrator --> OTel
 ```
 
 ## Minimum Flow
 
 1. install dependencies
-2. start infrastructure with Docker Compose
-3. start `api`, `orchestrator`, and `web`
+2. start infrastructure with Docker Compose and keep Docker as the local standard for Postgres, Redis, RabbitMQ, and observability
+3. start `api-web`, `api-business`, `orchestrator`, and `web` locally in debug mode
 4. validate health endpoints
-5. run targeted tests or exercise the Telegram path
+5. run targeted tests, exercise a chat flow, or submit a document and observe persisted status updates
 
 ## Important Note
 

@@ -16,6 +16,11 @@ type DocumentIngestionStep =
   | "EMBEDDING"
   | "INDEXING";
 
+export interface DocumentIngestionProcessResult {
+  status: "processed" | "skipped";
+  reason?: "source_not_found" | "already_completed" | "already_processing_same_event";
+}
+
 @Injectable()
 export class DocumentIngestionWorkerService {
   constructor(
@@ -28,7 +33,10 @@ export class DocumentIngestionWorkerService {
     private readonly ingestionInternalClient: DocumentIngestionInternalClient,
   ) {}
 
-  async process(payload: DocumentIngestionRequestedEvent): Promise<void> {
+  async process(
+    payload: DocumentIngestionRequestedEvent,
+    retryCount = 0,
+  ): Promise<DocumentIngestionProcessResult> {
     const startedAt = Date.now();
     const span = this.tracingService.startSpan("document_ingestion_worker");
 
@@ -39,10 +47,41 @@ export class DocumentIngestionWorkerService {
         sourceId: payload.sourceId,
         tenantId: payload.tenantId,
         filename: payload.filename,
+        eventId: payload.eventId,
+        correlationId: payload.correlationId,
+        retryCount,
       },
     );
 
     try {
+      const startResponse = await this.ingestionInternalClient.startIngestion({
+        sourceId: payload.sourceId,
+        eventId: payload.eventId,
+        correlationId: payload.correlationId,
+        retryCount,
+      });
+
+      if (!startResponse.shouldProcess) {
+        this.metricsService.increment("document_ingestion_skipped_total");
+        this.logger.warn(
+          "Skipping async document ingestion processing",
+          DocumentIngestionWorkerService.name,
+          {
+            sourceId: payload.sourceId,
+            tenantId: payload.tenantId,
+            eventId: payload.eventId,
+            correlationId: payload.correlationId,
+            retryCount,
+            reason: startResponse.reason ?? "already_processing_same_event",
+          },
+        );
+
+        return {
+          status: "skipped",
+          reason: startResponse.reason,
+        };
+      }
+
       await this.updateStep(payload, "PARSING");
 
       const fileBuffer = Buffer.from(payload.fileContentBase64, "base64");
@@ -93,8 +132,12 @@ export class DocumentIngestionWorkerService {
           tenantId: payload.tenantId,
           chunkCount: chunks.length,
           durationMs: Date.now() - startedAt,
+          eventId: payload.eventId,
+          correlationId: payload.correlationId,
+          retryCount,
         },
       );
+      return { status: "processed" };
     } catch (error) {
       this.metricsService.increment("document_ingestion_consumer_failure_total");
       this.metricsService.increment("documents_ingestion_failed_total");
@@ -102,11 +145,6 @@ export class DocumentIngestionWorkerService {
         "documents_ingestion_duration_ms",
         Date.now() - startedAt,
       );
-      await this.ingestionInternalClient.failIngestion({
-        sourceId: payload.sourceId,
-        reason:
-          error instanceof Error ? error.message : "document_ingestion_failed",
-      });
       this.logger.error(
         "Async document ingestion failed",
         error instanceof Error ? error.stack : undefined,
@@ -115,8 +153,12 @@ export class DocumentIngestionWorkerService {
           sourceId: payload.sourceId,
           tenantId: payload.tenantId,
           durationMs: Date.now() - startedAt,
+          eventId: payload.eventId,
+          correlationId: payload.correlationId,
+          retryCount,
         },
       );
+      throw error;
     } finally {
       this.tracingService.endSpan(span);
     }
@@ -140,6 +182,8 @@ export class DocumentIngestionWorkerService {
       sourceId: payload.sourceId,
       status: "PROCESSING",
       currentStep,
+      eventId: payload.eventId,
+      correlationId: payload.correlationId,
     });
   }
 }

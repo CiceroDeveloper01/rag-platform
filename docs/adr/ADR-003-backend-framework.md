@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The backend of RAG-PLATAFORM is responsible for several non-trivial concerns:
+The backend of RAG Platform is responsible for several non-trivial concerns:
 
 - modular business domains
 - session-based authentication

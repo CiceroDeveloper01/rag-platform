@@ -1,4 +1,6 @@
 export interface DocumentIngestionRequestedEvent {
+  eventId: string;
+  correlationId: string;
   sourceId: number;
   tenantId: string;
   sourceChannel?: string;

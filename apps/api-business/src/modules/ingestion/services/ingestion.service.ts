@@ -1,10 +1,13 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
+  NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import type { DocumentIngestionRequestedEvent } from '@rag-platform/contracts';
+import { randomUUID } from 'node:crypto';
 import { PinoLogger } from 'nestjs-pino';
 import { AppCacheService } from '../../../common/cache/services/app-cache.service';
 import { DocumentIngestionPublisherService } from '../../../common/messaging/document-ingestion.publisher';
@@ -95,6 +98,83 @@ export class IngestionService {
     );
   }
 
+  async replayFailedIngestion(sourceId: number) {
+    const source = await this.sourceRepository.findById(sourceId);
+
+    if (!source) {
+      throw new NotFoundException(`Source ${sourceId} not found`);
+    }
+
+    if (source.ingestionStatus !== 'FAILED') {
+      throw new ConflictException(
+        'Only failed document ingestions can be replayed',
+      );
+    }
+
+    if (!source.storageKey || !source.storageUrl || !source.type) {
+      throw new ConflictException(
+        'The failed source does not have enough stored metadata to replay ingestion',
+      );
+    }
+
+    const fileBuffer = await this.fileStorage.download(source.storageKey);
+
+    await this.sourceRepository.update(sourceId, {
+      ingestionStatus: 'PENDING',
+      ingestionCurrentStep: null,
+      ingestionFailureReason: null,
+      processingStartedAt: null,
+      completedAt: null,
+    });
+
+    try {
+      const event = this.buildRequestedEvent({
+        sourceId: source.id,
+        tenantId: source.tenantId,
+        sourceChannel: source.sourceChannel ?? 'unknown',
+        filename: source.filename,
+        mimeType: source.type,
+        storageKey: source.storageKey,
+        storageUrl: source.storageUrl,
+        buffer: fileBuffer,
+        uploadedAt: source.uploadedAt,
+      });
+
+      await this.publisherService.publish(event);
+      this.metricsService.incrementCustomCounter(
+        'documents_ingestion_replayed_total',
+      );
+      this.logger.warn(
+        {
+          sourceId: source.id,
+          tenantId: source.tenantId,
+          sourceChannel: source.sourceChannel ?? null,
+          eventId: event.eventId,
+          correlationId: event.correlationId,
+        },
+        'Replayed failed document ingestion event',
+      );
+
+      return {
+        documentId: source.id,
+        status: 'PENDING' as const,
+        message: 'Document ingestion replay requested successfully.',
+      };
+    } catch (error) {
+      await this.sourceRepository.update(source.id, {
+        ingestionStatus: 'FAILED',
+        ingestionCurrentStep: null,
+        ingestionFailureReason:
+          error instanceof Error ? error.message : 'ingestion_replay_failed',
+        lastFailureAt: new Date(),
+      });
+
+      throw new ServiceUnavailableException(
+        'Document ingestion replay is unavailable',
+      );
+    }
+  }
+
   private async queueBufferedDocument(
     input: QueueBufferedDocumentInput,
     route: string,
@@ -116,6 +196,7 @@ export class IngestionService {
       });
 
       const source = await this.sourceRepository.create({
+        tenantId: input.tenantId?.trim() || 'default-tenant',
         filename: safeFilename,
         type: input.mimeType,
         sourceChannel: input.sourceChannel ?? null,
@@ -125,7 +206,7 @@ export class IngestionService {
       });
       sourceId = source.id;
 
-      const event: DocumentIngestionRequestedEvent = {
+      const event = this.buildRequestedEvent({
         sourceId: source.id,
         tenantId: input.tenantId?.trim() || 'default-tenant',
         sourceChannel: source.sourceChannel ?? input.sourceChannel ?? 'unknown',
@@ -134,13 +215,12 @@ export class IngestionService {
         mimeType: input.mimeType,
         storageKey,
         storageUrl,
-        fileContentBase64: input.buffer.toString('base64'),
+        buffer: input.buffer,
         chunkSize: input.chunkSize,
         chunkOverlap: input.chunkOverlap,
         metadata,
-        requestedAt: new Date().toISOString(),
-        uploadedAt: source.uploadedAt.toISOString(),
-      };
+        uploadedAt: source.uploadedAt,
+      });
 
       await this.publisherService.publish(event);
       await Promise.all([
@@ -155,10 +235,12 @@ export class IngestionService {
       this.logger.info(
         {
           sourceId: source.id,
+          tenantId: event.tenantId,
           filename: source.filename,
           sourceChannel: source.sourceChannel ?? null,
           storageKey,
-          queue: 'document.ingestion.requested',
+          eventId: event.eventId,
+          correlationId: event.correlationId,
         },
         'Document ingestion request accepted and queued',
       );
@@ -231,5 +313,42 @@ export class IngestionService {
     } catch {
       throw new BadRequestException('metadata must be a valid JSON object');
     }
+  }
+
+  private buildRequestedEvent(input: {
+    sourceId: number;
+    tenantId: string;
+    sourceChannel?: string;
+    conversationId?: string;
+    filename: string;
+    mimeType: string;
+    storageKey: string;
+    storageUrl: string;
+    buffer: Buffer;
+    chunkSize?: number;
+    chunkOverlap?: number;
+    metadata?: Record<string, string>;
+    uploadedAt: Date;
+  }): DocumentIngestionRequestedEvent {
+    const correlationId = randomUUID();
+
+    return {
+      eventId: randomUUID(),
+      correlationId,
+      sourceId: input.sourceId,
+      tenantId: input.tenantId,
+      sourceChannel: input.sourceChannel,
+      conversationId: input.conversationId,
+      filename: input.filename,
+      mimeType: input.mimeType,
+      storageKey: input.storageKey,
+      storageUrl: input.storageUrl,
+      fileContentBase64: input.buffer.toString('base64'),
+      chunkSize: input.chunkSize,
+      chunkOverlap: input.chunkOverlap,
+      metadata: input.metadata,
+      requestedAt: new Date().toISOString(),
+      uploadedAt: input.uploadedAt.toISOString(),
+    };
   }
 }

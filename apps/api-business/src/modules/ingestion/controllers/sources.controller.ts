@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -90,5 +91,17 @@ export class SourcesController {
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   remove(@Param('id', ParseIntPipe) sourceId: number) {
     return this.sourcesService.delete(sourceId);
+  }
+
+  @Post(':id/replay')
+  @ApiOperation({
+    summary: 'Replays a failed document ingestion by republishing it to RabbitMQ.',
+  })
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @ApiOkResponse({ description: 'Replay requested successfully.' })
+  @ApiNotFoundResponse({ description: 'Source not found.' })
+  @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
+  replay(@Param('id', ParseIntPipe) sourceId: number) {
+    return this.sourcesService.replay(sourceId);
   }
 }

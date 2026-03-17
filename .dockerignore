@@ -3,6 +3,15 @@ node_modules
 .next
 coverage
 dist
+k8s
+docs
+infra
+docker
+database
+logs
+tmp
+storage
+*.log
 **/node_modules
 **/.next
 **/coverage

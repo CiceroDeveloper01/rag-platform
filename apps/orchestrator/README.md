@@ -34,6 +34,12 @@ It is not the portal API and it is not the primary business persistence boundary
 ### RabbitMQ
 
 - `document.ingestion.requested`
+- `document.ingestion.requested.retry`
+- `document.ingestion.requested.dlq`
+
+The RabbitMQ path is intentionally limited to document ingestion. It uses
+bounded retries, explicit dead-letter handling, and persisted status as the
+operator-facing source of truth.
 
 ## Typical Local Commands
 

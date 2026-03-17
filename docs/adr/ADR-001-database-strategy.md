@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-RAG-PLATAFORM needs a single persistence layer capable of supporting multiple data shapes and operational concerns at the same time. The platform stores relational application data such as users, sessions, conversations, requests, and connector state, but it also needs to persist document chunks and vector embeddings for retrieval workflows.
+RAG Platform needs a single persistence layer capable of supporting multiple data shapes and operational concerns at the same time. The platform stores relational application data such as users, sessions, conversations, requests, and connector state, but it also needs to persist document chunks and vector embeddings for retrieval workflows.
 
 At the same time, the omnichannel module and the dashboard query layer require operational metadata, execution history, and reporting-friendly records. Introducing separate databases for transactional data and vector search would increase infrastructure complexity, raise operational overhead, and make local development harder.
 

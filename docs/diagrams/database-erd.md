@@ -1,6 +1,6 @@
 # Database ERD
 
-This diagram shows the logical relationships between the main database tables used by **RAG-PLATAFORM**.
+This diagram shows the logical relationships between the main database tables used by **RAG Platform**.
 
 The schema supports:
 

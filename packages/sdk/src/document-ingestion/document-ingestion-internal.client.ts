@@ -4,6 +4,8 @@ import {
   DocumentIngestionClient,
   FailDocumentIngestionRequest,
   RequestDocumentIngestionRequest,
+  StartDocumentIngestionRequest,
+  StartDocumentIngestionResponse,
   UpdateDocumentIngestionStatusRequest,
 } from "../clients/document-ingestion.client";
 
@@ -15,6 +17,7 @@ export class DocumentIngestionInternalClient {
     requestPath = "/ingestion/request",
     completePath = "/ingestion/complete",
     failPath = "/ingestion/fail",
+    startPath = "/ingestion/start",
     statusPath = "/ingestion/status",
   ) {
     this.client = new DocumentIngestionClient(
@@ -22,6 +25,7 @@ export class DocumentIngestionInternalClient {
       requestPath,
       completePath,
       failPath,
+      startPath,
       statusPath,
     );
   }
@@ -42,6 +46,12 @@ export class DocumentIngestionInternalClient {
     payload: FailDocumentIngestionRequest,
   ): Promise<TResponse> {
     return this.client.fail<TResponse>(payload);
+  }
+
+  startIngestion<TResponse = StartDocumentIngestionResponse>(
+    payload: StartDocumentIngestionRequest,
+  ): Promise<TResponse> {
+    return this.client.start<TResponse>(payload);
   }
 
   updateIngestionStatus<TResponse = unknown>(

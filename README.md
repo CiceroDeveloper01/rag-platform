@@ -118,6 +118,8 @@ RabbitMQ is intentionally split across two levels of the monorepo:
 
 This keeps the broker itself as infrastructure while preserving publishers, consumers, queue bindings, and handlers inside the applications that own the runtime behavior.
 
+The document ingestion pipeline now also includes bounded retries, a dedicated dead-letter queue, persisted retry metadata, and an explicit replay path for failed ingestions. Persisted source status remains the source of truth for the UI and for operational recovery.
+
 ## Local Development
 
 Infrastructure is expected to run in Docker. Applications are usually run locally in debug mode.
@@ -142,7 +144,41 @@ npm run test:e2e:api
 npm run test:orchestrator
 npm run test:web
 npm run dev:infra
+npm run k8s:render:base
+npm run k8s:render:dev
 ```
+
+## Deployment Model
+
+The repository keeps two infrastructure modes on purpose:
+
+- Docker Compose is the default local development standard
+- Kubernetes is the prepared deployment target for shared environments
+
+Local Docker remains the simplest way to run PostgreSQL, Redis, RabbitMQ, and
+the observability stack while developers debug the four apps locally.
+
+Kubernetes deployment assets now live under:
+
+```text
+k8s/
+  base/
+  overlays/
+    dev/
+    staging/
+    prod/
+```
+
+These manifests only cover the deployable apps:
+
+- `web`
+- `api-web`
+- `api-business`
+- `orchestrator`
+
+Infrastructure dependencies such as PostgreSQL, Redis, RabbitMQ, and
+OpenTelemetry Collector are expected to be deployed separately in Kubernetes or
+provided as managed services.
 
 ## Main Documentation
 
@@ -150,6 +186,8 @@ npm run dev:infra
 - [Architecture Decisions](docs/ARCHITECTURE_DECISIONS.md)
 - [Channel Integration](docs/CHANNEL_INTEGRATION.md)
 - [Database and Persistence](docs/DATABASE.md)
+- [Deployment Guide](docs/deployment/DEPLOYMENT.md)
+- [Kubernetes Guide](docs/deployment/KUBERNETES.md)
 - [Technical Debt Register](docs/TECHNICAL_DEBT.md)
 - [Release Tasks](docs/RELEASE_TASKS.md)
 

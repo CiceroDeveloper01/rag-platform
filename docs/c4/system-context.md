@@ -1,6 +1,6 @@
 # System Context
 
-RAG-PLATAFORM is the central AI orchestration platform in this ecosystem.
+RAG Platform is the central AI orchestration platform in this ecosystem.
 
 Its role is to receive requests from multiple channels, normalize them into a channel-agnostic internal contract, orchestrate execution through agent and optional RAG flows, persist operational data, and expose dashboards and observability signals for operators and developers.
 
@@ -17,9 +17,9 @@ flowchart LR
     FutureChannels[Future Channels\nSlack / Teams / WhatsApp / SMS / Voice]
     OpenAI[OpenAI]
     PostgreSQL[(PostgreSQL + pgvector)]
-    Observability[Grafana / Prometheus /\nLoki / Jaeger]
+    Observability[Grafana / Prometheus /\nLoki / Tempo]
 
-    Platform[RAG-PLATAFORM]
+    Platform[RAG Platform]
 
     User --> Telegram
     User --> Email
@@ -75,13 +75,13 @@ The external AI provider used for embeddings and LLM completions in the current 
 
 The primary persistence platform used for transactional data, conversations, omnichannel records, and vector search.
 
-### Grafana / Prometheus / Loki / Jaeger
+### Grafana / Prometheus / Loki / Tempo
 
 The observability toolchain used to inspect metrics, logs, and traces emitted by the platform.
 
 ## System of Interest
 
-### RAG-PLATAFORM
+### RAG Platform
 
 The main platform that combines:
 

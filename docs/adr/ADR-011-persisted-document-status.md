@@ -14,6 +14,10 @@ Persist document ingestion status and step information in the business layer and
 
 The web UI must read persisted state. It must not query RabbitMQ directly.
 
+The persisted state also carries the operational metadata required to support
+retries, terminal failures, and explicit replay without making the queue itself
+the operator-facing source of truth.
+
 ## Consequences
 
 ### Positive
@@ -21,6 +25,7 @@ The web UI must read persisted state. It must not query RabbitMQ directly.
 - stable UI source of truth
 - clearer operational debugging
 - safer separation between transport and user-facing state
+- better support for idempotency and replay decisions in the async pipeline
 
 ### Trade-offs
 
