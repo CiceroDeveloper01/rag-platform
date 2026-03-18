@@ -51,9 +51,10 @@
   "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
+    "@nestjs/cache-manager": "^3.1.0",
+    "@types/node": "^25.5.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
-    "@types/node": "^25.5.0",
     "markdownlint-cli": "^0.48.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
