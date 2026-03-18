@@ -15,6 +15,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
+      "@rag-platform/config": ["../../packages/config/src/index.ts"],
       "@rag-platform/contracts": ["../../packages/contracts/src/index.ts"],
       "@rag-platform/types": ["../../packages/types/src/index.ts"],
       "@rag-platform/utils": ["../../packages/utils/src/index.ts"]
