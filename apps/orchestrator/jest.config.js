@@ -11,9 +11,9 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
-    "^bullmq$": "<rootDir>/../../node_modules/bullmq/dist/cjs/index.js",
+    "^bullmq$": "<rootDir>/test-support/shims/bullmq.ts",
     "^@langchain/langgraph$":
-      "<rootDir>/../../node_modules/@langchain/langgraph/index.cjs",
+      "<rootDir>/test-support/shims/langgraph.ts",
     "^@rag-platform/config$": "<rootDir>/../../packages/config/src/index.ts",
     "^@rag-platform/contracts$":
       "<rootDir>/../../packages/contracts/src/index.ts",
