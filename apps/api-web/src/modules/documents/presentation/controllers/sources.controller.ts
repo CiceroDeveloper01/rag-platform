@@ -11,17 +11,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { RequiredScopes } from '../../../../common/decorators/required-scopes.decorator';
 import { SessionAuthGuard } from '../../../auth/guards/session-auth.guard';
+import { ScopesGuard } from '../../../auth/guards/scopes.guard';
 import { DocumentsProxyService } from '../../application/services/documents-proxy.service';
 
 @ApiTags('Documents')
 @ApiCookieAuth('rag_platform_session')
 @Controller(['sources', 'api/v1/sources'])
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ScopesGuard)
 export class SourcesController {
   constructor(private readonly documentsProxyService: DocumentsProxyService) {}
 
   @Get()
+  @RequiredScopes('documents:read')
   @ApiOperation({ summary: 'Returns source records through the portal BFF.' })
   @ApiOkResponse({ description: 'Sources returned successfully.' })
   list(
@@ -51,6 +54,7 @@ export class SourcesController {
   }
 
   @Patch(':id')
+  @RequiredScopes('documents:write')
   @ApiOperation({ summary: 'Updates source metadata through the portal BFF.' })
   @ApiOkResponse({ description: 'Source updated successfully.' })
   update(
@@ -68,6 +72,7 @@ export class SourcesController {
   }
 
   @Delete(':id')
+  @RequiredScopes('documents:write')
   @ApiOperation({ summary: 'Deletes a source through the portal BFF.' })
   @ApiOkResponse({ description: 'Source deleted successfully.' })
   remove(

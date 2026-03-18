@@ -8,19 +8,22 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { map, Observable } from 'rxjs';
+import { RequiredScopes } from '../../../../common/decorators/required-scopes.decorator';
 import { SessionAuthGuard } from '../../../auth/guards/session-auth.guard';
+import { ScopesGuard } from '../../../auth/guards/scopes.guard';
 import { ExecutionActivityStreamService } from '../../application/services/execution-activity-stream.service';
 
 @ApiTags('Omnichannel', 'Dashboard')
 @ApiCookieAuth('rag_platform_session')
 @Controller('api/v1')
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ScopesGuard)
 export class ExecutionStreamController {
   constructor(
     private readonly executionActivityStreamService: ExecutionActivityStreamService,
   ) {}
 
   @Sse('executions/stream')
+  @RequiredScopes('omnichannel:read')
   @ApiProduces('text/event-stream')
   @ApiOperation({
     summary:

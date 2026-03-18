@@ -12,4 +12,11 @@ export class AuthenticatedUserResponse {
 
   @ApiProperty({ example: 'admin', enum: ['admin', 'user'] })
   role!: 'admin' | 'user';
+
+  @ApiProperty({
+    example: ['documents:read', 'documents:write', 'omnichannel:read'],
+    isArray: true,
+    type: String,
+  })
+  scopes!: string[];
 }

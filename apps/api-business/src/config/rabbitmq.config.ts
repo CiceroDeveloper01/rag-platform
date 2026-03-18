@@ -5,10 +5,12 @@ export const rabbitMqConfig = registerAs("rabbitmq", () => {
   const host = process.env.RABBITMQ_HOST ?? "localhost";
   const port = Number.parseInt(process.env.RABBITMQ_PORT ?? "5672", 10);
   const username =
+    process.env.RABBITMQ_API_BUSINESS_USER ??
     process.env.RABBITMQ_USER ??
     process.env.RABBITMQ_USERNAME ??
     "guest";
   const password =
+    process.env.RABBITMQ_API_BUSINESS_PASS ??
     process.env.RABBITMQ_PASS ??
     process.env.RABBITMQ_PASSWORD ??
     "guest";

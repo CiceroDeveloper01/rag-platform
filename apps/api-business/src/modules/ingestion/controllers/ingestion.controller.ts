@@ -21,18 +21,21 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
+import { ServiceScopes } from '../../../common/decorators/service-scopes.decorator';
+import { ServiceScopesGuard } from '../../../common/auth/guards/service-scopes.guard';
+import { SessionOrInternalAuthGuard } from '../../../common/auth/guards/session-or-internal-auth.guard';
 import { IngestionService } from '../services/ingestion.service';
 import { UploadDocumentRequest } from '../dtos/request/upload-document.request';
 
 @ApiTags('Documents', 'RAG')
 @ApiCookieAuth('rag_platform_session')
 @Controller(['ingestion', 'api/v1/ingestion'])
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionOrInternalAuthGuard, ServiceScopesGuard)
 export class IngestionController {
   constructor(private readonly ingestionService: IngestionService) {}
 
   @Post('upload')
+  @ServiceScopes('business:documents:write')
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({
     summary:

@@ -121,6 +121,10 @@ The apps connect through environment variables such as:
 - `RABBITMQ_PORT`
 - `RABBITMQ_USER`
 - `RABBITMQ_PASS`
+- `RABBITMQ_API_BUSINESS_USER`
+- `RABBITMQ_API_BUSINESS_PASS`
+- `RABBITMQ_ORCHESTRATOR_USER`
+- `RABBITMQ_ORCHESTRATOR_PASS`
 - `RABBITMQ_VHOST`
 
 This allows Kubernetes environments to use:
@@ -130,6 +134,21 @@ This allows Kubernetes environments to use:
 
 The repository does not embed a RabbitMQ operator or stateful manifest by
 default.
+
+Service-to-service authentication should be configured with:
+
+- shared signing settings
+  - `INTERNAL_SERVICE_TOKEN_SECRET`
+  - `INTERNAL_SERVICE_TOKEN_ISSUER`
+  - `INTERNAL_SERVICE_TOKEN_AUDIENCE`
+  - `INTERNAL_SERVICE_ALLOWED_SUBJECTS`
+- per-application identity settings
+  - `INTERNAL_SERVICE_SUBJECT`
+  - `INTERNAL_SERVICE_DEFAULT_SCOPES`
+
+The per-application identity values must be overridden per deployment because
+`api-web` and `orchestrator` authenticate to `api-business` as different
+services.
 
 ## Probes
 

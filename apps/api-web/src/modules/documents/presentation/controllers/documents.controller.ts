@@ -8,17 +8,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { RequiredScopes } from '../../../../common/decorators/required-scopes.decorator';
 import { SessionAuthGuard } from '../../../auth/guards/session-auth.guard';
+import { ScopesGuard } from '../../../auth/guards/scopes.guard';
 import { DocumentsProxyService } from '../../application/services/documents-proxy.service';
 
 @ApiTags('Documents')
 @ApiCookieAuth('rag_platform_session')
 @Controller(['documents', 'api/v1/documents'])
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ScopesGuard)
 export class DocumentsController {
   constructor(private readonly documentsProxyService: DocumentsProxyService) {}
 
   @Get('status')
+  @RequiredScopes('documents:read')
   @ApiOperation({ summary: 'Returns persisted document ingestion statuses through the BFF.' })
   @ApiOkResponse({ description: 'Document statuses returned successfully.' })
   listStatuses(
@@ -48,6 +51,7 @@ export class DocumentsController {
   }
 
   @Get(':id/status')
+  @RequiredScopes('documents:read')
   @ApiOperation({ summary: 'Returns a single document ingestion status through the BFF.' })
   @ApiOkResponse({ description: 'Document status returned successfully.' })
   getStatus(

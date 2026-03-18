@@ -67,6 +67,14 @@ class EnvironmentVariables {
 
   @IsOptional()
   @IsString()
+  RABBITMQ_API_BUSINESS_USER?: string;
+
+  @IsOptional()
+  @IsString()
+  RABBITMQ_API_BUSINESS_PASS?: string;
+
+  @IsOptional()
+  @IsString()
   RABBITMQ_PASSWORD?: string;
 
   @IsOptional()
@@ -224,6 +232,26 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   AUTH_SESSION_COOKIE_NAME?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_TOKEN_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_TOKEN_ISSUER?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_TOKEN_AUDIENCE?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_ALLOWED_SUBJECTS?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  INTERNAL_SERVICE_CLOCK_SKEW_SECONDS?: string;
 
   @IsOptional()
   @IsBooleanString()

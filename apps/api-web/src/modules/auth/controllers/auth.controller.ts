@@ -33,6 +33,7 @@ import { LoginResponse } from '../dtos/response/login.response';
 import { LogoutResponse } from '../dtos/response/logout.response';
 import { MeResponse } from '../dtos/response/me.response';
 import { SessionAuthGuard } from '../guards/session-auth.guard';
+import { UserAccessTokenService } from '../../../common/auth/services/user-access-token.service';
 import { AuthService } from '../services/auth.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -42,6 +43,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly userAccessTokenService: UserAccessTokenService,
   ) {}
 
   @Post('login')
@@ -72,12 +74,29 @@ export class AuthController {
 
     return {
       token: session.sessionToken,
+      accessToken: this.userAccessTokenService.issueToken({
+        id: session.user.id,
+        email: session.user.email,
+        fullName: session.user.fullName,
+        role: session.user.role,
+      }),
+      tokenType: 'Bearer',
       expiresAt: session.expiresAt.toISOString(),
       user: {
         id: session.user.id,
         email: session.user.email,
         name: session.user.fullName,
         role: session.user.role,
+        scopes: session.user.role === 'admin'
+          ? [
+              'documents:read',
+              'documents:write',
+              'omnichannel:read',
+              'omnichannel:write',
+              'auth:read',
+              'admin:*',
+            ]
+          : ['documents:read', 'documents:write', 'omnichannel:read', 'auth:read'],
       },
     };
   }
@@ -98,6 +117,7 @@ export class AuthController {
         email: user.email,
         name: user.fullName,
         role: user.role,
+        scopes: user.scopes ?? [],
       },
     };
   }

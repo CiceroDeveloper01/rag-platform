@@ -5,12 +5,14 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PinoLogger } from 'nestjs-pino';
+import { InternalServiceTokenService } from '../../../../common/auth/services/internal-service-token.service';
 
 @Injectable()
 export class DocumentsProxyService {
   constructor(
     private readonly configService: ConfigService,
     private readonly logger: PinoLogger,
+    private readonly internalServiceTokenService: InternalServiceTokenService,
   ) {
     this.logger.setContext(DocumentsProxyService.name);
   }
@@ -26,6 +28,7 @@ export class DocumentsProxyService {
       cookieHeader?: string;
       requestId?: string;
       tenantId?: string;
+      serviceScopes?: string[];
     },
   ) {
     const formData = new FormData();
@@ -52,9 +55,9 @@ export class DocumentsProxyService {
     return this.request('/ingestion/upload', {
       method: 'POST',
       body: formData,
-      cookieHeader: context.cookieHeader,
       requestId: context.requestId,
       tenantId: context.tenantId,
+      serviceScopes: ['business:documents:write'],
     });
   }
 
@@ -64,13 +67,14 @@ export class DocumentsProxyService {
       cookieHeader?: string;
       requestId?: string;
       tenantId?: string;
+      serviceScopes?: string[];
     },
   ) {
     return this.request(this.buildPath('/sources', query), {
       method: 'GET',
-      cookieHeader: context.cookieHeader,
       requestId: context.requestId,
       tenantId: context.tenantId,
+      serviceScopes: ['business:documents:read'],
     });
   }
 
@@ -81,15 +85,16 @@ export class DocumentsProxyService {
       cookieHeader?: string;
       requestId?: string;
       tenantId?: string;
+      serviceScopes?: string[];
     },
   ) {
     return this.request(`/sources/${String(sourceId)}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
       contentType: 'application/json',
-      cookieHeader: context.cookieHeader,
       requestId: context.requestId,
       tenantId: context.tenantId,
+      serviceScopes: ['business:documents:write'],
     });
   }
 
@@ -99,13 +104,14 @@ export class DocumentsProxyService {
       cookieHeader?: string;
       requestId?: string;
       tenantId?: string;
+      serviceScopes?: string[];
     },
   ) {
     return this.request(`/sources/${String(sourceId)}`, {
       method: 'DELETE',
-      cookieHeader: context.cookieHeader,
       requestId: context.requestId,
       tenantId: context.tenantId,
+      serviceScopes: ['business:documents:write'],
     });
   }
 
@@ -115,13 +121,14 @@ export class DocumentsProxyService {
       cookieHeader?: string;
       requestId?: string;
       tenantId?: string;
+      serviceScopes?: string[];
     },
   ) {
     return this.request(this.buildPath('/documents/status', query), {
       method: 'GET',
-      cookieHeader: context.cookieHeader,
       requestId: context.requestId,
       tenantId: context.tenantId,
+      serviceScopes: ['business:documents:read'],
     });
   }
 
@@ -131,13 +138,14 @@ export class DocumentsProxyService {
       cookieHeader?: string;
       requestId?: string;
       tenantId?: string;
+      serviceScopes?: string[];
     },
   ) {
     return this.request(`/documents/${String(documentId)}/status`, {
       method: 'GET',
-      cookieHeader: context.cookieHeader,
       requestId: context.requestId,
       tenantId: context.tenantId,
+      serviceScopes: ['business:documents:read'],
     });
   }
 
@@ -147,9 +155,9 @@ export class DocumentsProxyService {
       method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
       body?: BodyInit;
       contentType?: string;
-      cookieHeader?: string;
       requestId?: string;
       tenantId?: string;
+      serviceScopes?: string[];
     },
   ) {
     const baseUrl = this.configService.getOrThrow<string>('businessApi.baseUrl');
@@ -159,13 +167,16 @@ export class DocumentsProxyService {
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
+      const serviceToken = this.internalServiceTokenService.issueToken(
+        input.serviceScopes,
+      );
       const response = await fetch(new URL(path, baseUrl), {
         method: input.method,
         body: input.body,
         signal: controller.signal,
         headers: {
           ...(input.contentType ? { 'content-type': input.contentType } : {}),
-          ...(input.cookieHeader ? { cookie: input.cookieHeader } : {}),
+          authorization: `Bearer ${serviceToken}`,
           ...(input.requestId ? { 'x-request-id': input.requestId } : {}),
           ...(input.tenantId ? { 'x-tenant-id': input.tenantId } : {}),
         },

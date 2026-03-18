@@ -22,7 +22,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
+import { ServiceScopes } from '../../../common/decorators/service-scopes.decorator';
+import { ServiceScopesGuard } from '../../../common/auth/guards/service-scopes.guard';
+import { SessionOrInternalAuthGuard } from '../../../common/auth/guards/session-or-internal-auth.guard';
 import { DocumentsService } from '../services/documents.service';
 import { CreateDocumentRequest } from '../dtos/request/create-document.request';
 import { ListDocumentsRequest } from '../dtos/request/list-documents.request';
@@ -33,7 +35,7 @@ import { DocumentResponseMapper } from '../mappers/document-response.mapper';
 @ApiTags('Documents')
 @ApiCookieAuth('rag_platform_session')
 @Controller(['documents', 'api/v1/documents'])
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionOrInternalAuthGuard, ServiceScopesGuard)
 export class DocumentsController {
   constructor(
     private readonly documentsService: DocumentsService,
@@ -42,6 +44,7 @@ export class DocumentsController {
   ) {}
 
   @Get()
+  @ServiceScopes('business:documents:read')
   @ApiOperation({ summary: 'Returns paginated document records.' })
   @ApiOkResponse({ description: 'Document list returned successfully.' })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
@@ -63,6 +66,7 @@ export class DocumentsController {
   }
 
   @Get(':id')
+  @ServiceScopes('business:documents:read')
   @ApiOperation({ summary: 'Returns a single document by identifier.' })
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @ApiOkResponse({ description: 'Document returned successfully.' })
@@ -82,6 +86,7 @@ export class DocumentsController {
   }
 
   @Post()
+  @ServiceScopes('business:documents:write')
   @ApiOperation({ summary: 'Creates a document entry manually.' })
   @ApiBody({ type: CreateDocumentRequest })
   @ApiOkResponse({ description: 'Document created successfully.' })
@@ -106,6 +111,7 @@ export class DocumentsController {
   }
 
   @Patch(':id')
+  @ServiceScopes('business:documents:write')
   @ApiOperation({ summary: 'Updates document content or metadata.' })
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @ApiBody({ type: UpdateDocumentRequest })
@@ -132,6 +138,7 @@ export class DocumentsController {
   }
 
   @Delete(':id')
+  @ServiceScopes('business:documents:write')
   @ApiOperation({ summary: 'Deletes a document record.' })
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @ApiOkResponse({ description: 'Document deleted successfully.' })

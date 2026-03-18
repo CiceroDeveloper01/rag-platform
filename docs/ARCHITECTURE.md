@@ -212,6 +212,24 @@ This app owns the actual repository-backed business capabilities, including:
 
 This app is not a public HTTP controller surface for end users. It remains the worker/runtime boundary.
 
+## 6.1 Security Boundaries
+
+The security model follows the same runtime split:
+
+- `web -> api-web`
+  - public edge with end-user JWT validation and scope enforcement
+- `api-web -> api-business`
+  - internal service-to-service authentication with a signed service token
+- `api-business -> RabbitMQ -> orchestrator`
+  - broker credentials for queue access, not user tokens
+- `orchestrator -> api-business`
+  - internal service-to-service authentication for callbacks and status updates
+
+The detailed token model, folder structure, and boundary diagrams live in:
+
+- [Security Architecture](architecture/security-architecture.md)
+- [How Security Works](security/how-security-works.md)
+
 ## 7. Channel Integrations
 
 Channel integrations remain transport-focused.
