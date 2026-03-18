@@ -20,7 +20,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { RequiredScopes } from '../../../../common/decorators/required-scopes.decorator';
 import { SessionAuthGuard } from '../../../auth/guards/session-auth.guard';
+import { ScopesGuard } from '../../../auth/guards/scopes.guard';
 import { TenantContextService } from '../../../../common/tenancy/tenant-context.service';
 import { ToggleConnectorRequest } from '../../application/dtos/request/toggle-connector.request';
 import { OmnichannelConnectorService } from '../../application/services/omnichannel-connector.service';
@@ -47,7 +49,7 @@ import { ListRequestsQuery } from '../../application/queries/list-requests.query
 @ApiTags('Omnichannel', 'Dashboard')
 @ApiCookieAuth('rag_platform_session')
 @Controller('api/v1/omnichannel')
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ScopesGuard)
 export class OmnichannelDashboardController {
   constructor(
     private readonly queryService: OmnichannelQueryService,
@@ -56,6 +58,7 @@ export class OmnichannelDashboardController {
   ) {}
 
   @Get('overview')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary:
       'Returns aggregated omnichannel metrics for the operational dashboard.',
@@ -74,6 +77,7 @@ export class OmnichannelDashboardController {
   }
 
   @Get('requests')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary: 'Returns paginated omnichannel requests with optional filtering.',
   })
@@ -93,6 +97,7 @@ export class OmnichannelDashboardController {
   }
 
   @Get('requests/:id')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary:
       'Returns details for a single omnichannel request and its latest execution.',
@@ -112,6 +117,7 @@ export class OmnichannelDashboardController {
   }
 
   @Get('executions')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary:
       'Returns paginated omnichannel executions with optional filtering.',
@@ -132,6 +138,7 @@ export class OmnichannelDashboardController {
   }
 
   @Get('executions/:id')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary: 'Returns details for a single omnichannel execution.',
   })
@@ -150,6 +157,7 @@ export class OmnichannelDashboardController {
   }
 
   @Get('metrics/channels')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary:
       'Returns request volume and success/error distribution by channel.',
@@ -167,6 +175,7 @@ export class OmnichannelDashboardController {
   }
 
   @Get('metrics/latency')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary: 'Returns average and p95 latency metrics grouped by channel.',
   })
@@ -183,6 +192,7 @@ export class OmnichannelDashboardController {
   }
 
   @Get('metrics/rag-usage')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary: 'Returns RAG usage distribution across omnichannel executions.',
   })
@@ -199,6 +209,7 @@ export class OmnichannelDashboardController {
   }
 
   @Get('connectors')
+  @RequiredScopes('omnichannel:read')
   @ApiOperation({
     summary:
       'Returns connector availability and health status for omnichannel channels.',
@@ -210,6 +221,7 @@ export class OmnichannelDashboardController {
   }
 
   @Patch('connectors/:id/toggle')
+  @RequiredScopes('omnichannel:write')
   @ApiOperation({
     summary: 'Enables or disables an omnichannel connector.',
   })

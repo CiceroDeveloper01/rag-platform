@@ -36,6 +36,7 @@ Still worth strengthening further:
 
 ```bash
 npm run ci
+npm run test:rabbitmq:integration
 ```
 
 ### api-business
@@ -45,6 +46,7 @@ npm --prefix apps/api-business run lint
 npm --prefix apps/api-business run build
 npm --prefix apps/api-business run test -- --runInBand
 npm --prefix apps/api-business run test:e2e -- --runInBand
+npm --prefix apps/api-business run test:rabbitmq:integration
 ```
 
 ### api-web
@@ -61,6 +63,7 @@ npm --prefix apps/api-web run test -- --runInBand
 npm --prefix apps/orchestrator run lint
 npm --prefix apps/orchestrator run build
 npm --prefix apps/orchestrator run test -- --runInBand
+npm --prefix apps/orchestrator run test:rabbitmq:integration
 ```
 
 Notes:
@@ -81,6 +84,12 @@ npm --prefix apps/web run build
 ```
 
 ## Async Document Ingestion Validation
+
+RabbitMQ integration tests require a real broker. Reuse the local Docker broker:
+
+```bash
+docker compose up -d rabbitmq
+```
 
 ```mermaid
 sequenceDiagram
@@ -106,6 +115,17 @@ Validate at least:
 - final state becomes `COMPLETED` or `FAILED`
 - if a document reaches terminal `FAILED`, confirm replay remains possible only
   through the persisted-source path, not through direct queue manipulation
+
+Current RabbitMQ-specific test layers:
+
+- publisher unit tests validate payload, headers, tracing, and publish failure propagation
+- consumer unit tests validate success, retry, DLQ, invalid payload, nack fallback, and idempotent skip behavior
+- broker integration tests validate:
+  - real publisher to RabbitMQ topology and message contract
+  - real consumer success flow
+  - retry with bounded attempts
+  - DLQ routing after retry exhaustion
+  - duplicate-event idempotency against heavy processing
 
 ## Manual Regression Checklist
 

@@ -8,7 +8,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
+import { ServiceScopes } from '../../../common/decorators/service-scopes.decorator';
+import { ServiceScopesGuard } from '../../../common/auth/guards/service-scopes.guard';
+import { SessionOrInternalAuthGuard } from '../../../common/auth/guards/session-or-internal-auth.guard';
 import { DocumentStatusQueryRequest } from '../dtos/request/document-status-query.request';
 import { DocumentStatusResponse } from '../dtos/response/document-status.response';
 import { SourcesService } from '../services/sources.service';
@@ -16,11 +18,12 @@ import { SourcesService } from '../services/sources.service';
 @ApiTags('Documents')
 @ApiCookieAuth('rag_platform_session')
 @Controller(['documents', 'api/v1/documents'])
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionOrInternalAuthGuard, ServiceScopesGuard)
 export class DocumentStatusController {
   constructor(private readonly sourcesService: SourcesService) {}
 
   @Get('status')
+  @ServiceScopes('business:documents:read')
   @ApiOperation({
     summary: 'Returns persisted document ingestion status entries.',
   })
@@ -35,6 +38,7 @@ export class DocumentStatusController {
   }
 
   @Get(':id/status')
+  @ServiceScopes('business:documents:read')
   @ApiOperation({
     summary: 'Returns the persisted ingestion status for a single document.',
   })

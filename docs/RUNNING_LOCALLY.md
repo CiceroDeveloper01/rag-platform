@@ -111,6 +111,10 @@ RABBITMQ_HOST=localhost
 RABBITMQ_PORT=5672
 RABBITMQ_USER=guest
 RABBITMQ_PASS=guest
+RABBITMQ_API_BUSINESS_USER=api-business
+RABBITMQ_API_BUSINESS_PASS=api-business
+RABBITMQ_ORCHESTRATOR_USER=orchestrator
+RABBITMQ_ORCHESTRATOR_PASS=orchestrator
 RABBITMQ_QUEUE_DOCUMENT_INGESTION=document.ingestion.requested
 RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE=document.ingestion.requested.retry
 RABBITMQ_DOCUMENT_INGESTION_DLQ=document.ingestion.requested.dlq
@@ -127,6 +131,23 @@ INTERNAL_API_INGESTION_STATUS_PATH=/api/v1/internal/ingestion/status
 INTERNAL_API_INGESTION_COMPLETE_PATH=/api/v1/internal/ingestion/complete
 INTERNAL_API_INGESTION_FAIL_PATH=/api/v1/internal/ingestion/fail
 ```
+
+Important internal auth values:
+
+```env
+AUTH_USER_JWT_SECRET=change-me-user-jwt-secret
+AUTH_USER_JWT_ISSUER=rag-platform-api-web
+AUTH_USER_JWT_AUDIENCE=rag-platform-web
+INTERNAL_SERVICE_TOKEN_SECRET=change-me-internal-service-secret
+INTERNAL_SERVICE_TOKEN_ISSUER=rag-platform-internal
+INTERNAL_SERVICE_TOKEN_AUDIENCE=rag-platform-api-business
+INTERNAL_SERVICE_ALLOWED_SUBJECTS=service-api-web,service-orchestrator
+```
+
+Do not set a single shared `INTERNAL_SERVICE_SUBJECT` or
+`INTERNAL_SERVICE_DEFAULT_SCOPES` at the repository root unless your local setup
+supports per-app overrides. `api-web` and `orchestrator` intentionally use
+different defaults.
 
 Telegram note:
 

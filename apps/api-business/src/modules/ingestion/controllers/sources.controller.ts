@@ -20,7 +20,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
+import { ServiceScopes } from '../../../common/decorators/service-scopes.decorator';
+import { ServiceScopesGuard } from '../../../common/auth/guards/service-scopes.guard';
+import { SessionOrInternalAuthGuard } from '../../../common/auth/guards/session-or-internal-auth.guard';
 import { DocumentStatusQueryRequest } from '../dtos/request/document-status-query.request';
 import { ListSourcesRequest } from '../dtos/request/list-sources.request';
 import { UpdateSourceRequest } from '../dtos/request/update-source.request';
@@ -29,11 +31,12 @@ import { SourcesService } from '../services/sources.service';
 @ApiTags('Documents')
 @ApiCookieAuth('rag_platform_session')
 @Controller(['sources', 'api/v1/sources'])
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionOrInternalAuthGuard, ServiceScopesGuard)
 export class SourcesController {
   constructor(private readonly sourcesService: SourcesService) {}
 
   @Get()
+  @ServiceScopes('business:documents:read')
   @ApiOperation({
     summary: 'Returns source documents tracked by the ingestion pipeline.',
   })
@@ -44,6 +47,7 @@ export class SourcesController {
   }
 
   @Get('status')
+  @ServiceScopes('business:documents:read')
   @ApiOperation({
     summary: 'Returns source documents with persisted ingestion status fields.',
   })
@@ -54,6 +58,7 @@ export class SourcesController {
   }
 
   @Get(':id/status')
+  @ServiceScopes('business:documents:read')
   @ApiOperation({
     summary: 'Returns the persisted ingestion status for a source document.',
   })
@@ -66,6 +71,7 @@ export class SourcesController {
   }
 
   @Patch(':id')
+  @ServiceScopes('business:documents:write')
   @ApiOperation({
     summary: 'Updates source metadata such as filename or status flags.',
   })
@@ -82,6 +88,7 @@ export class SourcesController {
   }
 
   @Delete(':id')
+  @ServiceScopes('business:documents:write')
   @ApiOperation({
     summary: 'Deletes a source and its associated derived data when supported.',
   })
@@ -94,6 +101,7 @@ export class SourcesController {
   }
 
   @Post(':id/replay')
+  @ServiceScopes('business:documents:write')
   @ApiOperation({
     summary: 'Replays a failed document ingestion by republishing it to RabbitMQ.',
   })

@@ -14,6 +14,7 @@ import { omnichannelConfig } from './config/omnichannel.config';
 import { omnichannelTelegramConfig } from './config/omnichannel-telegram.config';
 import { omnichannelEmailConfig } from './config/omnichannel-email.config';
 import { storageConfig } from './config/storage.config';
+import { securityConfig } from './config/security.config';
 import { memoryConfig } from './config/memory.config';
 import { validateEnvironment } from './config/environment.validation';
 import { AiModule } from './infra/ai/ai.module';
@@ -52,6 +53,7 @@ import { SimulationModule } from './modules/simulation/simulation.module';
         omnichannelTelegramConfig,
         omnichannelEmailConfig,
         storageConfig,
+        securityConfig,
         memoryConfig,
       ],
       validate: validateEnvironment,

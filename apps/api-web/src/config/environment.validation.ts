@@ -154,6 +154,46 @@ class EnvironmentVariables {
   AUTH_SESSION_COOKIE_NAME?: string;
 
   @IsOptional()
+  @IsString()
+  AUTH_USER_JWT_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  AUTH_USER_JWT_ISSUER?: string;
+
+  @IsOptional()
+  @IsString()
+  AUTH_USER_JWT_AUDIENCE?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  AUTH_USER_JWT_TTL_MINUTES?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_TOKEN_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_TOKEN_ISSUER?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_TOKEN_AUDIENCE?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_SUBJECT?: string;
+
+  @IsOptional()
+  @IsString()
+  INTERNAL_SERVICE_DEFAULT_SCOPES?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  INTERNAL_SERVICE_TOKEN_TTL_SECONDS?: string;
+
+  @IsOptional()
   @IsBooleanString()
   AUTH_SECURE_COOKIES?: string;
 

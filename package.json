@@ -22,6 +22,7 @@
     "lint:api-web": "npm --prefix apps/api-web run lint",
     "build:api-web": "npm --prefix apps/api-web run build",
     "test:orchestrator": "npm --prefix apps/orchestrator run test -- --runInBand",
+    "test:rabbitmq:integration": "npm --prefix apps/api-business run test:rabbitmq:integration && npm --prefix apps/orchestrator run test:rabbitmq:integration",
     "coverage:orchestrator": "npm --prefix apps/orchestrator run test:cov:ci",
     "build:orchestrator": "npm --prefix apps/orchestrator run build",
     "lint:web": "npm --prefix apps/web run lint",

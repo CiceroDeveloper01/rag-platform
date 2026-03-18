@@ -4,6 +4,11 @@ import { ApiClient } from "../interfaces/api-client.interface";
 export interface InternalApiClientOptions {
   baseUrl: string;
   timeoutMs?: number;
+  defaultHeaders?:
+    | Record<string, string>
+    | (() =>
+        | Record<string, string>
+        | Promise<Record<string, string>>);
   retryEnabled?: boolean;
   retryMaxAttempts?: number;
   retryInitialDelayMs?: number;
@@ -126,10 +131,15 @@ export class InternalApiClient implements ApiClient {
     );
 
     try {
+      const defaultHeaders = await this.resolveDefaultHeaders();
       const response = await fetch(
         new URL(path, this.options.baseUrl).toString(),
         {
           ...init,
+          headers: {
+            ...defaultHeaders,
+            ...(init.headers ?? {}),
+          },
           signal: controller.signal,
         },
       );
@@ -163,6 +173,18 @@ export class InternalApiClient implements ApiClient {
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  private async resolveDefaultHeaders(): Promise<Record<string, string>> {
+    if (!this.options.defaultHeaders) {
+      return {};
+    }
+
+    if (typeof this.options.defaultHeaders === "function") {
+      return await this.options.defaultHeaders();
+    }
+
+    return this.options.defaultHeaders;
   }
 
   private resolveMaxAttempts(method?: string): number {

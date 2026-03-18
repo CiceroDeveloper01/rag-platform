@@ -8,20 +8,23 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { RequiredScopes } from '../../../../common/decorators/required-scopes.decorator';
 import { SessionAuthGuard } from '../../../auth/guards/session-auth.guard';
+import { ScopesGuard } from '../../../auth/guards/scopes.guard';
 import { ProcessOmnichannelMessageRequest } from '../../application/dtos/request/process-omnichannel-message.request';
 import { OmnichannelOrchestratorService } from '../../application/services/omnichannel-orchestrator.service';
 
 @ApiTags('Omnichannel')
 @ApiCookieAuth('rag_platform_session')
 @Controller('api/v1/omnichannel')
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ScopesGuard)
 export class OmnichannelController {
   constructor(
     private readonly orchestratorService: OmnichannelOrchestratorService,
   ) {}
 
   @Post('dev/process')
+  @RequiredScopes('omnichannel:write')
   @ApiOperation({
     summary:
       'Processes a normalized omnichannel payload through the orchestrator for development and testing.',

@@ -15,6 +15,7 @@ import { omnichannelEmailConfig } from './config/omnichannel-email.config';
 import { storageConfig } from './config/storage.config';
 import { memoryConfig } from './config/memory.config';
 import { rabbitMqConfig } from './config/rabbitmq.config';
+import { securityConfig } from './config/security.config';
 import { validateEnvironment } from './config/environment.validation';
 import { AiModule } from './infra/ai/ai.module';
 import { LoggerConfigModule } from './common/logger/logger.module';
@@ -56,6 +57,7 @@ import { SearchModule } from './modules/search/search.module';
         storageConfig,
         memoryConfig,
         rabbitMqConfig,
+        securityConfig,
       ],
       validate: validateEnvironment,
     }),

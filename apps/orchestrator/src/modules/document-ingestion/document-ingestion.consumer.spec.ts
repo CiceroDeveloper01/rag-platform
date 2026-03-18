@@ -241,4 +241,127 @@ describe('DocumentIngestionConsumerService', () => {
     );
     expect(ack).toHaveBeenCalled();
   });
+
+  it('acknowledges invalid payloads after routing them to the DLQ', async () => {
+    const ack = jest.fn();
+    const publish = jest.fn();
+    const service = new DocumentIngestionConsumerService(
+      createConfigService(),
+      {
+        log: jest.fn(),
+        error: jest.fn(),
+      } as unknown as AppLoggerService,
+      {
+        increment: jest.fn(),
+      } as unknown as MetricsService,
+      {
+        process: jest.fn(),
+      } as unknown as DocumentIngestionWorkerService,
+      {} as DocumentIngestionInternalClient,
+    );
+
+    Object.assign(service, {
+      channel: {
+        ack,
+        nack: jest.fn(),
+        publish,
+        waitForConfirms: jest.fn().mockResolvedValue(undefined),
+      },
+    });
+
+    await service.handleMessage({
+      ...createMessage({
+        sourceId: 'invalid-source-id',
+      }),
+      properties: {
+        ...createMessage().properties,
+        headers: { 'x-retry-count': 1 },
+      },
+    });
+
+    expect(publish).toHaveBeenCalledWith(
+      'documents.ingestion.dlx',
+      'document.ingestion.requested.dead',
+      expect.any(Buffer),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-failure-reason': 'invalid_payload',
+          'x-retry-count': 1,
+        }),
+      }),
+    );
+    expect(ack).toHaveBeenCalled();
+  });
+
+  it('skips already completed events without retrying or dead-lettering them', async () => {
+    const ack = jest.fn();
+    const publish = jest.fn();
+    const service = new DocumentIngestionConsumerService(
+      createConfigService(),
+      {
+        log: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+      } as unknown as AppLoggerService,
+      {
+        increment: jest.fn(),
+      } as unknown as MetricsService,
+      {
+        process: jest
+          .fn()
+          .mockResolvedValue({ status: 'skipped', reason: 'already_completed' }),
+      } as unknown as DocumentIngestionWorkerService,
+      {} as DocumentIngestionInternalClient,
+    );
+
+    Object.assign(service, {
+      channel: {
+        ack,
+        publish,
+        waitForConfirms: jest.fn().mockResolvedValue(undefined),
+      },
+    });
+
+    await service.handleMessage(createMessage());
+
+    expect(publish).not.toHaveBeenCalled();
+    expect(ack).toHaveBeenCalled();
+  });
+
+  it('nacks the original message when retry or DLQ republishing fails', async () => {
+    const ack = jest.fn();
+    const nack = jest.fn();
+    const service = new DocumentIngestionConsumerService(
+      createConfigService(),
+      {
+        log: jest.fn(),
+        error: jest.fn(),
+      } as unknown as AppLoggerService,
+      {
+        increment: jest.fn(),
+      } as unknown as MetricsService,
+      {
+        process: jest.fn().mockRejectedValue(new Error('transient_failure')),
+      } as unknown as DocumentIngestionWorkerService,
+      {
+        updateIngestionStatus: jest.fn().mockResolvedValue(undefined),
+      } as unknown as DocumentIngestionInternalClient,
+    );
+
+    Object.assign(service, {
+      channel: {
+        ack,
+        nack,
+        publish: jest.fn(() => {
+          throw new Error('retry_publish_failed');
+        }),
+        waitForConfirms: jest.fn().mockResolvedValue(undefined),
+      },
+    });
+
+    await service.handleMessage(createMessage());
+
+    expect(ack).not.toHaveBeenCalled();
+    expect(nack).toHaveBeenCalledWith(expect.anything(), false, true);
+  });
 });

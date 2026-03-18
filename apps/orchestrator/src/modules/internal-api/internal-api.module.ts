@@ -18,18 +18,26 @@ import {
   LoggerModule,
   MetricsService,
 } from "@rag-platform/observability";
+import { InternalServiceTokenService } from "../../common/auth/services/internal-service-token.service";
 
 @Module({
   imports: [LoggerModule],
   providers: [
     MetricsService,
+    InternalServiceTokenService,
     {
       provide: InternalApiClient,
-      inject: [ConfigService, AppLoggerService, MetricsService],
+      inject: [
+        ConfigService,
+        AppLoggerService,
+        MetricsService,
+        InternalServiceTokenService,
+      ],
       useFactory: (
         configService: ConfigService,
         logger: AppLoggerService,
         metricsService: MetricsService,
+        internalServiceTokenService: InternalServiceTokenService,
       ) =>
         new InternalApiClient({
           baseUrl: configService.getOrThrow<string>("internalApi.baseUrl"),
@@ -62,6 +70,9 @@ import {
               "internalApi.circuitBreakerOpenMs",
               30_000,
             ) ?? 30_000,
+          defaultHeaders: () => ({
+            authorization: `Bearer ${internalServiceTokenService.issueToken()}`,
+          }),
           onRetryAttempt: (context) => {
             logger.warn(
               "Internal API retry attempt",
@@ -258,6 +269,7 @@ import {
   ],
   exports: [
     InternalApiClient,
+    InternalServiceTokenService,
     DocumentIngestionClient,
     DocumentsClient,
     ConversationsClient,

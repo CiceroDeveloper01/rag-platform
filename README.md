@@ -183,6 +183,8 @@ provided as managed services.
 ## Main Documentation
 
 - [Platform Architecture](docs/ARCHITECTURE.md)
+- [Security Architecture](docs/architecture/security-architecture.md)
+- [How Security Works](docs/security/how-security-works.md)
 - [Architecture Decisions](docs/ARCHITECTURE_DECISIONS.md)
 - [Channel Integration](docs/CHANNEL_INTEGRATION.md)
 - [Database and Persistence](docs/DATABASE.md)

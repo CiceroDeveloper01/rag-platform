@@ -9,6 +9,7 @@ import { listenersConfig } from "./config/listeners.config";
 import { queueConfig } from "./config/queue.config";
 import { ragConfig } from "./config/rag.config";
 import { rabbitMqConfig } from "./config/rabbitmq.config";
+import { securityConfig } from "./config/security.config";
 import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { AgentTraceModule } from "./modules/agent-trace/agent-trace.module";
 import { AgentsModule } from "./modules/agents/agents.module";
@@ -113,6 +114,8 @@ const orchestratorEnvironmentSchema = z.object({
   RABBITMQ_USERNAME: z.string().optional(),
   RABBITMQ_PASS: z.string().optional(),
   RABBITMQ_PASSWORD: z.string().optional(),
+  RABBITMQ_ORCHESTRATOR_USER: z.string().optional(),
+  RABBITMQ_ORCHESTRATOR_PASS: z.string().optional(),
   RABBITMQ_VHOST: z.string().optional(),
   RABBITMQ_QUEUE_DOCUMENT_INGESTION: z.string().optional(),
   RABBITMQ_DOCUMENT_INGESTION_QUEUE: z.string().optional(),
@@ -128,6 +131,12 @@ const orchestratorEnvironmentSchema = z.object({
   RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY: z.string().optional(),
   RABBITMQ_DOCUMENT_INGESTION_PREFETCH: z.string().optional(),
   INTERNAL_API_INGESTION_START_PATH: z.string().optional(),
+  INTERNAL_SERVICE_TOKEN_SECRET: z.string().optional(),
+  INTERNAL_SERVICE_TOKEN_ISSUER: z.string().optional(),
+  INTERNAL_SERVICE_TOKEN_AUDIENCE: z.string().optional(),
+  INTERNAL_SERVICE_SUBJECT: z.string().optional(),
+  INTERNAL_SERVICE_DEFAULT_SCOPES: z.string().optional(),
+  INTERNAL_SERVICE_TOKEN_TTL_SECONDS: z.string().optional(),
   TRAINING_PIPELINE_ENABLED: z.string().optional(),
   TRAINING_PIPELINE_INTERVAL_MS: z.string().optional(),
 });
@@ -145,6 +154,7 @@ const orchestratorEnvironmentSchema = z.object({
         listenersConfig,
         ragConfig,
         rabbitMqConfig,
+        securityConfig,
         featureTogglesConfig,
       ],
       validate: (config) => validateEnv(orchestratorEnvironmentSchema, config),

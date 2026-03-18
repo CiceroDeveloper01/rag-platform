@@ -18,6 +18,7 @@
     "pretest": "npm --prefix ../.. run build:packages",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:rabbitmq:integration": "jest --runInBand --runTestsByPath src/common/messaging/document-ingestion.publisher.integration.spec.ts",
     "pretest:cov": "npm --prefix ../.. run build:packages",
     "test:cov": "jest --coverage",
     "test:cov:ci": "jest --coverage --runInBand",
