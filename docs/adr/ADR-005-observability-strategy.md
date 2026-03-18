@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-RAG-PLATAFORM is designed as an operational AI platform rather than a single-purpose API. That means the engineering team needs visibility into request flow, channel behavior, latency, RAG usage, dispatch failures, connector state, and infrastructure health.
+RAG Platform is designed as an operational AI platform rather than a single-purpose API. That means the engineering team needs visibility into request flow, channel behavior, latency, RAG usage, dispatch failures, connector state, and infrastructure health.
 
 Because the system spans authentication, chat, RAG ingestion, omnichannel orchestration, analytics endpoints, and Dockerized local infrastructure, observability needed to be designed as a first-class concern from the beginning.
 
@@ -25,10 +25,10 @@ Adopt an observability stack composed of:
 - **Prometheus**
 - **Grafana**
 - **Loki**
-- **Jaeger**
+- **Tempo**
 - **OpenTelemetry**
 
-Prometheus is used for metrics collection, Grafana for visualization, Loki for centralized logs, Jaeger for trace visualization, and OpenTelemetry for telemetry instrumentation and pipeline integration.
+Prometheus is used for metrics collection, Grafana for visualization, Loki for centralized logs, Tempo for trace visualization, and OpenTelemetry for telemetry instrumentation and pipeline integration.
 
 The platform emits telemetry across HTTP requests, RAG stages, omnichannel orchestration, dashboard query endpoints, and infrastructure components.
 

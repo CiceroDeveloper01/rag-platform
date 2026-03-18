@@ -1,19 +1,23 @@
 export interface UploadDocumentResponse {
-  sourceId: number;
+  documentId: number;
+  sourceId?: number;
+  sourceChannel?: string | null;
   filename: string;
   uploadedAt: string;
-  chunksGenerated: number;
-  documentsProcessed: number;
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+  message: string;
 }
 
 export interface DocumentListItem {
   id: number;
   filename: string;
+  sourceChannel?: string | null;
   type: string;
   createdAt: string;
-  status: "processed" | "pending" | "failed";
-  chunksGenerated?: number;
-  documentsProcessed?: number;
+  updatedAt?: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  currentStep?: string | null;
+  errorMessage?: string | null;
   chunksCount?: number;
 }
 

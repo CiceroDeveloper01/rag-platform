@@ -30,6 +30,11 @@ const AgentGraphState = Annotation.Root({
 });
 
 type AgentGraphStateType = typeof AgentGraphState.State;
+type AgentGraphStateSnapshot = AgentGraphStateType & {
+  inboundMessage: InboundMessagePayload;
+  decision: AgentDecision | null;
+  executionRequest: FlowExecutionRequest | null;
+};
 
 @Injectable()
 export class AgentGraphService {
@@ -50,11 +55,11 @@ export class AgentGraphService {
     const startedAt = Date.now();
 
     try {
-      const result = await this.buildGraph().invoke({
+      const result = (await this.buildGraph().invoke({
         inboundMessage,
         decision: null,
         executionRequest: null,
-      });
+      })) as AgentGraphStateSnapshot;
 
       const decision = this.requireDecision(result.decision);
       const executionRequest = this.requireExecutionRequest(
@@ -115,23 +120,23 @@ export class AgentGraphService {
   }
 
   private buildGraph() {
-    return new StateGraph(AgentGraphState)
-      .addNode("supervisor", async (state: AgentGraphStateType) => ({
+      return new StateGraph(AgentGraphState)
+      .addNode("supervisor", async (state: AgentGraphStateSnapshot) => ({
         decision: await this.supervisorAgent.decide(state.inboundMessage),
       }))
-      .addNode("document-agent", async (state: AgentGraphStateType) => ({
+      .addNode("document-agent", async (state: AgentGraphStateSnapshot) => ({
         executionRequest: await this.documentAgent.plan(
           state.inboundMessage,
           this.requireDecision(state.decision),
         ),
       }))
-      .addNode("conversation-agent", async (state: AgentGraphStateType) => ({
+      .addNode("conversation-agent", async (state: AgentGraphStateSnapshot) => ({
         executionRequest: await this.conversationAgent.plan(
           state.inboundMessage,
           this.requireDecision(state.decision),
         ),
       }))
-      .addNode("handoff-agent", async (state: AgentGraphStateType) => ({
+      .addNode("handoff-agent", async (state: AgentGraphStateSnapshot) => ({
         executionRequest: await this.handoffAgent.plan(
           state.inboundMessage,
           this.requireDecision(state.decision),
@@ -140,7 +145,7 @@ export class AgentGraphService {
       .addEdge(START, "supervisor")
       .addConditionalEdges(
         "supervisor",
-        (state: AgentGraphStateType) =>
+        (state: AgentGraphStateSnapshot) =>
           this.requireDecision(state.decision).targetAgent,
         {
           "document-agent": "document-agent",

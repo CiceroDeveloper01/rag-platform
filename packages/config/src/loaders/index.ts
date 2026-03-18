@@ -1,3 +1,1 @@
-// Base barrel for shared config loaders.
-
-export {};
+export * from "./rabbitmq";

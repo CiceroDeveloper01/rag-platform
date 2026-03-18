@@ -16,8 +16,18 @@ export const internalApiConfig = registerAs("internalApi", () => ({
     process.env.HTTP_CIRCUIT_BREAKER_OPEN_MS ?? 30_000,
   ),
   paths: {
+    requestDocumentIngestion:
+      process.env.INTERNAL_API_INGESTION_REQUEST_PATH ?? "/ingestion/request",
+    startDocumentIngestion:
+      process.env.INTERNAL_API_INGESTION_START_PATH ?? "/ingestion/start",
     registerDocument:
       process.env.INTERNAL_API_DOCUMENTS_REGISTER_PATH ?? "/documents/register",
+    completeDocumentIngestion:
+      process.env.INTERNAL_API_INGESTION_COMPLETE_PATH ?? "/ingestion/complete",
+    failDocumentIngestion:
+      process.env.INTERNAL_API_INGESTION_FAIL_PATH ?? "/ingestion/fail",
+    updateDocumentIngestionStatus:
+      process.env.INTERNAL_API_INGESTION_STATUS_PATH ?? "/ingestion/status",
     replyConversation:
       process.env.INTERNAL_API_CONVERSATIONS_REPLY_PATH ??
       "/conversations/reply",

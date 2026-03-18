@@ -1,63 +1,52 @@
 # Project Documentation
 
-This directory contains the public technical documentation for the repository.
+This directory contains the canonical technical documentation for the current monorepo.
 
-The documentation strategy is:
+## Recommended Reading Order
 
-- describe only what the code and migrations actually implement
-- mark evolving areas explicitly
-- reduce duplication
-- keep a small set of canonical entry points
+1. [Architecture](ARCHITECTURE.md)
+2. [Architecture Decisions](ARCHITECTURE_DECISIONS.md)
+3. [Running Locally](RUNNING_LOCALLY.md)
+4. [Testing Guide](TESTING_GUIDE.md)
+5. [Deployment Model](deployment/DEPLOYMENT.md)
+6. [Kubernetes Readiness](deployment/KUBERNETES.md)
+7. [Channel Integration](CHANNEL_INTEGRATION.md)
+8. [Database](DATABASE.md)
+9. [Technical Debt](TECHNICAL_DEBT.md)
 
-## Documentation Map
+## Current Documentation Map
 
 ```mermaid
 flowchart TD
     Docs[docs/] --> Architecture[ARCHITECTURE.md]
     Docs --> Decisions[ARCHITECTURE_DECISIONS.md]
-    Docs --> Running[RUNNING_LOCALLY.md]
+    Docs --> Local[RUNNING_LOCALLY.md]
+    Docs --> Deployment[deployment/DEPLOYMENT.md]
+    Docs --> Kubernetes[deployment/KUBERNETES.md]
     Docs --> Testing[TESTING_GUIDE.md]
     Docs --> Channels[CHANNEL_INTEGRATION.md]
     Docs --> Database[DATABASE.md]
+    Docs --> Debt[TECHNICAL_DEBT.md]
 ```
 
 ## Canonical Documents
 
-- [Platform Architecture](ARCHITECTURE.md)
-- [Architecture Decision Validation](ARCHITECTURE_DECISIONS.md)
+- [Architecture](ARCHITECTURE.md)
+- [Architecture Decisions](ARCHITECTURE_DECISIONS.md)
 - [Running Locally](RUNNING_LOCALLY.md)
+- [Deployment Model](deployment/DEPLOYMENT.md)
+- [Kubernetes Readiness](deployment/KUBERNETES.md)
 - [Testing Guide](TESTING_GUIDE.md)
 - [Channel Integration](CHANNEL_INTEGRATION.md)
-- [Database and Persistence](DATABASE.md)
+- [Database](DATABASE.md)
+- [Technical Debt](TECHNICAL_DEBT.md)
 - [Release Tasks](RELEASE_TASKS.md)
 
-## Supporting Documents
+## Historical and Supporting Material
 
-- [Consolidated Technical Report](relatorio-tecnico-consolidado.md)
+- [Historical ADRs](adr/)
 - [Runtime Flow](runtime-flow.md)
 - [RAG Flow](rag/rag-flow.md)
 - [Telegram Channel](channels/telegram.md)
-- [Conversation Memory](architecture/conversation-memory.md)
-- [Feature Flags](architecture/feature-flags.md)
-- [Multi-Tenancy](architecture/multi-tenancy.md)
-
-## Historical Material
-
-- [Historical ADRs](adr/)
 - [Legacy Architecture Reference](architecture/ARCHITECTURE.md)
-- [Legacy Compatibility Entry](architecture.md)
-
-## Database Sources
-
-The database documentation is derived from:
-
-- [Database Migration Directory](/home/cicero/projects/rag-platform/database)
-- [Database README](/home/cicero/projects/rag-platform/database/README.md)
-
-## Recommended Reading Order
-
-1. [Platform Architecture](ARCHITECTURE.md)
-2. [Architecture Decision Validation](ARCHITECTURE_DECISIONS.md)
-3. [Database and Persistence](DATABASE.md)
-4. [Running Locally](RUNNING_LOCALLY.md)
-5. [Testing Guide](TESTING_GUIDE.md)
+- [Compatibility Entry](architecture.md)

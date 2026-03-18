@@ -1,6 +1,6 @@
 # Observability
 
-RAG-PLATAFORM follows an **observability-first architecture**.
+RAG Platform follows an **observability-first architecture**.
 
 The platform includes built-in telemetry across:
 
@@ -259,7 +259,7 @@ This enables tracing a request across:
 Distributed tracing is implemented using:
 
 - OpenTelemetry instrumentation
-- Jaeger trace visualization
+- Tempo trace visualization
 
 Tracing allows visualization of request execution across internal components.
 
@@ -282,7 +282,7 @@ For local execution the NestJS API exports OTLP traces to:
 
 `http://otel-collector:4318`
 
-The OpenTelemetry Collector then forwards traces to Jaeger.
+The OpenTelemetry Collector then forwards traces to Tempo.
 
 ---
 
@@ -420,5 +420,5 @@ Expected results:
 - `/metrics` exposes Prometheus metrics, including omnichannel metrics
 - Prometheus targets page shows `up`
 - Grafana loads with provisioned datasources
-- Jaeger displays traces once API traffic is generated
+- Tempo displays traces once API traffic is generated
 - Loki receives container logs through Promtail

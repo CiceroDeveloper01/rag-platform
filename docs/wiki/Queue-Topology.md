@@ -2,10 +2,18 @@
 
 [Home](Home) | [Runtime Flow](Runtime-Flow) | [Feature Toggles](Feature-Toggles)
 
-The orchestrator currently uses two BullMQ queues in the main runtime path:
+The platform currently uses two queue systems for different responsibilities.
+
+BullMQ remains the main orchestrator runtime queue system:
 
 - `inbound-messages`
 - `flow-execution`
+
+RabbitMQ is used only for asynchronous document ingestion:
+
+- `document.ingestion.requested`
+- `document.ingestion.requested.retry`
+- `document.ingestion.requested.dlq`
 
 ## Queue Responsibilities
 
@@ -15,12 +23,19 @@ The orchestrator currently uses two BullMQ queues in the main runtime path:
 - `flow-execution`
   - downstream execution stage after agent planning
   - `jobId` derived from `jobName:channel:externalMessageId`
+- `document.ingestion.requested`
+  - asynchronous document ingestion queue published by `api-business`
+  - consumed by the orchestrator document worker
+- `document.ingestion.requested.retry`
+  - bounded retry path for transient ingestion failures
+- `document.ingestion.requested.dlq`
+  - terminal failure inspection queue after retry exhaustion
 
 ## Retry and DLQ
 
-- both queues use configurable attempts
-- both queues use exponential backoff
-- final failures are packaged into DLQ messages
+- BullMQ queues use configurable attempts and backoff
+- RabbitMQ document ingestion uses bounded retry attempts with retry metadata
+- final terminal failures land in an explicit DLQ instead of being dropped silently
 
 ```mermaid
 flowchart TD
@@ -32,6 +47,11 @@ flowchart TD
     FlowQueue -->|retry with exponential backoff| FlowQueue
     InboundProcessor -->|final failure| InboundDLQ[inbound-messages-dlq]
     FlowProcessor -->|final failure| FlowDLQ[flow-execution-dlq]
+    APIBusiness[api-business] --> RabbitMain[document.ingestion.requested]
+    RabbitMain -->|success| DocumentWorker[DocumentIngestionWorker]
+    DocumentWorker -->|transient failure| RabbitRetry[document.ingestion.requested.retry]
+    RabbitRetry -->|redelivery| RabbitMain
+    DocumentWorker -->|retry exhaustion| RabbitDLQ[document.ingestion.requested.dlq]
 ```
 
 Source:

@@ -22,13 +22,14 @@ buildable, testable, and understandable.
 The repository already includes:
 
 - a domain-oriented monorepo structure
-- strict application boundaries across `apps/web`, `apps/api`, and
-  `apps/orchestrator`
+- strict application boundaries across `apps/web`, `apps/api-web`,
+  `apps/api-business`, and `apps/orchestrator`
 - channel-specific organization under the orchestrator
 - canonical architecture documentation in English
 - architecture decision validation in English
 - Mermaid diagrams in the main documentation set
 - Dockerfiles and a local Docker Compose stack
+- Kubernetes deployment-ready manifests under `k8s/`
 - automated tests for API, orchestrator, web, and critical flows
 
 Known operational note:
@@ -41,7 +42,8 @@ Known operational note:
 ### Monorepo boundaries
 
 - [ ] Confirm `apps/web` contains only frontend concerns.
-- [ ] Confirm `apps/api` contains only API and synchronous backend concerns.
+- [ ] Confirm `apps/api-web` contains only portal-facing presentation and BFF concerns.
+- [ ] Confirm `apps/api-business` contains only business and synchronous backend concerns.
 - [ ] Confirm `apps/orchestrator` contains the async runtime and channel-facing
       orchestration concerns.
 - [ ] Confirm `packages/*` only contains code that is truly reusable across
@@ -117,6 +119,7 @@ pre-commit run --all-files
 ### Image build validation
 
 - [ ] Build the API image successfully.
+- [ ] Build the api-web image successfully.
 - [ ] Build the orchestrator image successfully.
 - [ ] Build the web image successfully.
 - [ ] Confirm the Dockerfiles still work with the monorepo root build context.
@@ -124,10 +127,12 @@ pre-commit run --all-files
 ### Compose stack validation
 
 - [ ] Start the local stack successfully.
-- [ ] Confirm `api` becomes healthy.
+- [ ] Confirm `api-business` becomes healthy.
+- [ ] Confirm `api-web` becomes healthy if it is part of the current local stack profile.
 - [ ] Confirm `web` starts successfully.
 - [ ] Confirm infrastructure services (`postgres`, `redis`, `grafana`, `loki`,
-      `tempo`, `otel`, `prometheus`, `promtail`) start successfully.
+      `tempo`, `otel-collector`, `prometheus`, `promtail`, `rabbitmq`) start
+      successfully.
 - [ ] Confirm whether `orchestrator` is healthy or intentionally blocked by
       local Telegram configuration.
 - [ ] If `orchestrator` restarts, capture the exact reason in the release notes.
@@ -137,7 +142,8 @@ pre-commit run --all-files
 ```bash
 docker compose up -d --build
 docker compose ps
-docker compose logs --tail=100 api
+docker compose logs --tail=100 api-business
+docker compose logs --tail=100 api-web
 docker compose logs --tail=100 orchestrator
 docker compose logs --tail=100 web
 ```

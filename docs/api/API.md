@@ -1,6 +1,6 @@
 # API Documentation
 
-This document provides an overview of the main API endpoints exposed by **RAG-PLATAFORM**.
+This document provides an overview of the main API endpoints exposed by **RAG Platform**.
 
 The API is responsible for:
 

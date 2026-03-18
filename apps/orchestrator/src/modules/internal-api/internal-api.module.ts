@@ -3,6 +3,8 @@ import { ConfigService } from "@nestjs/config";
 import {
   ConversationsClient,
   ConversationsInternalClient,
+  DocumentIngestionClient,
+  DocumentIngestionInternalClient,
   DocumentsClient,
   DocumentsInternalClient,
   HandoffClient,
@@ -137,6 +139,32 @@ import {
         ),
     },
     {
+      provide: DocumentIngestionClient,
+      inject: [InternalApiClient, ConfigService],
+      useFactory: (
+        httpClient: InternalApiClient,
+        configService: ConfigService,
+      ) =>
+        new DocumentIngestionClient(
+          httpClient,
+          configService.getOrThrow<string>(
+            "internalApi.paths.requestDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.completeDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.failDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.startDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.updateDocumentIngestionStatus",
+          ),
+        ),
+    },
+    {
       provide: DocumentsInternalClient,
       inject: [InternalApiClient, ConfigService],
       useFactory: (
@@ -147,6 +175,32 @@ import {
           httpClient,
           configService.getOrThrow<string>(
             "internalApi.paths.registerDocument",
+          ),
+        ),
+    },
+    {
+      provide: DocumentIngestionInternalClient,
+      inject: [InternalApiClient, ConfigService],
+      useFactory: (
+        httpClient: InternalApiClient,
+        configService: ConfigService,
+      ) =>
+        new DocumentIngestionInternalClient(
+          httpClient,
+          configService.getOrThrow<string>(
+            "internalApi.paths.requestDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.completeDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.failDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.startDocumentIngestion",
+          ),
+          configService.getOrThrow<string>(
+            "internalApi.paths.updateDocumentIngestionStatus",
           ),
         ),
     },
@@ -204,10 +258,12 @@ import {
   ],
   exports: [
     InternalApiClient,
+    DocumentIngestionClient,
     DocumentsClient,
     ConversationsClient,
     HandoffClient,
     DocumentsInternalClient,
+    DocumentIngestionInternalClient,
     ConversationsInternalClient,
     HandoffInternalClient,
     MemoryInternalClient,

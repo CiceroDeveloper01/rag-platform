@@ -1,4 +1,5 @@
 import type { DocumentListItem as DocumentListItemModel } from "../types/documents.types";
+import { StatusPill } from "@/src/components/ui/status-pill";
 import { DocumentActionsMenu } from "./document-actions-menu";
 
 export function DocumentTableRow({
@@ -17,24 +18,29 @@ export function DocumentTableRow({
                 {item.filename}
 
       </td>
-            <td className="px-4 py-4 text-sm text-slate-600">{item.type}</td>
-
-      <td className="px-4 py-4 text-sm text-slate-600">
-                {new Date(item.createdAt).toLocaleString("pt-BR")}
-
-      </td>
-
-      <td className="px-4 py-4 text-sm text-slate-600">
-                {item.chunksGenerated ?? item.chunksCount ?? "n/a"}
+            <td className="px-4 py-4 text-sm text-slate-600">
+                {item.sourceChannel ?? "n/a"}
 
       </td>
 
       <td className="px-4 py-4">
+        <StatusPill tone={resolveStatusTone(item.status)}>
+          {item.status}
+        </StatusPill>
+      </td>
 
-        <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">
-                    {item.status}
+      <td className="px-4 py-4 text-sm text-slate-600">
+                {item.currentStep ?? "n/a"}
 
-        </span>
+      </td>
+
+      <td className="px-4 py-4 text-sm text-slate-600">
+                {new Date(item.updatedAt ?? item.createdAt).toLocaleString("pt-BR")}
+
+      </td>
+
+      <td className="px-4 py-4 text-sm text-slate-600">
+                {item.errorMessage ?? "—"}
 
       </td>
 
@@ -46,4 +52,18 @@ export function DocumentTableRow({
 
     </tr>
   );
+}
+
+function resolveStatusTone(status: DocumentListItemModel["status"]) {
+  switch (status) {
+    case "completed":
+      return "success";
+    case "failed":
+      return "error";
+    case "processing":
+      return "info";
+    case "pending":
+    default:
+      return "warning";
+  }
 }

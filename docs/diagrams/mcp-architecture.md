@@ -1,6 +1,6 @@
 # MCP / Omnichannel Architecture
 
-This diagram shows how **RAG-PLATAFORM** handles multi-channel communication through an MCP-style omnichannel architecture.
+This diagram shows how **RAG Platform** handles multi-channel communication through an MCP-style omnichannel architecture.
 
 The platform receives requests from different channels, normalizes them into a common contract, routes them through orchestration and optional RAG retrieval, and dispatches the response back to the originating channel.
 
@@ -281,7 +281,7 @@ The observability stack includes:
 - Prometheus
 - Grafana
 - Loki
-- Jaeger
+- Tempo
 - OpenTelemetry Collector
 
 This enables:

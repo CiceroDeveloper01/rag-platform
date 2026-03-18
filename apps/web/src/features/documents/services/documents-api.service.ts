@@ -29,19 +29,36 @@ export const documentsApiService = {
   },
 
   async listDocuments(): Promise<DocumentsListResponse> {
-    const sources =
-      await optionalApiRequest<Array<Record<string, unknown>>>("/sources");
+    const statuses =
+      await optionalApiRequest<Array<Record<string, unknown>>>("/documents/status");
 
-    if (sources) {
+    if (statuses) {
       return {
-        items: sources.map((source) => ({
-          id: Number(source.id ?? 0),
-          filename: String(source.filename ?? "Source"),
+        items: statuses.map((source) => ({
+          id: Number(source.documentId ?? source.id ?? 0),
+          filename: String(source.fileName ?? source.filename ?? "Source"),
+          sourceChannel:
+            typeof source.sourceChannel === "string"
+              ? source.sourceChannel
+              : null,
           type: String(source.type ?? "unknown"),
           createdAt: String(
-            source.uploadedAt ?? source.created_at ?? new Date().toISOString(),
+            source.createdAt ??
+              source.uploadedAt ??
+              source.created_at ??
+              new Date().toISOString(),
           ),
-          status: "processed",
+          updatedAt: String(
+            source.updatedAt ??
+              source.uploadedAt ??
+              source.updated_at ??
+              new Date().toISOString(),
+          ),
+          status: normalizeStatus(source.status),
+          currentStep:
+            typeof source.currentStep === "string" ? source.currentStep : null,
+          errorMessage:
+            typeof source.errorMessage === "string" ? source.errorMessage : null,
           chunksCount:
             Number(source.chunksCount ?? source.documentsProcessed ?? 0) ||
             undefined,
@@ -72,7 +89,7 @@ export const documentsApiService = {
                   document.createdAt ??
                   new Date().toISOString(),
               ),
-              status: "processed",
+              status: "completed",
               chunksCount:
                 Number(metadata?.totalChunks ?? metadata?.chunksCount ?? 0) ||
                 undefined,
@@ -116,3 +133,19 @@ export const documentsApiService = {
     });
   },
 };
+
+function normalizeStatus(
+  status: unknown,
+): "pending" | "processing" | "completed" | "failed" {
+  switch (String(status ?? "").toUpperCase()) {
+    case "PROCESSING":
+      return "processing";
+    case "COMPLETED":
+      return "completed";
+    case "FAILED":
+      return "failed";
+    case "PENDING":
+    default:
+      return "pending";
+  }
+}

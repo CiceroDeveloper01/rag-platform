@@ -8,6 +8,7 @@ import { internalApiConfig } from "./config/internal-api.config";
 import { listenersConfig } from "./config/listeners.config";
 import { queueConfig } from "./config/queue.config";
 import { ragConfig } from "./config/rag.config";
+import { rabbitMqConfig } from "./config/rabbitmq.config";
 import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { AgentTraceModule } from "./modules/agent-trace/agent-trace.module";
 import { AgentsModule } from "./modules/agents/agents.module";
@@ -16,6 +17,7 @@ import { HealthModule } from "./modules/health/health.module";
 import { ChannelsModule } from "./modules/channels/channels.module";
 import { ProcessorsModule } from "./modules/processors/processors.module";
 import { QueueModule } from "./modules/queue/queue.module";
+import { DocumentIngestionModule } from "./modules/document-ingestion/document-ingestion.module";
 import { SimulationModule } from "./modules/simulation/simulation.module";
 import { TenancyModule } from "./modules/tenancy/tenancy.module";
 import { TrainingModule } from "./modules/training/training.module";
@@ -45,6 +47,10 @@ const orchestratorEnvironmentSchema = z.object({
   FLOW_EXECUTION_QUEUE_FAILED_RETENTION_SECONDS: z.string().optional(),
   INTERNAL_API_BASE_URL: z.string().optional(),
   INTERNAL_API_REQUEST_TIMEOUT_MS: z.string().optional(),
+  INTERNAL_API_INGESTION_REQUEST_PATH: z.string().optional(),
+  INTERNAL_API_INGESTION_COMPLETE_PATH: z.string().optional(),
+  INTERNAL_API_INGESTION_FAIL_PATH: z.string().optional(),
+  INTERNAL_API_INGESTION_STATUS_PATH: z.string().optional(),
   HTTP_RETRY_ENABLED: z.string().optional(),
   HTTP_RETRY_MAX_ATTEMPTS: z.string().optional(),
   HTTP_RETRY_INITIAL_DELAY_MS: z.string().optional(),
@@ -101,6 +107,27 @@ const orchestratorEnvironmentSchema = z.object({
   WHATSAPP_LISTENER_RETRY_MAX_ATTEMPTS: z.string().optional(),
   WHATSAPP_LISTENER_RETRY_INITIAL_DELAY_MS: z.string().optional(),
   WHATSAPP_LISTENER_RETRY_MAX_DELAY_MS: z.string().optional(),
+  RABBITMQ_HOST: z.string().optional(),
+  RABBITMQ_PORT: z.string().optional(),
+  RABBITMQ_USER: z.string().optional(),
+  RABBITMQ_USERNAME: z.string().optional(),
+  RABBITMQ_PASS: z.string().optional(),
+  RABBITMQ_PASSWORD: z.string().optional(),
+  RABBITMQ_VHOST: z.string().optional(),
+  RABBITMQ_QUEUE_DOCUMENT_INGESTION: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_QUEUE: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_EXCHANGE: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_RETRY_DELAY_MS: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_DLX: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_DLQ: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY: z.string().optional(),
+  RABBITMQ_DOCUMENT_INGESTION_PREFETCH: z.string().optional(),
+  INTERNAL_API_INGESTION_START_PATH: z.string().optional(),
   TRAINING_PIPELINE_ENABLED: z.string().optional(),
   TRAINING_PIPELINE_INTERVAL_MS: z.string().optional(),
 });
@@ -117,6 +144,7 @@ const orchestratorEnvironmentSchema = z.object({
         internalApiConfig,
         listenersConfig,
         ragConfig,
+        rabbitMqConfig,
         featureTogglesConfig,
       ],
       validate: (config) => validateEnv(orchestratorEnvironmentSchema, config),
@@ -127,6 +155,7 @@ const orchestratorEnvironmentSchema = z.object({
     CostMonitoringModule,
     AgentTraceModule,
     QueueModule,
+    DocumentIngestionModule,
     AgentsModule,
     ChannelsModule,
     ProcessorsModule,

@@ -7,6 +7,7 @@ import { CostMonitoringModule } from "../cost-monitoring/cost-monitoring.module"
 import { EvaluationModule } from "../evaluation/evaluation.module";
 import { GuardrailsModule } from "../guardrails/guardrails.module";
 import { ChannelsModule } from "../channels/channels.module";
+import { InternalApiModule } from "../internal-api/internal-api.module";
 import { QueueModule } from "../queue/queue.module";
 import { TenancyModule } from "../tenancy/tenancy.module";
 import { ToolsModule } from "../tools/tools.module";
@@ -24,6 +25,7 @@ import { InboundMessageProcessor } from "./inbound-message.processor";
     GuardrailsModule,
     AgentsModule,
     ChannelsModule,
+    InternalApiModule,
     ToolsModule,
     QueueModule,
   ],

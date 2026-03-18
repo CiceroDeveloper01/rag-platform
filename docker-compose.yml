@@ -37,21 +37,44 @@ services:
     networks:
       - rag-network
 
-  api:
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rag-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - rag-network
+
+  api-business:
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
-    container_name: rag-api
+      dockerfile: apps/api-business/Dockerfile
+    container_name: rag-api-business
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       otel-collector:
         condition: service_healthy
     environment:
-      APP_NAME: rag-platform-api
+      APP_NAME: rag-platform-api-business
       NODE_ENV: production
       PORT: 3000
       APP_VERSION: 0.0.1
@@ -60,6 +83,22 @@ services:
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_DB: ${REDIS_DB:-0}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_QUEUE_DOCUMENT_INGESTION: ${RABBITMQ_QUEUE_DOCUMENT_INGESTION:-document.ingestion.requested}
+      RABBITMQ_DOCUMENT_INGESTION_EXCHANGE: ${RABBITMQ_DOCUMENT_INGESTION_EXCHANGE:-documents.ingestion}
+      RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY:-document.ingestion.requested}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE:-documents.ingestion.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE:-document.ingestion.requested.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY:-document.ingestion.requested.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_DELAY_MS: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_DELAY_MS:-30000}
+      RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS: ${RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS:-3}
+      RABBITMQ_DOCUMENT_INGESTION_DLX: ${RABBITMQ_DOCUMENT_INGESTION_DLX:-documents.ingestion.dlx}
+      RABBITMQ_DOCUMENT_INGESTION_DLQ: ${RABBITMQ_DOCUMENT_INGESTION_DLQ:-document.ingestion.requested.dlq}
+      RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY:-document.ingestion.requested.dead}
       REDIS_TTL_DEFAULT: ${REDIS_TTL_DEFAULT:-30}
       STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
       LOCAL_STORAGE_PATH: ${LOCAL_STORAGE_PATH:-storage/documents}
@@ -110,11 +149,11 @@ services:
       EMAIL_INBOX: ${EMAIL_INBOX:-INBOX}
       EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-no-reply@rag-platform.local}
       EMAIL_MAX_ATTACHMENT_MB: ${EMAIL_MAX_ATTACHMENT_MB:-10}
-      METRICS_PREFIX: rag_platform_api_
+      METRICS_PREFIX: rag_platform_api_business_
       METRICS_DEFAULTS_ENABLED: "true"
       OTEL_ENABLED: ${OTEL_ENABLED:-true}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-      OTEL_SERVICE_NAME: rag-platform-api
+      OTEL_SERVICE_NAME: rag-platform-api-business
       OTEL_SERVICE_VERSION: 0.0.1
       OTEL_RESOURCE_ATTRIBUTES: deployment.environment=docker-local
       LOG_LEVEL: info
@@ -138,6 +177,107 @@ services:
     networks:
       - rag-network
 
+  api-web:
+    build:
+      context: .
+      dockerfile: apps/api-web/Dockerfile
+    container_name: rag-api-web
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        condition: service_healthy
+    environment:
+      APP_NAME: rag-platform-api-web
+      NODE_ENV: production
+      PORT: 3000
+      APP_VERSION: 0.0.1
+      FRONTEND_ORIGINS: http://localhost:3002
+      REDIS_ENABLED: ${REDIS_ENABLED:-true}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_DB: ${REDIS_DB:-0}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_QUEUE_DOCUMENT_INGESTION: ${RABBITMQ_QUEUE_DOCUMENT_INGESTION:-document.ingestion.requested}
+      RABBITMQ_DOCUMENT_INGESTION_EXCHANGE: ${RABBITMQ_DOCUMENT_INGESTION_EXCHANGE:-documents.ingestion}
+      RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY:-document.ingestion.requested}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE:-documents.ingestion.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE:-document.ingestion.requested.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY:-document.ingestion.requested.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_DELAY_MS: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_DELAY_MS:-30000}
+      RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS: ${RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS:-3}
+      RABBITMQ_DOCUMENT_INGESTION_DLX: ${RABBITMQ_DOCUMENT_INGESTION_DLX:-documents.ingestion.dlx}
+      RABBITMQ_DOCUMENT_INGESTION_DLQ: ${RABBITMQ_DOCUMENT_INGESTION_DLQ:-document.ingestion.requested.dlq}
+      RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY:-document.ingestion.requested.dead}
+      API_BUSINESS_BASE_URL: ${API_BUSINESS_BASE_URL:-http://api-business:3000}
+      API_BUSINESS_TIMEOUT_MS: ${API_BUSINESS_TIMEOUT_MS:-10000}
+      REDIS_TTL_DEFAULT: ${REDIS_TTL_DEFAULT:-30}
+      AUTH_SESSION_TTL_HOURS: 8
+      AUTH_SESSION_COOKIE_NAME: rag_platform_session
+      AUTH_SECURE_COOKIES: "false"
+      AUTH_RATE_LIMIT_TTL_MS: 60000
+      AUTH_RATE_LIMIT_LIMIT: 120
+      DEMO_USER_EMAIL: demo@ragplatform.dev
+      DEMO_USER_PASSWORD: demo123
+      DEMO_USER_NAME: Demo Operator
+      DATABASE_ENABLED: "true"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: rag
+      DB_PASSWORD: rag
+      DB_NAME: ragdb
+      DB_SCHEMA: public
+      DB_SSL: "false"
+      DB_SYNCHRONIZE: "false"
+      DB_LOGGING: "false"
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-mock}
+      EMAIL_IMAP_HOST: ${EMAIL_IMAP_HOST:-imap.gmail.com}
+      EMAIL_IMAP_PORT: ${EMAIL_IMAP_PORT:-993}
+      EMAIL_IMAP_SECURE: ${EMAIL_IMAP_SECURE:-true}
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST:-smtp.gmail.com}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT:-465}
+      EMAIL_SMTP_SECURE: ${EMAIL_SMTP_SECURE:-true}
+      EMAIL_USERNAME: ${EMAIL_USERNAME:-}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-}
+      EMAIL_POLL_INTERVAL_SECONDS: ${EMAIL_POLL_INTERVAL_SECONDS:-30}
+      EMAIL_INBOX: ${EMAIL_INBOX:-INBOX}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-no-reply@rag-platform.local}
+      EMAIL_MAX_ATTACHMENT_MB: ${EMAIL_MAX_ATTACHMENT_MB:-10}
+      METRICS_PREFIX: rag_platform_api_web_
+      METRICS_DEFAULTS_ENABLED: "true"
+      OTEL_ENABLED: ${OTEL_ENABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_SERVICE_NAME: rag-platform-api-web
+      OTEL_SERVICE_VERSION: 0.0.1
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=docker-local
+      LOG_LEVEL: info
+      LOG_PRETTY: "false"
+      LOG_REDACT_ENABLED: "true"
+    ports:
+      - "3004:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/v1/health/ready').then((res)=>process.exit(res.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - rag-network
+
   orchestrator:
     build:
       context: .
@@ -147,7 +287,9 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      api:
+      rabbitmq:
+        condition: service_healthy
+      api-business:
         condition: service_healthy
     environment:
       APP_NAME: rag-platform-orchestrator
@@ -158,6 +300,22 @@ services:
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_DB: ${REDIS_DB:-0}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_QUEUE_DOCUMENT_INGESTION: ${RABBITMQ_QUEUE_DOCUMENT_INGESTION:-document.ingestion.requested}
+      RABBITMQ_DOCUMENT_INGESTION_EXCHANGE: ${RABBITMQ_DOCUMENT_INGESTION_EXCHANGE:-documents.ingestion}
+      RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY:-document.ingestion.requested}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE:-documents.ingestion.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE:-document.ingestion.requested.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY:-document.ingestion.requested.retry}
+      RABBITMQ_DOCUMENT_INGESTION_RETRY_DELAY_MS: ${RABBITMQ_DOCUMENT_INGESTION_RETRY_DELAY_MS:-30000}
+      RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS: ${RABBITMQ_DOCUMENT_INGESTION_MAX_ATTEMPTS:-3}
+      RABBITMQ_DOCUMENT_INGESTION_DLX: ${RABBITMQ_DOCUMENT_INGESTION_DLX:-documents.ingestion.dlx}
+      RABBITMQ_DOCUMENT_INGESTION_DLQ: ${RABBITMQ_DOCUMENT_INGESTION_DLQ:-document.ingestion.requested.dlq}
+      RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY: ${RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY:-document.ingestion.requested.dead}
       INBOUND_QUEUE_NAME: ${INBOUND_QUEUE_NAME:-inbound-messages}
       INBOUND_QUEUE_CONCURRENCY: ${INBOUND_QUEUE_CONCURRENCY:-5}
       INBOUND_QUEUE_ATTEMPTS: ${INBOUND_QUEUE_ATTEMPTS:-3}
@@ -166,7 +324,7 @@ services:
       FLOW_EXECUTION_QUEUE_CONCURRENCY: ${FLOW_EXECUTION_QUEUE_CONCURRENCY:-5}
       FLOW_EXECUTION_QUEUE_ATTEMPTS: ${FLOW_EXECUTION_QUEUE_ATTEMPTS:-3}
       FLOW_EXECUTION_QUEUE_BACKOFF_MS: ${FLOW_EXECUTION_QUEUE_BACKOFF_MS:-1000}
-      INTERNAL_API_BASE_URL: ${INTERNAL_API_BASE_URL:-http://api:3000}
+      INTERNAL_API_BASE_URL: ${INTERNAL_API_BASE_URL:-http://api-business:3000}
       INTERNAL_API_REQUEST_TIMEOUT_MS: ${INTERNAL_API_REQUEST_TIMEOUT_MS:-10000}
       HTTP_RETRY_ENABLED: ${HTTP_RETRY_ENABLED:-true}
       HTTP_RETRY_MAX_ATTEMPTS: ${HTTP_RETRY_MAX_ATTEMPTS:-3}
@@ -181,6 +339,8 @@ services:
       INBOUND_QUEUE_FAILED_RETENTION_SECONDS: ${INBOUND_QUEUE_FAILED_RETENTION_SECONDS:-604800}
       FLOW_EXECUTION_QUEUE_COMPLETED_RETENTION_SECONDS: ${FLOW_EXECUTION_QUEUE_COMPLETED_RETENTION_SECONDS:-86400}
       FLOW_EXECUTION_QUEUE_FAILED_RETENTION_SECONDS: ${FLOW_EXECUTION_QUEUE_FAILED_RETENTION_SECONDS:-604800}
+      INTERNAL_API_INGESTION_REQUEST_PATH: ${INTERNAL_API_INGESTION_REQUEST_PATH:-/ingestion/request}
+      INTERNAL_API_INGESTION_START_PATH: ${INTERNAL_API_INGESTION_START_PATH:-/ingestion/start}
       INTERNAL_API_DOCUMENTS_REGISTER_PATH: ${INTERNAL_API_DOCUMENTS_REGISTER_PATH:-/documents/register}
       INTERNAL_API_CONVERSATIONS_REPLY_PATH: ${INTERNAL_API_CONVERSATIONS_REPLY_PATH:-/conversations/reply}
       INTERNAL_API_HANDOFF_PATH: ${INTERNAL_API_HANDOFF_PATH:-/handoff}
@@ -243,7 +403,7 @@ services:
     container_name: rag-web
     restart: unless-stopped
     depends_on:
-      api:
+      api-business:
         condition: service_healthy
     environment:
       HOSTNAME: 0.0.0.0
@@ -303,7 +463,7 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      api:
+      api-business:
         condition: service_healthy
       otel-collector:
         condition: service_healthy
@@ -426,6 +586,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:
   api_storage_data:
   prometheus_data:
   grafana_data:

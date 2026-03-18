@@ -4,159 +4,218 @@
 [![Node 20](https://img.shields.io/badge/node-20.x-green.svg)](package.json)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](docker-compose.yml)
 [![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue)](.github/workflows/ci.yml)
-[![PR Validation](https://img.shields.io/badge/PR%20Validation-GitHub_Actions-blue)](.github/workflows/pr-validation.yml)
 
-TypeScript monorepo for orchestrating AI agents through an asynchronous, queue-based runtime. The platform combines channel integrations, agent-first routing, document ingestion, RAG retrieval, conversation memory, feature toggles, and operational observability.
+TypeScript monorepo for an AI agent platform with a queue-driven orchestrator, synchronous business APIs, a presentation/BFF API, and a Next.js web application.
 
-## What This Project Solves
-
-The platform separates:
-
-- message transport
-- business decisions
-- technical execution
-
-Instead of embedding business logic in channels, the system centralizes runtime processing in `apps/orchestrator`. Channels normalize external events, `AgentGraphService` decides the execution path, and tools perform operations such as parsing, chunking, embeddings, storage, and retrieval.
-
-## Architecture Overview
-
-The main runtime flow implemented today is:
-
-`Channels -> Channel Adapter -> Inbound Queue -> Orchestrator Runtime -> Supervisor Agent -> Specialized Agents -> Tools -> RAG / Memory -> Response Generation -> Outbound Channel`
-
-Current architectural principles:
-
-- `agent-first`: agents decide runtime behavior
-- `channel-agnostic`: channels do not contain business rules
-- `orchestrator-centered`: the real runtime lives in `apps/orchestrator`
-- `event-driven`: BullMQ queues decouple intake from execution
-
-```mermaid
-flowchart LR
-    Channel[Channels] --> Adapter[Adapters]
-    Adapter --> InboundQ[inbound-messages]
-    InboundQ --> Orchestrator[Orchestrator runtime]
-    Orchestrator --> Graph[Agent graph]
-    Graph --> FlowQ[flow-execution]
-    FlowQ --> Outbound[Outbound services]
-```
-
-## Repository Structure
+## Monorepo Boundaries
 
 ```text
 apps/
-  api
-  orchestrator
   web
+  api-web
+  api-business
+  orchestrator
 
 packages/
-  config
   contracts
-  observability
-  sdk
   shared
+  sdk
+  config
+  observability
   types
   utils
-
-docs/
-  ARCHITECTURE.md
-  ARCHITECTURE_DECISIONS.md
-  DATABASE.md
-  RUNNING_LOCALLY.md
-  TESTING_GUIDE.md
-  CHANNEL_INTEGRATION.md
 ```
 
-## Module Responsibilities
-
-- `apps/api`
-  - synchronous APIs for administration, analytics, documents, search, internal memory, and management surfaces
-
-- `apps/orchestrator`
-  - asynchronous runtime, queues, agents, tools, RAG, memory, guardrails, feature toggles, tracing, and outbound routing
-
 - `apps/web`
-  - dashboards, command center, chat screens, and operational views
+  - user interface, dashboards, chat screens, and document status views
+- `apps/api-web`
+  - presentation and BFF boundary for portal-facing concerns
+- `apps/api-business`
+  - synchronous business/domain APIs that already exist in the repository
+- `apps/orchestrator`
+  - asynchronous runtime for queues, agents, channels, tools, and workers
 
-- `packages/contracts`
-  - canonical contracts and shared events
+## Root Structure
 
-- `packages/sdk`
-  - internal clients used mainly by the orchestrator to talk to the API
+The repository root keeps cross-application concerns only:
 
-- `packages/config`
-  - configuration loading and validation
+```text
+/
+  apps/
+  packages/
+  docs/
+  scripts/
+  .github/
+  docker-compose.yml
+  .env.example
+  README.md
+  CONTRIBUTING.md
+```
 
-- `packages/observability`
-  - logging, metrics, and tracing
+- `apps/`
+  - deployable applications and runtime boundaries
+- `packages/`
+  - truly shared contracts, config helpers, SDK clients, observability primitives, and low-level utilities
+- `docs/`
+  - canonical architecture, ADRs, operational guides, and release documentation
+- `scripts/`
+  - local developer workflow helpers
+- `.github/workflows/`
+  - CI and deployment automation
+- `docker-compose.yml`
+  - local infrastructure and containerized app runtime definition
 
-## Main Technologies
+## Runtime Model
 
-- NestJS
-- Next.js
-- BullMQ
-- Redis
-- PostgreSQL
-- OpenTelemetry
-- Prometheus
-- Grafana
-- Tempo
-- Loki
+The platform uses two execution styles on purpose:
 
-## Current Project Status
+- chat and message replies stay synchronous when the user needs an immediate answer
+- heavy document processing moves to an asynchronous flow
 
-### Most Stable
+The main runtime path remains:
 
-- asynchronous runtime in `apps/orchestrator`
-- core queue topology
-- `AgentGraphService`
-- Telegram integration
-- primary document pipeline
-- retrieval with fallback behavior
-- feature toggles with safe degradation
-- observability in the critical path
+`Channels -> BullMQ inbound queue -> orchestrator -> agents -> tools -> flow execution -> outbound channel`
 
-### Still Evolving
+Document ingestion now adds a dedicated asynchronous path:
 
-- Email and WhatsApp are behind Telegram in maturity
-- conversation memory
-- vector persistence and retrieval for larger scale
-- API hardening as a synchronous boundary
+`web or channel origin -> api-business -> RabbitMQ document.ingestion.requested -> orchestrator worker -> persisted status`
 
-### Not Yet Enterprise-Complete
+```mermaid
+flowchart LR
+    Web[web] --> APIWeb[api-web]
+    APIWeb --> APIBusiness[api-business]
+    Channel[Telegram / Email / WhatsApp] --> Orchestrator[orchestrator]
+    Orchestrator --> APIBusiness
+    APIBusiness --> RabbitMQ[document.ingestion.requested]
+    RabbitMQ --> IngestionWorker[document ingestion worker]
+    IngestionWorker --> APIBusiness
+    APIBusiness --> Postgres[(PostgreSQL)]
+```
 
-- centralized end-to-end idempotency
-- full enterprise document storage lifecycle
-- uniformly hardened multi-tenant isolation across every surface
+## Why Documents Use RabbitMQ
 
-## Running Locally
+Document parsing, chunking, embeddings, and indexing are heavier than normal chat turns. The repository therefore uses RabbitMQ only for document ingestion so that:
+
+- a web upload can return `202 Accepted`
+- a channel conversation does not block while the document is processed
+- the UI can poll persisted status instead of waiting for a long-running request
+
+Chat remains synchronous for now. That is intentional and documented.
+
+## RabbitMQ Responsibility Split
+
+RabbitMQ is intentionally split across two levels of the monorepo:
+
+- root-level infrastructure concerns
+  - `docker-compose.yml`
+  - root and app env examples
+  - local startup and operational documentation
+- application-level messaging concerns
+  - `apps/api-business`
+    - publishes `document.ingestion.requested`
+  - `apps/orchestrator`
+    - consumes and processes `document.ingestion.requested`
+
+This keeps the broker itself as infrastructure while preserving publishers, consumers, queue bindings, and handlers inside the applications that own the runtime behavior.
+
+The document ingestion pipeline now also includes bounded retries, a dedicated dead-letter queue, persisted retry metadata, and an explicit replay path for failed ingestions. Persisted source status remains the source of truth for the UI and for operational recovery.
+
+## Local Development
+
+Infrastructure is expected to run in Docker. Applications are usually run locally in debug mode.
+
+Typical local split:
+
+- Docker: PostgreSQL, Redis, RabbitMQ, Grafana, Prometheus, Loki, Tempo, OpenTelemetry Collector
+- Local processes: `api-web`, `api-business`, `orchestrator`, `web`
 
 See:
 
 - [Running Locally](docs/RUNNING_LOCALLY.md)
-
-## Testing
-
-See:
-
 - [Testing Guide](docs/TESTING_GUIDE.md)
 
-## Channels
+Common root commands:
 
-See:
+```bash
+npm run ci
+npm run build:packages
+npm run test:api
+npm run test:e2e:api
+npm run test:orchestrator
+npm run test:web
+npm run dev:infra
+npm run k8s:render:base
+npm run k8s:render:dev
+```
 
-- [Channel Integration](docs/CHANNEL_INTEGRATION.md)
-- [Telegram Channel](docs/channels/telegram.md)
+## Deployment Model
 
-## Core Documentation
+The repository keeps two infrastructure modes on purpose:
+
+- Docker Compose is the default local development standard
+- Kubernetes is the prepared deployment target for shared environments
+
+Local Docker remains the simplest way to run PostgreSQL, Redis, RabbitMQ, and
+the observability stack while developers debug the four apps locally.
+
+Kubernetes deployment assets now live under:
+
+```text
+k8s/
+  base/
+  overlays/
+    dev/
+    staging/
+    prod/
+```
+
+These manifests only cover the deployable apps:
+
+- `web`
+- `api-web`
+- `api-business`
+- `orchestrator`
+
+Infrastructure dependencies such as PostgreSQL, Redis, RabbitMQ, and
+OpenTelemetry Collector are expected to be deployed separately in Kubernetes or
+provided as managed services.
+
+## Main Documentation
 
 - [Platform Architecture](docs/ARCHITECTURE.md)
-- [Architecture Decision Validation](docs/ARCHITECTURE_DECISIONS.md)
+- [Architecture Decisions](docs/ARCHITECTURE_DECISIONS.md)
+- [Channel Integration](docs/CHANNEL_INTEGRATION.md)
 - [Database and Persistence](docs/DATABASE.md)
-- [Consolidated Technical Report](docs/relatorio-tecnico-consolidado.md)
-- [Runtime Flow](docs/runtime-flow.md)
-- [RAG Flow](docs/rag/rag-flow.md)
+- [Deployment Guide](docs/deployment/DEPLOYMENT.md)
+- [Kubernetes Guide](docs/deployment/KUBERNETES.md)
+- [Technical Debt Register](docs/TECHNICAL_DEBT.md)
+- [Release Tasks](docs/RELEASE_TASKS.md)
 
-## Publication Notes
+## App Guides
 
-This repository already demonstrates a coherent architecture that can be discussed confidently in interviews, architecture reviews, and controlled pilot contexts. At the same time, the documentation intentionally distinguishes what is stable, what is evolving, and what should not yet be described as enterprise-complete.
+- [web](apps/web/README.md)
+- [api-web](apps/api-web/README.md)
+- [api-business](apps/api-business/README.md)
+- [orchestrator](apps/orchestrator/README.md)
+
+## Current Status
+
+What is solid:
+
+- orchestrator-centered runtime
+- channel adapters and queue topology
+- document processing worker structure
+- persisted document status tracking
+- core observability primitives
+
+What is still evolving:
+
+- web alignment with the intended API boundaries
+- full end-to-end unification of synchronous and asynchronous RAG paths
+- stronger idempotency and multi-tenant hardening
+
+## RabbitMQ Management
+
+When running locally through `docker compose`, RabbitMQ management is available at:
+
+- `http://localhost:15672`

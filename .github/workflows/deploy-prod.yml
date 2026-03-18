@@ -34,9 +34,25 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./apps/api/Dockerfile
+          file: ./apps/api-business/Dockerfile
           push: false
-          tags: rag-platform-api:prod
+          tags: rag-platform-api-business:prod
+
+      - name: Build API Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./apps/api-web/Dockerfile
+          push: false
+          tags: rag-platform-api-web:prod
+
+      - name: Build orchestrator image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./apps/orchestrator/Dockerfile
+          push: false
+          tags: rag-platform-orchestrator:prod
 
       - name: Build web image
         uses: docker/build-push-action@v6

@@ -1,97 +1,98 @@
 # Channel Integration
 
-This document summarizes how channels integrate with the platform runtime.
+This document describes how channels fit into the current architecture.
 
 ## Core Principle
 
-Channels are treated as the transport layer.
+Channels remain transport boundaries.
 
 They should:
 
 - receive external events
-- normalize payloads
-- publish canonical messages to the inbound queue
+- normalize payloads into canonical contracts
+- enqueue inbound work for the orchestrator
 - deliver outbound responses
 
 They should not:
 
-- choose the target agent
-- perform document ingestion
-- execute retrieval logic
-- own runtime business rules
+- choose business execution paths directly
+- perform document parsing, chunking, or embeddings
+- bypass the orchestrator runtime for channel-origin work
 
-## Channel Integration Model
+## Channel Runtime Flow
 
 ```mermaid
 flowchart LR
     Provider[External provider] --> Adapter[Inbound adapter]
     Adapter --> Listener[Channel listener]
     Listener --> InboundQ[inbound-messages]
-    InboundQ --> Orchestrator[Orchestrator runtime]
+    InboundQ --> Orchestrator[orchestrator]
     Orchestrator --> FlowQ[flow-execution]
     FlowQ --> Outbound[Outbound service]
     Outbound --> Provider
 ```
 
+## Documents From Channels
+
+Documents can arrive from:
+
+- Telegram
+- Email
+- WhatsApp
+- any other channel already modeled in the runtime
+
+Heavy processing should not block the conversation turn.
+
+Current channel-origin document model:
+
+1. the channel listener publishes the canonical message
+2. the orchestrator plans the document action
+3. flow execution performs lightweight download/content extraction work
+4. the orchestrator requests ingestion through `api-business`
+5. `api-business` publishes `document.ingestion.requested`
+6. the RabbitMQ-backed worker processes the document asynchronously
+
+```mermaid
+sequenceDiagram
+    participant Provider as Channel provider
+    participant Listener as Channel listener
+    participant Runtime as orchestrator
+    participant API as api-business
+    participant Rabbit as RabbitMQ
+    participant Worker as document worker
+
+    Provider->>Listener: document message
+    Listener->>Runtime: canonical inbound payload
+    Runtime->>API: internal ingestion request
+    API->>Rabbit: document.ingestion.requested
+    API-->>Runtime: accepted
+    Rabbit->>Worker: consume
+```
+
 ## Telegram
 
-Telegram is the most mature channel in the repository.
+Telegram remains the most mature integration.
 
-Main runtime components:
+Main components:
 
 - `TelegramInboundAdapter`
 - `TelegramPollingService`
 - `TelegramListener`
 - `TelegramOutboundService`
 
-```mermaid
-sequenceDiagram
-    participant Telegram as Telegram API
-    participant Polling as TelegramPollingService
-    participant Adapter as TelegramInboundAdapter
-    participant Listener as TelegramListener
-    participant InboundQ as inbound-messages
-    participant Runtime as Orchestrator runtime
-    participant Flow as FlowExecutionProcessor
-    participant Outbound as TelegramOutboundService
-
-    Telegram->>Polling: updates
-    Polling->>Adapter: provider payload
-    Adapter->>Listener: canonical inbound message
-    Listener->>InboundQ: enqueue job
-    InboundQ->>Runtime: process inbound job
-    Runtime->>Flow: enqueue downstream execution
-    Flow->>Outbound: send response
-    Outbound->>Telegram: Bot API request
-```
-
 ## Email
 
-Email has adapter, listener, and outbound components in the runtime shape, but it is still less mature operationally than Telegram.
+Email has the expected architectural shape, but it is still less mature than Telegram in operational depth.
 
 ## WhatsApp
 
-WhatsApp also has adapter and listener components, but it remains less mature than Telegram in current operational terms.
+WhatsApp also follows the channel pattern, but it remains behind Telegram in maturity.
 
-## Channel Maturity Reading
+## Channel Integration Rules
 
-- Telegram: most stable
-- Email: acceptable but still evolving
-- WhatsApp: still evolving
-
-## Guidance for Future Channels
-
-```mermaid
-flowchart TD
-    NewChannel[New channel] --> Canonical[Produce canonical payload]
-    Canonical --> Queue[inbound-messages]
-    Queue --> Runtime[Orchestrator runtime]
-    Runtime --> Outbound[Dedicated outbound service]
-```
-
-Any new channel should preserve:
+Any future channel should preserve:
 
 - canonical payload mapping
 - no business logic in adapters
 - orchestrator-centered execution
-- dedicated outbound delivery logic
+- asynchronous handoff for heavy document work

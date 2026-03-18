@@ -1,6 +1,6 @@
 # Roadmap
 
-This document describes the planned evolution of **RAG-PLATAFORM**.
+This document describes the planned evolution of **RAG Platform**.
 
 The roadmap reflects the natural growth of the platform as an **Omnichannel AI Gateway with RAG capabilities**.
 
@@ -130,7 +130,7 @@ Goals:
 
 # Long-Term Vision
 
-RAG-PLATAFORM aims to become a **full AI communication orchestration platform**, capable of:
+RAG Platform aims to become a **full AI communication orchestration platform**, capable of:
 
 - receiving requests from any channel
 - routing to intelligent agents

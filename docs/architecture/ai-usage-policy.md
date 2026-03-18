@@ -1,6 +1,6 @@
 # AI Usage Policy
 
-This document describes the AI usage policy layer that protects the LLM execution boundary in **RAG-PLATAFORM**.
+This document describes the AI usage policy layer that protects the LLM execution boundary in **RAG Platform**.
 
 ## Purpose
 

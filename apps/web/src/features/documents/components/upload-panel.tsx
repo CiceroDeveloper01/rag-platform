@@ -137,8 +137,8 @@ export function UploadPanel() {
 
           {result ? (
             <SuccessFeedback
-              title="Documento ingerido com sucesso"
-              description={`Arquivo ${result.filename} processado com ${result.chunksGenerated} chunks e ${result.documentsProcessed} registros persistidos.`}
+              title="Document queued successfully"
+              description={result.message}
             />
           ) : null}
 

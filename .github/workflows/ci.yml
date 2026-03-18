@@ -64,16 +64,14 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            apps/api/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install root dependencies
         run: npm ci
 
       - name: Install API dependencies
         run: npm ci
-        working-directory: apps/api
+        working-directory: apps/api-business
 
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -88,23 +86,31 @@ jobs:
 
       - name: Lint API
         run: npm run lint
-        working-directory: apps/api
+        working-directory: apps/api-business
 
       - name: Run API unit tests
         run: npm run test -- --runInBand
-        working-directory: apps/api
+        working-directory: apps/api-business
 
       - name: Run API integration tests
         run: npm run test:e2e -- --runInBand
-        working-directory: apps/api
+        working-directory: apps/api-business
 
       - name: Generate API coverage
         run: npm run test:cov:ci
-        working-directory: apps/api
+        working-directory: apps/api-business
 
       - name: Build API
         run: npm run build
-        working-directory: apps/api
+        working-directory: apps/api-business
+
+      - name: Lint API Web
+        run: npm run lint
+        working-directory: apps/api-web
+
+      - name: Build API Web
+        run: npm run build
+        working-directory: apps/api-web
 
       - name: Run orchestrator tests
         run: npm run test -- --runInBand
@@ -122,14 +128,21 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: api-dist
-          path: apps/api/dist
+          path: apps/api-business/dist
+          if-no-files-found: error
+
+      - name: Upload API Web build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-web-dist
+          path: apps/api-web/dist
           if-no-files-found: error
 
       - name: Upload API coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: api-coverage
-          path: apps/api/coverage
+          path: apps/api-business/coverage
           if-no-files-found: error
 
       - name: Upload orchestrator build artifact
@@ -224,7 +237,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./apps/api/Dockerfile
+          file: ./apps/api-business/Dockerfile
           push: false
           tags: rag-platform-api:ci
           cache-from: type=gha

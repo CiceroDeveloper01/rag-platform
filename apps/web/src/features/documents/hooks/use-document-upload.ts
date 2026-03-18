@@ -92,9 +92,13 @@ export function useDocumentUpload() {
     }
 
     void loadDocuments();
+    const pollingInterval = window.setInterval(() => {
+      void loadDocuments();
+    }, 5000);
 
     return () => {
       isMounted = false;
+      window.clearInterval(pollingInterval);
     };
   }, []);
 
@@ -121,15 +125,18 @@ export function useDocumentUpload() {
         setDocuments((current) => {
           const next = [
             {
-              id: response.sourceId,
+              id: response.documentId,
               filename: response.filename,
+              sourceChannel: response.sourceChannel ?? "web",
               type: file.type || "application/octet-stream",
               createdAt: response.uploadedAt,
-              status: "processed" as const,
-              chunksGenerated: response.chunksGenerated,
-              documentsProcessed: response.documentsProcessed,
+              updatedAt: response.uploadedAt,
+              status: normalizeStatus(response.status),
+              currentStep:
+                response.status === "PENDING" ? "RECEIVED" : null,
+              errorMessage: null,
             },
-            ...current.filter((item) => item.id !== response.sourceId),
+            ...current.filter((item) => item.id !== response.documentId),
           ];
           writeLocalHistory(next);
           return next;
@@ -150,7 +157,7 @@ export function useDocumentUpload() {
   }
 
   const processedDocuments = useMemo(
-    () => documents.filter((document) => document.status === "processed"),
+    () => documents.filter((document) => document.status === "completed"),
     [documents],
   );
 
@@ -251,4 +258,20 @@ export function useDocumentUpload() {
     updateDocument,
     deleteDocument,
   };
+}
+
+function normalizeStatus(
+  status: UploadDocumentResponse["status"],
+): "pending" | "processing" | "completed" | "failed" {
+  switch (status) {
+    case "PROCESSING":
+      return "processing";
+    case "COMPLETED":
+      return "completed";
+    case "FAILED":
+      return "failed";
+    case "PENDING":
+    default:
+      return "pending";
+  }
 }
