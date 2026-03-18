@@ -132,6 +132,9 @@ Telegram note:
 
 - if Telegram is enabled without valid bot credentials, the orchestrator will fail fast during startup
 - document ingestion retries are now bounded; failed messages are inspectable in the RabbitMQ DLQ instead of being dropped silently
+- orchestrator CI/build stability uses local test shims and module declarations
+  for `bullmq` and `@langchain/langgraph`; these are build/test safeguards, not
+  runtime replacements
 
 ## 6. Recommended Local Validation
 
@@ -166,3 +169,21 @@ flowchart TD
 2. send a document through the channel
 3. confirm the conversation is not blocked waiting for indexing
 4. check persisted status through the API or web status page
+
+## 8. Replay a Failed Document Ingestion
+
+Replay is intentionally backend-driven and uses persisted source metadata as the
+source of truth.
+
+Use the business API endpoint:
+
+```bash
+curl -X POST http://localhost:3001/api/v1/sources/<source-id>/replay
+```
+
+Notes:
+
+- replay is only valid for sources already in `FAILED`
+- the system republishes a new ingestion request from persisted source metadata
+- the UI should keep reading persisted status; it should not interact with
+  RabbitMQ directly for replay

@@ -63,6 +63,15 @@ npm --prefix apps/orchestrator run build
 npm --prefix apps/orchestrator run test -- --runInBand
 ```
 
+Notes:
+
+- the orchestrator test suite uses local Jest shims for `bullmq` and
+  `@langchain/langgraph` so CI does not depend on the workspace hoisting shape
+- the orchestrator build also carries local module declarations for these two
+  runtime libraries to keep `nest build` stable in workspace-based CI runners
+- these shims and declarations exist only to stabilize build/test resolution;
+  they do not change runtime behavior in development or production
+
 ### web
 
 ```bash
@@ -95,6 +104,8 @@ Validate at least:
 - worker transitions to `PROCESSING`
 - `currentStep` progresses when applicable
 - final state becomes `COMPLETED` or `FAILED`
+- if a document reaches terminal `FAILED`, confirm replay remains possible only
+  through the persisted-source path, not through direct queue manipulation
 
 ## Manual Regression Checklist
 

@@ -49,3 +49,13 @@ npm --prefix apps/orchestrator run test -- --runInBand
 npm --prefix apps/orchestrator run build
 npm --prefix apps/orchestrator run start:dev
 ```
+
+## CI and Build Notes
+
+To keep workspace-based CI runners stable, the orchestrator includes:
+
+- local Jest shims for `bullmq` and `@langchain/langgraph`
+- local TypeScript module declarations for those same runtime libraries
+
+These files exist only to stabilize test/build resolution inside the monorepo.
+They do not replace the real runtime dependencies used by the application.
