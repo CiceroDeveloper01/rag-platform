@@ -1,12 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { SecurityEventLogger } from "./security-event.logger";
 
-type AgentName = "document-agent" | "conversation-agent" | "handoff-agent";
+type AgentName =
+  | "document-agent"
+  | "conversation-agent"
+  | "handoff-agent"
+  | "account-manager-agent";
 
 const POLICY_MAP: Record<AgentName, string> = {
   "document-agent": "execute.register-document",
   "conversation-agent": "execute.reply-conversation",
   "handoff-agent": "execute.handoff",
+  "account-manager-agent": "execute.reply-conversation",
 };
 
 @Injectable()

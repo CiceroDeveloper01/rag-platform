@@ -284,6 +284,9 @@ export class InboundMessageProcessor implements OnModuleInit, OnModuleDestroy {
     const llmContext = executionRequest.payload.context?.["llmContext"] as
       | string
       | undefined;
+    const aiUsage = executionRequest.payload.context?.["aiUsage"] as
+      | { usedRag?: boolean; usedLlm?: boolean }
+      | undefined;
     const retrievedDocuments = executionRequest.payload.context?.[
       "retrievedDocuments"
     ] as Array<Record<string, unknown>> | undefined;
@@ -315,7 +318,10 @@ export class InboundMessageProcessor implements OnModuleInit, OnModuleDestroy {
       },
     });
 
-    if (llmContext) {
+    const shouldEvaluateLlmOutput =
+      (aiUsage?.usedLlm ?? llmContext !== undefined) && !!llmContext;
+
+    if (shouldEvaluateLlmOutput) {
       if (this.isEvaluationEnabled()) {
         this.outputFilterService.assertSafe(llmContext, {
           externalMessageId: inboundMessage.externalMessageId,

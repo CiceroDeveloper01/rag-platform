@@ -13,6 +13,7 @@ import {
   FlowExecutionRequest,
 } from "./document-agent/document.agent";
 import { HandoffAgent } from "./handoff-agent/handoff.agent";
+import { AccountManagerAgent } from "./account-manager-agent/account-manager.agent";
 import { AgentDecision, SupervisorAgent } from "./supervisor/supervisor.agent";
 
 const AgentGraphState = Annotation.Root({
@@ -45,6 +46,7 @@ export class AgentGraphService {
     private readonly documentAgent: DocumentAgent,
     private readonly conversationAgent: ConversationAgent,
     private readonly handoffAgent: HandoffAgent,
+    private readonly accountManagerAgent: AccountManagerAgent,
   ) {}
 
   async execute(inboundMessage: InboundMessagePayload): Promise<{
@@ -142,6 +144,12 @@ export class AgentGraphService {
           this.requireDecision(state.decision),
         ),
       }))
+      .addNode("account-manager-agent", async (state: AgentGraphStateSnapshot) => ({
+        executionRequest: await this.accountManagerAgent.plan(
+          state.inboundMessage,
+          this.requireDecision(state.decision),
+        ),
+      }))
       .addEdge(START, "supervisor")
       .addConditionalEdges(
         "supervisor",
@@ -151,11 +159,13 @@ export class AgentGraphService {
           "document-agent": "document-agent",
           "conversation-agent": "conversation-agent",
           "handoff-agent": "handoff-agent",
+          "account-manager-agent": "account-manager-agent",
         },
       )
       .addEdge("document-agent", END)
       .addEdge("conversation-agent", END)
       .addEdge("handoff-agent", END)
+      .addEdge("account-manager-agent", END)
       .compile();
   }
 }

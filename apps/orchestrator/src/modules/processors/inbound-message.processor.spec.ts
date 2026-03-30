@@ -420,4 +420,61 @@ describe("InboundMessageProcessor", () => {
 
     expect(deadLetterQueueService.enqueueInboundFailure).not.toHaveBeenCalled();
   });
+
+  it("does not record llm cost or evaluation for tool-only banking responses", async () => {
+    agentGraphService.execute.mockResolvedValueOnce({
+      decision: {
+        intent: "account-manager",
+        confidence: 0.95,
+        targetAgent: "account-manager-agent",
+        detectedLanguage: "en",
+      },
+      executionRequest: {
+        jobName: "execute.reply-conversation",
+        payload: {
+          channel: Channel.TELEGRAM,
+          externalMessageId: "telegram:banking:tool-only",
+          context: {
+            body: "show my cards",
+            responseText: "Your card limit is R$ 18000.00.",
+            aiUsage: {
+              usedRag: false,
+              usedLlm: false,
+            },
+            metadata: {
+              tenantId: "tenant-a",
+              telegramChatId: "1001",
+            },
+          },
+        },
+      },
+      durationMs: 10,
+    });
+
+    const processor = createProcessor();
+
+    await processor.handleJob({
+      id: "job-tool-only",
+      name: TELEGRAM_RECEIVED_JOB,
+      data: {
+        eventType: "message.received",
+        channel: Channel.TELEGRAM,
+        externalMessageId: "telegram:banking:tool-only",
+        conversationId: "1001",
+        from: "ada",
+        body: "show my cards",
+        receivedAt: "2026-03-15T12:00:00.000Z",
+        metadata: {
+          telegramChatId: "1001",
+        },
+      },
+      attemptsMade: 1,
+      opts: {
+        attempts: 3,
+      },
+    } as any);
+
+    expect(responseEvaluatorService.evaluateResponse).not.toHaveBeenCalled();
+    expect(usageRepository.save).not.toHaveBeenCalled();
+  });
 });

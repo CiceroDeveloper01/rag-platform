@@ -2,12 +2,15 @@ import { Injectable } from "@nestjs/common";
 import { ChannelMessageEvent } from "@rag-platform/contracts";
 import { AppLoggerService } from "@rag-platform/observability";
 import { z } from "zod";
+import { hasAnyBankingRoutingKeyword } from "../../decision-layer/banking-routing-keywords";
+import { BankingConversationStateService } from "../../orchestrator/account-manager/banking-conversation-state.service";
 import { LanguageDetectionService } from "../language-detection.service";
 
 const targetAgentSchema = z.enum([
   "document-agent",
   "conversation-agent",
   "handoff-agent",
+  "account-manager-agent",
 ]);
 
 const agentDecisionSchema = z.object({
@@ -27,6 +30,7 @@ export class SupervisorAgent {
   constructor(
     private readonly logger: AppLoggerService,
     private readonly languageDetectionService: LanguageDetectionService,
+    private readonly bankingConversationStateService: BankingConversationStateService,
   ) {}
 
   async decide(message: ChannelMessageEvent): Promise<AgentDecision> {
@@ -42,11 +46,16 @@ export class SupervisorAgent {
       .toLowerCase();
 
     const language = this.languageDetectionService.detect(normalizedText);
+    const pendingConfirmation =
+      await this.bankingConversationStateService.getPendingConfirmationState(
+        message,
+      );
     const decision = this.buildDecision(
       messageType,
       normalizedText,
       attachmentCount,
       language,
+      pendingConfirmation,
     );
 
     this.logger.debug("Supervisor decision produced", SupervisorAgent.name, {
@@ -70,6 +79,7 @@ export class SupervisorAgent {
       confidence: number;
       usedFallback: boolean;
     },
+    pendingConfirmation: { confirmationPending: boolean } | null,
   ): AgentDecision {
     if (messageType === "document") {
       return agentDecisionSchema.parse({
@@ -98,6 +108,17 @@ export class SupervisorAgent {
       });
     }
 
+    if (pendingConfirmation?.confirmationPending) {
+      return agentDecisionSchema.parse({
+        intent: "account-manager-pending-confirmation",
+        confidence: 0.98,
+        targetAgent: "account-manager-agent",
+        detectedLanguage: language.detectedLanguage,
+        languageConfidence: language.confidence,
+        languageUsedFallback: language.usedFallback,
+      });
+    }
+
     if (
       normalizedText.includes("humano") ||
       normalizedText.includes("atendente") ||
@@ -109,6 +130,17 @@ export class SupervisorAgent {
         intent: "handoff",
         confidence: 0.81,
         targetAgent: "handoff-agent",
+        detectedLanguage: language.detectedLanguage,
+        languageConfidence: language.confidence,
+        languageUsedFallback: language.usedFallback,
+      });
+    }
+
+    if (hasAnyBankingRoutingKeyword(normalizedText)) {
+      return agentDecisionSchema.parse({
+        intent: "account-manager",
+        confidence: 0.87,
+        targetAgent: "account-manager-agent",
         detectedLanguage: language.detectedLanguage,
         languageConfidence: language.confidence,
         languageUsedFallback: language.usedFallback,
