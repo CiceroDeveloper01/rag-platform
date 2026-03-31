@@ -1,5 +1,7 @@
 import { ConfigService } from '@nestjs/config';
+import { isMessagingEnvelope } from '@rag-platform/contracts';
 import { PinoLogger } from 'nestjs-pino';
+import { ObservabilityMetricsService } from '../observability/services/metrics.service';
 import { TracingService } from '../observability/services/tracing.service';
 import { DocumentIngestionPublisherService } from './document-ingestion.publisher';
 
@@ -27,6 +29,9 @@ describe('DocumentIngestionPublisherService', () => {
       setContext?: jest.Mock;
       info?: jest.Mock;
     };
+    metrics?: {
+      incrementCounter?: jest.Mock;
+    };
   }) {
     const publish =
       overrides?.channel?.publish ??
@@ -40,6 +45,9 @@ describe('DocumentIngestionPublisherService', () => {
     const logger = {
       setContext: overrides?.logger?.setContext ?? jest.fn(),
       info: overrides?.logger?.info ?? jest.fn(),
+    };
+    const metrics = {
+      incrementCounter: overrides?.metrics?.incrementCounter ?? jest.fn(),
     };
 
     const service = new DocumentIngestionPublisherService(
@@ -63,6 +71,7 @@ describe('DocumentIngestionPublisherService', () => {
       {
         runInSpan: tracingRunInSpan,
       } as unknown as TracingService,
+      metrics as unknown as ObservabilityMetricsService,
       logger as unknown as PinoLogger,
     );
 
@@ -73,11 +82,18 @@ describe('DocumentIngestionPublisherService', () => {
       }),
     });
 
-    return { service, publish, waitForConfirms, tracingRunInSpan, logger };
+    return {
+      service,
+      publish,
+      waitForConfirms,
+      tracingRunInSpan,
+      logger,
+      metrics,
+    };
   }
 
   it('publishes document ingestion requests with the expected contract metadata', async () => {
-    const { service, publish, waitForConfirms, tracingRunInSpan, logger } =
+    const { service, publish, waitForConfirms, tracingRunInSpan, logger, metrics } =
       createService();
 
     await service.publish(createPayload());
@@ -115,8 +131,12 @@ describe('DocumentIngestionPublisherService', () => {
         messageId: 'evt-1',
         correlationId: 'corr-1',
         headers: expect.objectContaining({
+          'x-message-id': 'evt-1',
           'x-event-id': 'evt-1',
           'x-correlation-id': 'corr-1',
+          'x-tenant-id': 'tenant-acme',
+          'x-event-type': 'document.ingestion.requested',
+          'x-event-source': 'api-business.document-ingestion.publisher',
           'x-retry-count': 0,
           'x-source-id': 7,
         }),
@@ -124,10 +144,34 @@ describe('DocumentIngestionPublisherService', () => {
     );
 
     const publishedBuffer = publish.mock.calls[0][2] as Buffer;
-    expect(JSON.parse(publishedBuffer.toString('utf-8'))).toEqual(
-      expect.objectContaining(createPayload()),
+    const publishedMessage = JSON.parse(publishedBuffer.toString('utf-8'));
+    expect(isMessagingEnvelope(publishedMessage)).toBe(true);
+    expect(publishedMessage).toEqual(
+      expect.objectContaining({
+        messageId: 'evt-1',
+        correlationId: 'corr-1',
+        causationId: 'evt-1',
+        tenantId: 'tenant-acme',
+        eventType: 'document.ingestion.requested',
+        source: 'api-business.document-ingestion.publisher',
+        payload: expect.objectContaining(createPayload()),
+        metadata: expect.objectContaining({
+          sourceId: 7,
+        }),
+      }),
     );
     expect(waitForConfirms).toHaveBeenCalledTimes(1);
+    expect(metrics.incrementCounter).toHaveBeenCalledWith(
+      'rabbitmq_messages_published_total',
+      expect.objectContaining({
+        exchange: 'documents.ingestion',
+        routing_key: 'document.ingestion.requested',
+        event_type: 'document.ingestion.requested',
+        source: 'api-business.document-ingestion.publisher',
+      }),
+      1,
+      expect.any(String),
+    );
   });
 
   it('propagates broker confirmation failures', async () => {

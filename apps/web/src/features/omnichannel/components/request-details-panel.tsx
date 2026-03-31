@@ -37,7 +37,7 @@ function timelineFromDetails(details: OmnichannelRequestDetails) {
         : ("warning" as const),
     },
     {
-      label: "RAG Query",
+      label: "Knowledge Query",
       value: execution?.usedRag
         ? execution.ragQuery || "Context retrieved"
         : "Direct response",
@@ -250,7 +250,7 @@ export function RequestDetailsPanel({
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
 
-                <span className="font-medium text-slate-950">RAG:</span>
+                <span className="font-medium text-slate-950">Knowledge:</span>
 
                 {details.execution.usedRag ? "Enabled" : "Direct"}
 
@@ -287,7 +287,9 @@ export function RequestDetailsPanel({
               {details.execution.ragQuery ? (
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
 
-                  <span className="font-medium text-slate-950">RAG query:</span>
+                  <span className="font-medium text-slate-950">
+                    Knowledge query:
+                  </span>
                                     {details.execution.ragQuery}
 
                 </div>

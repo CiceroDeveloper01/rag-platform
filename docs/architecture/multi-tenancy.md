@@ -39,7 +39,7 @@ Inbound channel event
   -> tenant resolved in orchestrator
   -> tenant propagated in message metadata
   -> memory store/query scoped by tenant + channel + conversation
-  -> RAG retrieval scoped by tenant
+  -> knowledge retrieval scoped by tenant
   -> internal API requests include tenantId
   -> PostgreSQL persists/query by tenant_id
 ```

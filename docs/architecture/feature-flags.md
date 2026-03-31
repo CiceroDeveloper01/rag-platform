@@ -47,7 +47,7 @@ When disabled:
 
 - the pipeline uses text fallback instead of full parsing
 
-### RAG Retrieval
+### Knowledge Retrieval
 
 When disabled:
 

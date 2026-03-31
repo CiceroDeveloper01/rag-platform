@@ -2,6 +2,7 @@ import { registerAs } from "@nestjs/config";
 import { buildRabbitMqUrl } from "@rag-platform/config";
 import { ACTIVE_MESSAGING_TOPOLOGY } from "@rag-platform/contracts";
 
+// RabbitMQ stays focused on durable async publishing, not synchronous banking reads or chat flows.
 export const rabbitMqConfig = registerAs("rabbitmq", () => {
   const activeIngestionTopology =
     ACTIVE_MESSAGING_TOPOLOGY.ingestion.documentRequested;

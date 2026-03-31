@@ -1,8 +1,8 @@
 # System Context
 
-RAG Platform is the central AI orchestration platform in this ecosystem.
+Intelligent Automation Platform is the central automation and orchestration platform in this ecosystem.
 
-Its role is to receive requests from multiple channels, normalize them into a channel-agnostic internal contract, orchestrate execution through agent and optional RAG flows, persist operational data, and expose dashboards and observability signals for operators and developers.
+Its role is to receive requests from multiple channels, normalize them into a channel-agnostic internal contract, orchestrate execution through agent-based flows and optional knowledge retrieval, persist operational data, and expose dashboards and observability signals for operators and developers.
 
 ## System Context Diagram
 
@@ -19,7 +19,7 @@ flowchart LR
     PostgreSQL[(PostgreSQL + pgvector)]
     Observability[Grafana / Prometheus /\nLoki / Tempo]
 
-    Platform[RAG Platform]
+    Platform[Intelligent Automation Platform]
 
     User --> Telegram
     User --> Email
@@ -47,7 +47,7 @@ A person interacting with the platform through supported channels such as Telegr
 
 ### Operator / Admin
 
-A platform operator who uses the web dashboard and observability tooling to inspect requests, connector status, latency, RAG usage, and operational health.
+A platform operator who uses the web dashboard and observability tooling to inspect requests, connector status, latency, knowledge retrieval usage, and operational health.
 
 ### Developer
 
@@ -69,7 +69,7 @@ Additional connectors planned in the architecture, including Slack, Microsoft Te
 
 ### OpenAI
 
-The external AI provider used for embeddings and LLM completions in the current RAG implementation.
+The external AI provider used for embeddings and LLM completions in the current knowledge retrieval and automation implementation.
 
 ### PostgreSQL + pgvector
 
@@ -81,13 +81,13 @@ The observability toolchain used to inspect metrics, logs, and traces emitted by
 
 ## System of Interest
 
-### RAG Platform
+### Intelligent Automation Platform
 
 The main platform that combines:
 
 - omnichannel message processing
 - channel normalization and orchestration
-- optional RAG invocation
+- optional knowledge retrieval invocation
 - persistence and analytics
 - dashboard-facing query endpoints
 - observability-first runtime behavior

@@ -10,7 +10,7 @@ The backend documents the main operational modules with consistent OpenAPI annot
 
 - `Omnichannel`
 - `Chat`
-- `RAG`
+- `Knowledge Retrieval`
 - `Documents`
 - `Conversations`
 - `Auth`
@@ -40,7 +40,7 @@ DTOs should use:
 The current Swagger setup covers:
 
 - omnichannel webhook and dashboard endpoints
-- RAG chat and search endpoints
+- knowledge retrieval chat and search endpoints
 - document ingestion and source management
 - authentication and conversation endpoints
 - health endpoints under `/health` and `/api/v1/health`

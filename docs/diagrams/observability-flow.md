@@ -1,6 +1,6 @@
 # Observability Flow
 
-This diagram shows how telemetry flows through the **RAG Platform observability stack**.
+This diagram shows how telemetry flows through the **Intelligent Automation Platform observability stack**.
 
 The platform follows an **observability-first architecture**, capturing:
 
@@ -21,8 +21,8 @@ flowchart TD
     APIBUS[NestJS api-business]
     ORCH[NestJS orchestrator]
 
-    RAG[RAG Pipeline]
-    AGENT[Agent Executor]
+    Knowledge[Knowledge Retrieval Capability]
+    AGENT[Decision Runtime / Agent Executor]
 
     DB[(PostgreSQL + pgvector)]
 
@@ -39,27 +39,27 @@ flowchart TD
     WEB --> APIWEB
     APIWEB --> APIBUS
 
-    APIBUS --> RAG
-    RAG --> AGENT
+    APIBUS --> Knowledge
+    Knowledge --> AGENT
     AGENT --> DB
     ORCH --> DB
 
     APIWEB -. metrics .-> OTEL
     APIBUS -. metrics .-> OTEL
     ORCH -. metrics .-> OTEL
-    RAG -. metrics .-> OTEL
+    Knowledge -. metrics .-> OTEL
     AGENT -. metrics .-> OTEL
 
     APIWEB -. logs .-> OTEL
     APIBUS -. logs .-> OTEL
     ORCH -. logs .-> OTEL
-    RAG -. logs .-> OTEL
+    Knowledge -. logs .-> OTEL
     AGENT -. logs .-> OTEL
 
     APIWEB -. traces .-> OTEL
     APIBUS -. traces .-> OTEL
     ORCH -. traces .-> OTEL
-    RAG -. traces .-> OTEL
+    Knowledge -. traces .-> OTEL
     AGENT -. traces .-> OTEL
 
     OTEL --> COLLECTOR
@@ -87,7 +87,7 @@ Examples:
 
 - request count
 - request latency
-- RAG execution duration
+- knowledge retrieval execution duration
 - vector search time
 - LLM response latency
 
@@ -102,7 +102,7 @@ Logs capture structured runtime events.
 Examples include:
 
 - inbound message logs
-- RAG retrieval logs
+- knowledge retrieval logs
 - agent execution logs
 - dispatch failures
 
@@ -122,7 +122,7 @@ Example trace flow:
 1. request received
 2. normalization
 3. orchestration
-4. optional RAG retrieval
+4. optional knowledge retrieval
 5. agent execution
 6. response dispatch
 
@@ -145,7 +145,7 @@ Typical dashboards include:
 - error rate
 - latency percentiles
 
-### RAG Performance
+### Knowledge Retrieval Performance
 
 - embedding duration
 - vector search latency
@@ -173,4 +173,4 @@ This architecture allows engineers to:
 - analyze AI pipeline performance
 - monitor channel activity
 - debug distributed workflows
-- understand RAG execution behavior
+- understand knowledge retrieval behavior

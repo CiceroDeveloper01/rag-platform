@@ -4,7 +4,9 @@ import {
   MetricsService,
   TracingModule,
 } from "@rag-platform/observability";
+import { InternalApiModule } from "../internal-api/internal-api.module";
 import { RagModule } from "../rag/rag.module";
+import { ApiBusinessBankingClient } from "../integrations/api-business/api-business-banking.client";
 import { ChunkDocumentToolService } from "./document-ingestion/chunk-document.tool";
 import { DocumentIngestionPipelineService } from "./document-ingestion/document-ingestion.pipeline";
 import { DownloadFileToolService } from "./document-ingestion/download-file.tool";
@@ -15,19 +17,24 @@ import { StoreDocumentToolService } from "./document-ingestion/store-document.to
 import { BlockCardToolService } from "./banking/block-card.tool";
 import { CreateNegotiationProposalToolService } from "./banking/create-negotiation-proposal.tool";
 import { GetAccountsToolService } from "./banking/get-accounts.tool";
+import { GetCardInfoToolService } from "./banking/get-card-info.tool";
 import { GetCardsToolService } from "./banking/get-cards.tool";
 import { GetCustomerProfileToolService } from "./banking/get-customer-profile.tool";
+import { GetCustomerSummaryToolService } from "./banking/get-customer-summary.tool";
 import { GetDebtStatusToolService } from "./banking/get-debt-status.tool";
+import { GetCreditLimitToolService } from "./banking/get-credit-limit.tool";
 import { GetInvestmentProductsToolService } from "./banking/get-investment-products.tool";
 import { GetInvoiceToolService } from "./banking/get-invoice.tool";
+import { SimulateCreditToolService } from "./banking/simulate-credit.tool";
 import { SimulateInvestmentToolService } from "./banking/simulate-investment.tool";
 import { SimulateLoanToolService } from "./banking/simulate-loan.tool";
 import { RetrieveDocumentsToolService } from "./retrieval/retrieve-documents.tool";
 
 @Module({
-  imports: [LoggerModule, TracingModule, RagModule],
+  imports: [LoggerModule, TracingModule, RagModule, InternalApiModule],
   providers: [
     MetricsService,
+    ApiBusinessBankingClient,
     DownloadFileToolService,
     ParseDocumentToolService,
     ChunkDocumentToolService,
@@ -37,7 +44,9 @@ import { RetrieveDocumentsToolService } from "./retrieval/retrieve-documents.too
     RetrieveDocumentsToolService,
     DocumentIngestionPipelineService,
     GetCustomerProfileToolService,
+    GetCustomerSummaryToolService,
     GetAccountsToolService,
+    GetCardInfoToolService,
     GetCardsToolService,
     BlockCardToolService,
     GetInvoiceToolService,
@@ -46,6 +55,8 @@ import { RetrieveDocumentsToolService } from "./retrieval/retrieve-documents.too
     SimulateInvestmentToolService,
     GetDebtStatusToolService,
     CreateNegotiationProposalToolService,
+    SimulateCreditToolService,
+    GetCreditLimitToolService,
   ],
   exports: [
     DownloadFileToolService,
@@ -57,7 +68,9 @@ import { RetrieveDocumentsToolService } from "./retrieval/retrieve-documents.too
     RetrieveDocumentsToolService,
     DocumentIngestionPipelineService,
     GetCustomerProfileToolService,
+    GetCustomerSummaryToolService,
     GetAccountsToolService,
+    GetCardInfoToolService,
     GetCardsToolService,
     BlockCardToolService,
     GetInvoiceToolService,
@@ -66,6 +79,8 @@ import { RetrieveDocumentsToolService } from "./retrieval/retrieve-documents.too
     SimulateInvestmentToolService,
     GetDebtStatusToolService,
     CreateNegotiationProposalToolService,
+    SimulateCreditToolService,
+    GetCreditLimitToolService,
   ],
 })
 export class ToolsModule {}

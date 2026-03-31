@@ -14,7 +14,7 @@ Highest-confidence areas today:
 - Telegram-centric runtime behavior
 - agent routing
 - document ingestion
-- RAG retrieval
+- knowledge retrieval
 - feature toggle ON/OFF behavior
 
 ```mermaid

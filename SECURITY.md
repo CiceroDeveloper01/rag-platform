@@ -13,7 +13,7 @@ The following versions of the project are currently supported with security upda
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in **RAG-PLATAFORM**, please report it responsibly.
+If you discover a security vulnerability in **Intelligent Automation Platform**, please report it responsibly.
 
 Do **NOT** open a public issue describing the vulnerability.
 

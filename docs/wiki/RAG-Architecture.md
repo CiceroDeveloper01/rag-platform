@@ -1,4 +1,4 @@
-# RAG Architecture
+# Knowledge Retrieval Capability
 
 [Home](Home) | [Document Processing](Document-Processing) | [Database Model](Database-Model)
 
@@ -13,7 +13,7 @@ The repository currently supports:
 ```mermaid
 flowchart LR
     UserQuestion[User question] --> ConversationAgent[conversation-agent]
-    ConversationAgent --> Retrieval[Retrieval service]
+    ConversationAgent --> Retrieval[Knowledge retrieval service]
     Retrieval --> APISearch[API search path]
     Retrieval --> LocalFallback[Local fallback repository]
     APISearch --> Context[retrievedDocuments]

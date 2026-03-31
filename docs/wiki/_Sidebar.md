@@ -7,7 +7,7 @@
 - [Agent Architecture](Agent-Architecture)
 - [Queue Topology](Queue-Topology)
 - [Document Processing](Document-Processing)
-- [RAG Architecture](RAG-Architecture)
+- [Knowledge Retrieval Capability](RAG-Architecture)
 - [Feature Toggles](Feature-Toggles)
 - [Observability](Observability)
 - [Testing Strategy](Testing-Strategy)

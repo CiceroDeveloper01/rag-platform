@@ -10,7 +10,7 @@ It is intended to highlight:
 
 - inbound message arrival
 - execution start
-- RAG retrieval progress
+- knowledge retrieval progress
 - agent execution progress
 - response dispatch
 - execution failures
@@ -55,7 +55,7 @@ Events sent to the frontend include:
 {
   "executionId": 42,
   "type": "rag_retrieval_completed",
-  "message": "RAG retrieval completed (4 documents)",
+  "message": "Knowledge retrieval completed (4 documents)",
   "color": "purple",
   "icon": "database",
   "severity": "success",
@@ -142,7 +142,7 @@ Color mapping currently used:
 
 - green: `message_received`
 - blue: `execution_started`
-- purple: RAG retrieval events
+- purple: knowledge retrieval events
 - yellow: agent execution events
 - cyan: `response_sent`
 - red: `error`
@@ -151,8 +151,8 @@ Icon mapping currently used:
 
 - `message-circle`: inbound message received
 - `play`: execution started
-- `search`: RAG retrieval started
-- `database`: RAG retrieval completed
+- `search`: knowledge retrieval started
+- `database`: knowledge retrieval completed
 - `bot`: agent execution started
 - `check-circle`: agent execution completed
 - `send`: response sent

@@ -1,18 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
-  --font-heading:
-    "Avenir Next Condensed", "Arial Narrow", "Avenir Next", sans-serif;
+  --font-sans: "Manrope", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-heading: "Fraunces", "Georgia", serif;
   --font-mono: "IBM Plex Mono", "SFMono-Regular", "Menlo", monospace;
-  --surface: #f6f9fc;
+  --surface: #eef4f8;
   --surface-elevated: rgba(255, 255, 255, 0.92);
-  --line: rgba(148, 163, 184, 0.24);
-  --text: #0f172a;
-  --muted: #475569;
-  --accent: #0369a1;
-  --accent-soft: rgba(3, 105, 161, 0.12);
-  --shadow-xl: 0 24px 60px rgba(15, 23, 42, 0.08);
+  --line: rgba(71, 85, 105, 0.22);
+  --text: #082032;
+  --muted: #516170;
+  --accent: #0f766e;
+  --accent-soft: rgba(15, 118, 110, 0.12);
+  --shadow-xl: 0 24px 60px rgba(8, 32, 50, 0.1);
 }
 
 * {
@@ -29,20 +28,20 @@ body {
   background:
     radial-gradient(
       circle at top left,
-      rgba(14, 165, 233, 0.16),
+      rgba(15, 118, 110, 0.18),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 88% 10%,
+      rgba(8, 145, 178, 0.16),
       transparent 26%
     ),
     radial-gradient(
-      circle at 85% 12%,
-      rgba(59, 130, 246, 0.14),
-      transparent 22%
-    ),
-    radial-gradient(
       circle at 50% 100%,
-      rgba(34, 197, 94, 0.08),
-      transparent 25%
+      rgba(180, 83, 9, 0.08),
+      transparent 24%
     ),
-    linear-gradient(180deg, #f9fbff 0%, #f8fafc 42%, #edf4ff 100%);
+    linear-gradient(180deg, #f7fafb 0%, #eef3f6 42%, #e7eef4 100%);
   color: var(--text);
   font-family: var(--font-sans), sans-serif;
   text-rendering: optimizeLegibility;
@@ -65,9 +64,9 @@ textarea {
 
 .app-grid {
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-  background-size: 26px 26px;
+    linear-gradient(rgba(71, 85, 105, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(71, 85, 105, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 ::-webkit-scrollbar {

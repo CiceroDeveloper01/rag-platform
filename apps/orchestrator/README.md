@@ -1,6 +1,6 @@
 # Orchestrator
 
-`apps/orchestrator` is the asynchronous runtime of the platform.
+`apps/orchestrator` is the asynchronous runtime and conversational coordinator of the platform.
 
 ## Responsibilities
 
@@ -8,38 +8,36 @@ This app owns:
 
 - channel listeners and adapters
 - BullMQ processors
-- agent graph and specialized agents
-- runtime tools
-- outbound routing
+- supervisor and specialized agent flows
+- banking account manager orchestration
+- decision layer
+- specialists
+- tools
+- guardrails
+- response composition
+- handoff routing
 - RabbitMQ-backed document ingestion consumers and workers
 
-## Runtime Scope
+## Banking Role
 
-The orchestrator is responsible for:
+The orchestrator is the current home of the AI Account Manager scenario.
 
-- reacting to inbound channel events
-- planning work through agents
-- replying through outbound channels
-- coordinating heavy asynchronous document ingestion
+In the banking branch it:
 
-It is not the portal API and it is not the primary business persistence boundary.
+- receives user messages
+- classifies intent
+- routes to specialists such as cards and investments
+- uses knowledge retrieval for knowledge questions
+- uses tools for deterministic business queries and actions
+- protects sensitive actions with guardrails
+- reuses the real handoff pipeline when needed
 
-## Queues
+## Architectural Boundaries
 
-### BullMQ
-
-- `inbound-messages`
-- `flow-execution`
-
-### RabbitMQ
-
-- `document.ingestion.requested`
-- `document.ingestion.requested.retry`
-- `document.ingestion.requested.dlq`
-
-The RabbitMQ path is intentionally limited to document ingestion. It uses
-bounded retries, explicit dead-letter handling, and persisted status as the
-operator-facing source of truth.
+- it is not the source of truth for business persistence
+- it should not own business repositories that belong in `api-business`
+- it may call `api-business` through internal tools and integration clients
+- it should keep decision logic in the orchestration and specialist layers, not inside tools
 
 ## Typical Local Commands
 
@@ -49,13 +47,3 @@ npm --prefix apps/orchestrator run test -- --runInBand
 npm --prefix apps/orchestrator run build
 npm --prefix apps/orchestrator run start:dev
 ```
-
-## CI and Build Notes
-
-To keep workspace-based CI runners stable, the orchestrator includes:
-
-- local Jest shims for `bullmq` and `@langchain/langgraph`
-- local TypeScript module declarations for those same runtime libraries
-
-These files exist only to stabilize test/build resolution inside the monorepo.
-They do not replace the real runtime dependencies used by the application.

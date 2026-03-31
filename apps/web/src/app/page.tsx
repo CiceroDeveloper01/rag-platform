@@ -1,32 +1,43 @@
 import Link from "next/link";
 import { PageHeader } from "@/src/components/ui/page-header";
 import { SectionCard } from "@/src/components/ui/section-card";
-import { StatusPill } from "@/src/components/ui/status-pill";
 
 const quickLinks = [
   {
-    href: "/dashboard",
-    title: "Operations Dashboard",
+    href: "/cards",
+    title: "Cartoes",
     description:
-      "Tenha uma visao consolidada de status da API, documentos recentes e links operacionais do ambiente.",
+      "Acesse status, limite, fatura e operacoes sensiveis de cartao em um modulo com cara de internet banking.",
   },
   {
-    href: "/chat",
-    title: "Conversational RAG",
+    href: "/credit",
+    title: "Credito",
     description:
-      "Pergunte em linguagem natural e consulte o contexto recuperado pelo backend com embeddings e pgvector.",
+      "Consulte limite pre-aprovado, contratos e rode simulacoes de proposta em uma jornada mais financeira.",
   },
   {
-    href: "/documents",
-    title: "Document Ingestion",
+    href: "/investments",
+    title: "Investimentos",
     description:
-      "Envie arquivos PDF e TXT para extracao, chunking, vetorizacao e persistencia automatica.",
+      "Veja produtos, carteira e simulacoes com o assistente inteligente contextualizado.",
+  },
+  {
+    href: "/conversations",
+    title: "Conversations",
+    description:
+      "Acompanhe sessoes reais de Web, WhatsApp e Telegram com detalhes operacionais e estado do fluxo.",
+  },
+  {
+    href: "/conversation-simulator",
+    title: "Simulator",
+    description:
+      "Teste interacoes por canal e contexto em um ambiente controlado para validacao e portfólio.",
   },
   {
     href: "/observability",
-    title: "Operational Visibility",
+    title: "Monitorias",
     description:
-      "Confira health check, links do Prometheus e Grafana e acompanhe a prontidao da plataforma.",
+      "Acompanhe health, latencia, throughput, consumo de IA e sinais de operacao da plataforma.",
   },
 ];
 
@@ -35,30 +46,29 @@ export default function HomePage() {
     <div className="space-y-10">
 
       <PageHeader
-        eyebrow="RAG Platform"
-        title="Uma interface web para operar um backend RAG de ponta a ponta."
-        description="Navegue entre dashboard, ingestao de documentos, chat com recuperacao vetorial e observabilidade em uma experiencia mais proxima de produto real."
+        eyebrow="Intelligent automation platform"
+        title="Um portal bancario digital com assistente inteligente e operacao observavel."
+        description="A home agora apresenta o produto como banco digital moderno: modulos de negocio, assistente embutido e monitorias que demonstram maturidade tecnica."
       />
 
       <section className="grid gap-5 xl:grid-cols-[1.35fr_0.95fr]">
 
-        <SectionCard className="overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(60,94,255,0.18),_transparent_38%),linear-gradient(135deg,_rgba(9,16,32,0.98),_rgba(15,27,52,0.92))] text-slate-100">
+        <SectionCard className="overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.16),_transparent_36%),linear-gradient(135deg,_rgba(5,21,31,0.98),_rgba(8,47,73,0.96))] text-slate-100">
 
           <div className="space-y-6">
-                        <StatusPill tone="info">Ready for Retrieval</StatusPill>
 
             <div className="space-y-3">
 
               <h2 className="max-w-2xl font-[family:var(--font-heading)] text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                                Controle o ciclo completo do seu sistema RAG no navegador.
+                                Banking, assistant e monitorias na mesma experiencia.
 
               </h2>
 
               <p className="max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                                A interface foi estruturada por features para crescer com o
-                                monorepo. Cada pagina consome a API via services dedicados, com
-                                estados de loading, erro e sucesso preparados para um produto
-                                real.
+                                A navegacao deixa de priorizar chat e passa a organizar o
+                                frontend como produto financeiro. Cartoes, credito,
+                                investimentos, cliente e monitorias viram modulos principais,
+                                enquanto o assistente entra como apoio contextual.
               </p>
 
             </div>
@@ -68,11 +78,11 @@ export default function HomePage() {
               <div className="rounded-2xl border border-white/10 bg-white/6 p-4 backdrop-blur">
 
                 <div className="text-xs uppercase tracking-[0.24em] text-slate-400">
-                                    Retrieval
+                                    Banking
                 </div>
 
                 <div className="mt-2 font-medium text-white">
-                                    pgvector + search
+                                    cartoes, credito e investimentos
                 </div>
 
               </div>
@@ -80,11 +90,11 @@ export default function HomePage() {
               <div className="rounded-2xl border border-white/10 bg-white/6 p-4 backdrop-blur">
 
                 <div className="text-xs uppercase tracking-[0.24em] text-slate-400">
-                                    Ingestion
+                                    Assistant
                 </div>
 
                 <div className="mt-2 font-medium text-white">
-                                    upload, parsing e chunking
+                                    contexto por tela e suporte orientado ao produto
                 </div>
 
               </div>
@@ -92,11 +102,11 @@ export default function HomePage() {
               <div className="rounded-2xl border border-white/10 bg-white/6 p-4 backdrop-blur">
 
                 <div className="text-xs uppercase tracking-[0.24em] text-slate-400">
-                                    Dashboard
+                                    Monitorias
                 </div>
 
                 <div className="mt-2 font-medium text-white">
-                                    status, links e cards executivos
+                                    health, latencia e throughput operacional
 
                 </div>
 
@@ -113,11 +123,11 @@ export default function HomePage() {
           <div>
 
             <p className="text-xs font-medium uppercase tracking-[0.24em] text-slate-500">
-                            Platform Highlights
+                            Platform highlights
             </p>
 
             <h2 className="mt-3 font-[family:var(--font-heading)] text-2xl font-semibold tracking-tight text-slate-950">
-                            O que ja esta conectado no backend
+                            O que ja sustenta a experiencia bancaria
             </h2>
 
           </div>
@@ -125,23 +135,25 @@ export default function HomePage() {
           <ul className="space-y-3 text-sm leading-7 text-slate-600">
 
             <li className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                            Endpoints `/documents`, `/search`, `/chat`, `/health` e
-                            `/metrics`.
+                            Banking em `api-business`, orchestrator com specialists,
+                            tools, guardrails, handoff e monitorias.
             </li>
 
             <li className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                            Embeddings reais, busca vetorial no PostgreSQL + pgvector e
-                            persistencia de queries.
+                            Integracoes reais para perfil, cartoes, credito e
+                            investimentos, com fallback coerente quando a boundary web
+                            ainda nao expoe tudo.
             </li>
 
             <li className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                            Ingestao com upload, parser de PDF/TXT, chunking automatico e
-                            observabilidade.
+                            Observabilidade com health, throughput, latencia, custo de IA
+                            e diferenciacao entre fluxo deterministico e assistido por
+                            conhecimento.
             </li>
 
             <li className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                            Frontend por features com streaming pronto para SSE, dashboard e
-                            fallback elegante para endpoints futuros.
+                            Frontend modular por dominio, reutilizando shell, graficos e
+                            services existentes para parecer produto e nao laboratorio.
 
             </li>
 

@@ -1,6 +1,6 @@
 # AI Usage Policy
 
-This document describes the AI usage policy layer that protects the LLM execution boundary in **RAG Platform**.
+This document describes the AI usage policy layer that protects the LLM execution boundary in **Intelligent Automation Platform**.
 
 ## Purpose
 
@@ -21,7 +21,7 @@ Current runtime sequence:
 
 ```text
 Orchestrator
-  -> optional RAG retrieval
+  -> optional knowledge retrieval
   -> AI usage policy check
   -> Agent Executor
 ```

@@ -2,6 +2,7 @@ export interface NavigationItem {
   href: string;
   label: string;
   description: string;
+  group: "banking" | "operations" | "runtime";
 }
 
 export function isNavigationItemActive(pathname: string, item: NavigationItem) {
@@ -18,58 +19,81 @@ export function isNavigationItemActive(pathname: string, item: NavigationItem) {
 
 export const navigationItems: NavigationItem[] = [
   {
-    href: "/",
-    label: "Home",
-    description: "Resumo da plataforma",
-  },
-  {
-    href: "/login",
-    label: "Login",
-    description: "Acesso da demo",
-  },
-  {
     href: "/dashboard",
     label: "Dashboard",
-    description: "Visao geral do ambiente",
+    description: "Resumo financeiro e status da plataforma",
+    group: "banking",
   },
   {
-    href: "/dashboard/cost-monitor",
-    label: "Cost Monitor",
-    description: "Consumo de IA por agente e tenant",
+    href: "/cards",
+    label: "Cartoes",
+    description: "Status, limite, fatura e bloqueio",
+    group: "banking",
+  },
+  {
+    href: "/credit",
+    label: "Credito",
+    description: "Limite, contratos e simulacao",
+    group: "banking",
+  },
+  {
+    href: "/investments",
+    label: "Investimentos",
+    description: "Produtos, carteira e simulacao",
+    group: "banking",
+  },
+  {
+    href: "/customer",
+    label: "Cliente",
+    description: "Perfil e relacionamento",
+    group: "banking",
+  },
+  {
+    href: "/conversations",
+    label: "Conversations",
+    description: "Sessoes reais de Web, WhatsApp e Telegram",
+    group: "operations",
+  },
+  {
+    href: "/conversation-simulator",
+    label: "Simulator",
+    description: "Simulacao controlada de interacoes com IA",
+    group: "operations",
+  },
+  {
+    href: "/handoffs",
+    label: "Handoffs",
+    description: "Escalacoes humanas e filas de atendimento",
+    group: "operations",
+  },
+  {
+    href: "/observability",
+    label: "Monitoring",
+    description: "Health, latencia e operacao",
+    group: "operations",
+  },
+  {
+    href: "/assistant",
+    label: "Assistant",
+    description: "Assistente contextual do produto",
+    group: "runtime",
   },
   {
     href: "/dashboard/omnichannel",
     label: "Omnichannel",
-    description: "Monitoramento de canais e execucoes",
+    description: "Metrica por canal e atividade da camada de entrada",
+    group: "runtime",
   },
   {
     href: "/command-center",
-    label: "Command Center",
-    description: "Execucao de agentes em tempo real",
-  },
-  {
-    href: "/simulation-lab",
-    label: "Simulation Lab",
-    description: "Teste de cenarios e validacao",
-  },
-  {
-    href: "/chat",
-    label: "Chat",
-    description: "Perguntas e respostas RAG",
+    label: "Runtime",
+    description: "Traces de agentes, tools e reasoning",
+    group: "runtime",
   },
   {
     href: "/documents",
     label: "Documents",
-    description: "Upload e ingestao",
-  },
-  {
-    href: "/documents/status",
-    label: "Documents Status",
-    description: "Fila e processamento assincrono",
-  },
-  {
-    href: "/observability",
-    label: "Observability",
-    description: "Health e links operacionais",
+    description: "Ingestao e base de conhecimento",
+    group: "runtime",
   },
 ];

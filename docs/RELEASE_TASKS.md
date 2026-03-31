@@ -335,7 +335,7 @@ Mark this section only when the release is genuinely ready.
 - [ ] Docker local runtime verified
 - [ ] Channel validation completed
 - [ ] Document ingestion validated
-- [ ] RAG retrieval validated
+- [ ] knowledge retrieval validated
 - [ ] Conversation memory validated
 - [ ] Feature toggles validated
 - [ ] Observability validated

@@ -45,10 +45,10 @@ export function SummaryCards({ overview }: { overview: OmnichannelOverview }) {
       />
 
       <StatusCard
-        title="RAG usage"
+        title="Knowledge-assisted"
         value={formatPercentage(overview.ragUsagePercentage)}
         tone="info"
-        description="Percentual das execucoes que usaram o pipeline RAG."
+        description="Percentual das execucoes que usaram retrieval de conhecimento."
       />
 
     </section>

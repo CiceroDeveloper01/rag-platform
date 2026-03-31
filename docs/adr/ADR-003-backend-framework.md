@@ -6,11 +6,11 @@ Accepted
 
 ## Context
 
-The backend of RAG Platform is responsible for several non-trivial concerns:
+The backend of Intelligent Automation Platform is responsible for several non-trivial concerns:
 
 - modular business domains
 - session-based authentication
-- RAG execution and document ingestion
+- knowledge retrieval execution and document ingestion
 - omnichannel orchestration
 - dashboard and analytics queries
 - observability and operational endpoints

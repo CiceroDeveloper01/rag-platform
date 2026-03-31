@@ -37,5 +37,13 @@ export const internalApiConfig = registerAs("internalApi", () => ({
       process.env.INTERNAL_API_MEMORY_STORE_PATH ?? "/memory/messages",
     memoryContext:
       process.env.INTERNAL_API_MEMORY_CONTEXT_PATH ?? "/memory/context",
+    bankingCards: process.env.INTERNAL_API_BANKING_CARDS_PATH ?? "/banking/cards",
+    bankingInvestments:
+      process.env.INTERNAL_API_BANKING_INVESTMENTS_PATH ??
+      "/banking/investments",
+    bankingCustomer:
+      process.env.INTERNAL_API_BANKING_CUSTOMER_PATH ?? "/banking/customer",
+    bankingCredit:
+      process.env.INTERNAL_API_BANKING_CREDIT_PATH ?? "/banking/credit",
   },
 }));

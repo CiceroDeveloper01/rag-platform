@@ -17,8 +17,14 @@ export function Sidebar() {
     router.refresh();
   }
 
+  const bankingItems = navigationItems.filter((item) => item.group === "banking");
+  const operationsItems = navigationItems.filter(
+    (item) => item.group === "operations",
+  );
+  const runtimeItems = navigationItems.filter((item) => item.group === "runtime");
+
   return (
-    <aside className="hidden w-[340px] shrink-0 border-r border-white/50 bg-white/72 px-7 py-8 backdrop-blur xl:block">
+    <aside className="hidden w-[350px] shrink-0 border-r border-white/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(241,245,249,0.88))] px-7 py-8 backdrop-blur xl:block">
 
       <div className="space-y-8">
 
@@ -26,12 +32,12 @@ export function Sidebar() {
 
           <div className="flex flex-wrap items-center gap-2">
 
-            <div className="inline-flex rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-800">
-                            Monorepo
+            <div className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-teal-800">
+                            Banking
             </div>
 
-            <div className="inline-flex rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-800">
-                            SaaS UI
+            <div className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-800">
+                            Platform Ops
             </div>
 
           </div>
@@ -39,11 +45,12 @@ export function Sidebar() {
           <div>
 
             <h1 className="font-[family:var(--font-heading)] text-2xl font-semibold tracking-tight text-slate-950">
-                            RAG Platform
+                            Meridian Digital
             </h1>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">
-                            Frontend de operacao do backend RAG em
+                            Portal da Intelligent Automation Platform com modulos
+                            bancarios, assistente contextual e monitorias operacionais em
 
               <code className="rounded bg-slate-100 px-1.5 py-0.5 font-[family:var(--font-mono)] text-xs">
                                 apps/web
@@ -55,9 +62,38 @@ export function Sidebar() {
 
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-6">
+          <div className="space-y-2">
+            <div className="px-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+              Banking
+            </div>
+            {bankingItems.map((item) => {
+              const isActive = isNavigationItemActive(pathname, item);
 
-          {navigationItems.map((item) => {
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`block rounded-2xl border px-4 py-3 transition ${
+                    isActive
+                      ? "border-teal-300 bg-teal-50 text-teal-950 shadow-[0_12px_30px_rgba(13,148,136,0.12)]"
+                      : "border-transparent bg-transparent text-slate-700 hover:border-slate-200 hover:bg-white/70"
+                  }`}
+                >
+                  <div className="font-medium">{item.label}</div>
+                  <div className="mt-1 text-sm text-slate-500">
+                    {item.description}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="space-y-2">
+            <div className="px-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+              Operations
+            </div>
+            {operationsItems.map((item) => {
             const isActive = isNavigationItemActive(pathname, item);
 
             return (
@@ -67,42 +103,63 @@ export function Sidebar() {
                 className={`block rounded-2xl border px-4 py-3 transition ${
                   isActive
                     ? "border-sky-300 bg-sky-50 text-sky-950 shadow-[0_12px_30px_rgba(14,165,233,0.12)]"
-                    : "border-transparent bg-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-50"
+                    : "border-transparent bg-transparent text-slate-700 hover:border-slate-200 hover:bg-white/70"
                 }`}
               >
-                                <div className="font-medium">{item.label}</div>
-
+                <div className="font-medium">{item.label}</div>
                 <div className="mt-1 text-sm text-slate-500">
-                                    {item.description}
-
+                  {item.description}
                 </div>
-
               </Link>
             );
           })}
-
-        </nav>
-
-        <div className="rounded-[28px] border border-slate-200 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(240,249,255,0.9))] p-5 shadow-[0_16px_40px_rgba(15,23,42,0.05)]">
-
-          <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        Stack
           </div>
 
-          <div className="mt-4 grid gap-3 text-sm text-slate-600">
+          <div className="space-y-2">
+            <div className="px-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+              Runtime
+            </div>
+            {runtimeItems.map((item) => {
+              const isActive = isNavigationItemActive(pathname, item);
 
-            <div className="rounded-2xl bg-slate-950 px-4 py-3 text-slate-100">
-                            Next.js App Router + TypeScript
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`block rounded-2xl border px-4 py-3 transition ${
+                    isActive
+                      ? "border-violet-300 bg-violet-50 text-violet-950 shadow-[0_12px_30px_rgba(139,92,246,0.12)]"
+                      : "border-transparent bg-transparent text-slate-700 hover:border-slate-200 hover:bg-white/70"
+                  }`}
+                >
+                  <div className="font-medium">{item.label}</div>
+                  <div className="mt-1 text-sm text-slate-500">
+                    {item.description}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        <div className="rounded-[28px] border border-slate-200 bg-[linear-gradient(145deg,rgba(6,78,59,0.96),rgba(8,47,73,0.94))] p-5 text-white shadow-[0_16px_40px_rgba(15,23,42,0.05)]">
+
+          <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
+                        Platform snapshot
+          </div>
+
+          <div className="mt-4 grid gap-3 text-sm text-white/80">
+
+            <div className="rounded-2xl bg-white/10 px-4 py-3">
+                            Banking modules, omnichannel visibility e simulacao controlada
             </div>
 
-            <div className="rounded-2xl bg-slate-100 px-4 py-3">
-                            Tailwind CSS + componentizacao por feature
-
+            <div className="rounded-2xl bg-white/10 px-4 py-3">
+                            Integracao com cards, credito, investimentos, cliente e sessoes reais
             </div>
 
-            <div className="rounded-2xl bg-slate-100 px-4 py-3">
-                            Integracao com NestJS via services de dominio
-
+            <div className="rounded-2xl bg-white/10 px-4 py-3">
+                            Monitorias, handoffs e runtime operacional como vitrine tecnica
             </div>
 
           </div>
@@ -137,8 +194,8 @@ export function Sidebar() {
           </div>
 
           <p className="mt-3 text-sm leading-6 text-slate-600">
-                        Cookies e estado no client protegem as rotas privadas e deixam a
-                        base pronta para integracao real com backend.
+                        Sessao no client, rotas privadas e UI modular deixam a base
+                        pronta para evoluir como portal financeiro conectado aos backends.
           </p>
 
           <div className="mt-4">

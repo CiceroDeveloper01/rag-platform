@@ -1,139 +1,68 @@
 # Roadmap
 
-This document describes the planned evolution of **RAG Platform**.
+This roadmap reflects the repository after the banking scenario was introduced and after the first two implementation phases were completed.
 
-The roadmap reflects the natural growth of the platform as an **Omnichannel AI Gateway with RAG capabilities**.
+## Current Position
 
----
+Delivered so far:
 
-# Version Strategy
+- monorepo application split across `web`, `api-web`, `api-business`, and `orchestrator`
+- generic platform capabilities such as chat, search, documents, memory, and ingestion
+- banking account manager branch in the orchestrator
+- `banking` domain in `api-business`
+- real tool integration from orchestrator to `api-business`
+- multi-turn confirmation, handoff reuse, and corrected tool-only observability
 
-The project follows **Semantic Versioning**.
+## Completed Milestones
 
-Format:
+### Banking Phase 1
 
-MAJOR.MINOR.PATCH
+Completed:
 
-Example:
+- supervisor routing into the banking branch
+- account manager orchestration
+- decision layer
+- initial specialists
+- response composer
+- handoff reuse
+- multi-turn confirmation for sensitive operations
 
-v1.2.3
+### Banking Phase 2
 
-- MAJOR → breaking changes
-- MINOR → new features
-- PATCH → bug fixes
+Completed:
 
----
+- banking tools layer in orchestrator
+- basic guardrail service
+- real integration from tools to `api-business`
+- cards and investments connected in active specialist flows
+- customer and credit tools prepared for broader usage
+- observability aligned for tool-only versus knowledge-assisted flows
 
-# v0.1.0 — Initial Platform Release
+## Next Likely Steps
 
-Status: Released
+### Banking Phase 3
 
-Features included:
+Expected focus:
 
-- NestJS backend
-- Next.js dashboard
-- Omnichannel gateway
-- Telegram connector
-- Email (dev provider)
-- RAG gateway integration
-- PostgreSQL persistence (port 5433)
-- Observability stack
-- Docker environment
-- CI/CD pipelines
-- Operational dashboard
+- replace mock-backed banking services with persistent repositories or external integrations
+- expand specialist usage of customer and credit tools
+- improve explicit product and entity resolution
+- deepen metrics, tracing, and operational dashboards for banking flows
 
----
+### Banking Phase 4
 
-# v0.2.0 — New Channel Connectors
+Expected focus:
 
-Planned improvements:
+- broaden banking domains still pending full implementation
+- deepen handoff workflows and operator tooling
+- refine specialist strategies and fallback behavior
+- continue hardening internal service boundaries
 
-- Slack connector
-- Microsoft Teams connector
-- WhatsApp connector
-- SMS connector
+## Longer-Term Architectural Review
 
-Goals:
+A later discussion may revisit whether the repository should draw a cleaner distinction between:
 
-- expand omnichannel capabilities
-- standardize adapter interface
-- improve dispatcher abstraction
+- platform capabilities such as chat, search, documents, memory, and ingestion
+- banking core business domains
 
----
-
-# v0.3.0 — Advanced RAG Capabilities
-
-Planned improvements:
-
-- vector database support
-- advanced retrieval ranking
-- configurable RAG policies
-- contextual memory
-- document ingestion pipeline
-
-Goals:
-
-- improve contextual accuracy
-- support knowledge bases
-- enhance agent intelligence
-
----
-
-# v0.4.0 — Multi-Agent Orchestration
-
-Planned improvements:
-
-- specialized agents
-- agent routing by intent
-- agent policies
-- multi-agent collaboration
-
-Goals:
-
-- improve AI response quality
-- separate domain-specific knowledge
-
----
-
-# v0.5.0 — Multi-Tenant Support
-
-Planned improvements:
-
-- tenant isolation
-- tenant configuration
-- tenant-level metrics
-- tenant-level connectors
-
-Goals:
-
-- enable SaaS deployments
-- support enterprise clients
-
----
-
-# v0.6.0 — Production Deployment
-
-Planned improvements:
-
-- Kubernetes manifests
-- Helm charts
-- autoscaling
-- production secrets management
-- production observability dashboards
-
-Goals:
-
-- cloud-ready deployments
-- scalable infrastructure
-
----
-
-# Long-Term Vision
-
-RAG Platform aims to become a **full AI communication orchestration platform**, capable of:
-
-- receiving requests from any channel
-- routing to intelligent agents
-- integrating enterprise knowledge bases
-- providing full observability of AI systems
-- enabling AI-powered operational workflows
+That is intentionally not the focus of the current phase. The current priority remains expanding real business capability first.

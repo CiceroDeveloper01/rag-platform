@@ -1,5 +1,6 @@
 import { registerAs } from "@nestjs/config";
 
+// BullMQ remains the internal runtime queue for conversational orchestration.
 export const queueConfig = registerAs("queue", () => ({
   redis: {
     host: process.env.REDIS_HOST ?? "localhost",

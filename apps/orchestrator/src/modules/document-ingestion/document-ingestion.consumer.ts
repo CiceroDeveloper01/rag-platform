@@ -1,6 +1,13 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { DocumentIngestionRequestedEvent } from "@rag-platform/contracts";
+import {
+  assertMessagingBindingTopology,
+  buildMessagingPublishProperties,
+  createMessagingEnvelope,
+  isMessagingEnvelope,
+  type DocumentIngestionRequestedEvent,
+  type MessagingEnvelope,
+} from "@rag-platform/contracts";
 import { AppLoggerService, MetricsService } from "@rag-platform/observability";
 import { DocumentIngestionInternalClient } from "@rag-platform/sdk";
 import { randomUUID } from "node:crypto";
@@ -59,6 +66,12 @@ export class DocumentIngestionConsumerService
       payload = this.parseMessage(message);
 
       this.metricsService.increment("document_ingestion_consumer_received_total");
+      this.metricsService.increment("rabbitmq_messages_consumed_total", {
+        queue:
+          this.configService.get<string>("rabbitmq.queue") ??
+          "document.ingestion.requested",
+        event_type: "document.ingestion.requested",
+      });
       this.logger.log(
         "Consumed document ingestion request",
         DocumentIngestionConsumerService.name,
@@ -82,6 +95,12 @@ export class DocumentIngestionConsumerService
           error: "source_not_found",
         });
         this.metricsService.increment("document_ingestion_consumer_dlq_total");
+        this.metricsService.increment("rabbitmq_messages_dead_lettered_total", {
+          queue:
+            this.configService.get<string>("rabbitmq.deadLetterQueue") ??
+            "document.ingestion.requested.dlq",
+          event_type: "document.ingestion.failed",
+        });
       } else if (result.status === "skipped") {
         this.metricsService.increment("document_ingestion_consumer_skipped_total");
       }
@@ -118,6 +137,12 @@ export class DocumentIngestionConsumerService
               error instanceof Error ? error.message : "invalid_document_event",
           });
           this.metricsService.increment("document_ingestion_consumer_dlq_total");
+          this.metricsService.increment("rabbitmq_messages_dead_lettered_total", {
+            queue:
+              this.configService.get<string>("rabbitmq.deadLetterQueue") ??
+              "document.ingestion.requested.dlq",
+            event_type: "document.ingestion.failed",
+          });
           this.channel.ack(message);
           return;
         }
@@ -141,6 +166,12 @@ export class DocumentIngestionConsumerService
                 : "document_ingestion_failed",
           });
           this.metricsService.increment("document_ingestion_consumer_dlq_total");
+          this.metricsService.increment("rabbitmq_messages_dead_lettered_total", {
+            queue:
+              this.configService.get<string>("rabbitmq.deadLetterQueue") ??
+              "document.ingestion.requested.dlq",
+            event_type: "document.ingestion.failed",
+          });
         } else {
           await this.ingestionInternalClient.updateIngestionStatus({
             sourceId: payload.sourceId,
@@ -155,6 +186,12 @@ export class DocumentIngestionConsumerService
           });
           await this.publishToRetry(payload, nextRetryCount);
           this.metricsService.increment("document_ingestion_consumer_retry_total");
+          this.metricsService.increment("rabbitmq_messages_republished_total", {
+            exchange:
+              this.configService.get<string>("rabbitmq.retryExchange") ??
+              "documents.ingestion.retry",
+            event_type: "document.ingestion.requested.retry",
+          });
         }
 
         this.channel.ack(message);
@@ -183,44 +220,49 @@ export class DocumentIngestionConsumerService
   private parseMessage(message: Message): DocumentIngestionRequestedEvent {
     const parsed = JSON.parse(
       message.content.toString("utf-8"),
+    ) as Partial<DocumentIngestionRequestedEvent> | MessagingEnvelope<unknown>;
+    const event = (
+      isMessagingEnvelope<DocumentIngestionRequestedEvent>(parsed)
+        ? parsed.payload
+        : parsed
     ) as Partial<DocumentIngestionRequestedEvent>;
 
     if (
-      typeof parsed.sourceId !== "number" ||
-      typeof parsed.tenantId !== "string" ||
-      typeof parsed.filename !== "string" ||
-      typeof parsed.mimeType !== "string" ||
-      typeof parsed.storageKey !== "string" ||
-      typeof parsed.storageUrl !== "string" ||
-      typeof parsed.fileContentBase64 !== "string" ||
-      typeof parsed.uploadedAt !== "string"
+      typeof event.sourceId !== "number" ||
+      typeof event.tenantId !== "string" ||
+      typeof event.filename !== "string" ||
+      typeof event.mimeType !== "string" ||
+      typeof event.storageKey !== "string" ||
+      typeof event.storageUrl !== "string" ||
+      typeof event.fileContentBase64 !== "string" ||
+      typeof event.uploadedAt !== "string"
     ) {
       throw new Error("document_ingestion_invalid_payload");
     }
 
     return {
       eventId:
-        parsed.eventId ??
+        event.eventId ??
         message.properties.messageId ??
         `ingestion-${randomUUID()}`,
       correlationId:
-        parsed.correlationId ??
+        event.correlationId ??
         message.properties.correlationId ??
         randomUUID(),
-      sourceId: parsed.sourceId,
-      tenantId: parsed.tenantId,
-      sourceChannel: parsed.sourceChannel,
-      conversationId: parsed.conversationId,
-      filename: parsed.filename,
-      mimeType: parsed.mimeType,
-      storageKey: parsed.storageKey,
-      storageUrl: parsed.storageUrl,
-      fileContentBase64: parsed.fileContentBase64,
-      chunkSize: parsed.chunkSize,
-      chunkOverlap: parsed.chunkOverlap,
-      metadata: parsed.metadata,
-      requestedAt: parsed.requestedAt,
-      uploadedAt: parsed.uploadedAt,
+      sourceId: event.sourceId,
+      tenantId: event.tenantId,
+      sourceChannel: event.sourceChannel,
+      conversationId: event.conversationId,
+      filename: event.filename,
+      mimeType: event.mimeType,
+      storageKey: event.storageKey,
+      storageUrl: event.storageUrl,
+      fileContentBase64: event.fileContentBase64,
+      chunkSize: event.chunkSize,
+      chunkOverlap: event.chunkOverlap,
+      metadata: event.metadata,
+      requestedAt: event.requestedAt,
+      uploadedAt: event.uploadedAt,
     };
   }
 
@@ -242,24 +284,31 @@ export class DocumentIngestionConsumerService
       throw new Error("document_ingestion_retry_channel_unavailable");
     }
 
+    const envelope = createMessagingEnvelope({
+      messageId: payload.eventId,
+      correlationId: payload.correlationId,
+      causationId: payload.eventId,
+      tenantId: payload.tenantId,
+      eventType: "document.ingestion.requested.retry",
+      source: "orchestrator.document-ingestion.consumer",
+      payload,
+      metadata: {
+        retryCount,
+        sourceId: payload.sourceId,
+      },
+    });
+
     this.channel.publish(
       this.configService.getOrThrow<string>("rabbitmq.retryExchange"),
       this.configService.getOrThrow<string>("rabbitmq.retryRoutingKey"),
-      Buffer.from(JSON.stringify(payload)),
-      {
-        persistent: true,
-        contentType: "application/json",
-        contentEncoding: "utf-8",
-        messageId: payload.eventId,
-        correlationId: payload.correlationId,
-        type: "document.ingestion.requested.retry",
+      Buffer.from(JSON.stringify(envelope)),
+      buildMessagingPublishProperties(envelope, {
         headers: {
           "x-event-id": payload.eventId,
-          "x-correlation-id": payload.correlationId,
           "x-retry-count": retryCount,
           "x-source-id": payload.sourceId,
         },
-      },
+      }),
     );
     await this.channel.waitForConfirms();
   }
@@ -285,83 +334,125 @@ export class DocumentIngestionConsumerService
       payload?.correlationId ??
       message.properties.correlationId ??
       randomUUID();
+    const content = this.buildDeadLetterMessageContent(
+      message,
+      payload,
+      eventId,
+      correlationId,
+      retryCount,
+      context,
+    );
 
     this.channel.publish(
       this.configService.getOrThrow<string>("rabbitmq.deadLetterExchange"),
       this.configService.getOrThrow<string>("rabbitmq.deadLetterRoutingKey"),
-      message.content,
-      {
-        persistent: true,
+      Buffer.from(JSON.stringify(content)),
+      buildMessagingPublishProperties(content, {
         contentType: message.properties.contentType || "application/json",
         contentEncoding: message.properties.contentEncoding || "utf-8",
-        messageId: eventId,
-        correlationId,
-        type: "document.ingestion.failed",
         headers: {
           ...(message.properties.headers ?? {}),
           "x-event-id": eventId,
-          "x-correlation-id": correlationId,
           "x-retry-count": retryCount,
           "x-source-id": payload?.sourceId,
           "x-failure-reason": context.reason,
           "x-failure-message": context.error,
         },
-      },
+      }),
     );
     await this.channel.waitForConfirms();
   }
 
   private async assertTopology(channel: ConfirmChannel): Promise<void> {
-    const exchange = this.configService.getOrThrow<string>("rabbitmq.exchange");
-    const routingKey =
-      this.configService.getOrThrow<string>("rabbitmq.routingKey");
-    const queue = this.configService.getOrThrow<string>("rabbitmq.queue");
-    const retryExchange =
-      this.configService.getOrThrow<string>("rabbitmq.retryExchange");
-    const retryQueue =
-      this.configService.getOrThrow<string>("rabbitmq.retryQueue");
-    const retryRoutingKey =
-      this.configService.getOrThrow<string>("rabbitmq.retryRoutingKey");
-    const deadLetterExchange = this.configService.getOrThrow<string>(
-      "rabbitmq.deadLetterExchange",
-    );
-    const deadLetterQueue = this.configService.getOrThrow<string>(
-      "rabbitmq.deadLetterQueue",
-    );
-    const deadLetterRoutingKey = this.configService.getOrThrow<string>(
-      "rabbitmq.deadLetterRoutingKey",
-    );
     const retryDelayMs =
       this.configService.get<number>("rabbitmq.retryDelayMs", 30_000) ?? 30_000;
 
-    await channel.assertExchange(exchange, "direct", { durable: true });
-    await channel.assertExchange(retryExchange, "direct", { durable: true });
-    await channel.assertExchange(deadLetterExchange, "direct", { durable: true });
-
-    await channel.assertQueue(queue, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": deadLetterExchange,
-        "x-dead-letter-routing-key": deadLetterRoutingKey,
+    await assertMessagingBindingTopology(
+      channel,
+      {
+        exchange: this.configService.getOrThrow<string>("rabbitmq.exchange"),
+        queue: this.configService.getOrThrow<string>("rabbitmq.queue"),
+        routingKey: this.configService.getOrThrow<string>("rabbitmq.routingKey"),
+        retryExchange:
+          this.configService.getOrThrow<string>("rabbitmq.retryExchange"),
+        retryQueue: this.configService.getOrThrow<string>("rabbitmq.retryQueue"),
+        retryRoutingKey: this.configService.getOrThrow<string>(
+          "rabbitmq.retryRoutingKey",
+        ),
+        deadLetterExchange: this.configService.getOrThrow<string>(
+          "rabbitmq.deadLetterExchange",
+        ),
+        deadLetterQueue: this.configService.getOrThrow<string>(
+          "rabbitmq.deadLetterQueue",
+        ),
+        deadLetterRoutingKey: this.configService.getOrThrow<string>(
+          "rabbitmq.deadLetterRoutingKey",
+        ),
       },
-    });
-    await channel.bindQueue(queue, exchange, routingKey);
-
-    await channel.assertQueue(retryQueue, {
-      durable: true,
-      arguments: {
-        "x-message-ttl": retryDelayMs,
-        "x-dead-letter-exchange": exchange,
-        "x-dead-letter-routing-key": routingKey,
-      },
-    });
-    await channel.bindQueue(retryQueue, retryExchange, retryRoutingKey);
-
-    await channel.assertQueue(deadLetterQueue, { durable: true });
-    await channel.bindQueue(
-      deadLetterQueue,
-      deadLetterExchange,
-      deadLetterRoutingKey,
+      retryDelayMs,
     );
+  }
+
+  private buildDeadLetterMessageContent(
+    message: Message,
+    payload: DocumentIngestionRequestedEvent | null,
+    eventId: string,
+    correlationId: string,
+    retryCount: number,
+    context: {
+      reason: string;
+      error: string;
+    },
+  ): MessagingEnvelope<unknown> {
+    const parsed = this.tryParseMessageContent(message.content);
+
+    if (isMessagingEnvelope(parsed)) {
+      return createMessagingEnvelope({
+        messageId: eventId,
+        correlationId,
+        causationId:
+          parsed.causationId ??
+          parsed.messageId ??
+          message.properties.messageId ??
+          eventId,
+        tenantId: payload?.tenantId ?? parsed.tenantId ?? null,
+        eventType: "document.ingestion.failed",
+        source: "orchestrator.document-ingestion.consumer",
+        payload: parsed.payload,
+        metadata: {
+          ...(parsed.metadata ?? {}),
+          retryCount,
+          failureReason: context.reason,
+          failureMessage: context.error,
+          sourceId: payload?.sourceId,
+        },
+      });
+    }
+
+    return createMessagingEnvelope({
+      messageId: eventId,
+      correlationId,
+      causationId: message.properties.messageId ?? eventId,
+      tenantId: payload?.tenantId ?? null,
+      eventType: "document.ingestion.failed",
+      source: "orchestrator.document-ingestion.consumer",
+      payload: parsed,
+      metadata: {
+        retryCount,
+        failureReason: context.reason,
+        failureMessage: context.error,
+        sourceId: payload?.sourceId,
+      },
+    });
+  }
+
+  private tryParseMessageContent(content: Buffer): unknown {
+    try {
+      return JSON.parse(content.toString("utf-8")) as unknown;
+    } catch {
+      return {
+        rawContent: content.toString("utf-8"),
+      };
+    }
   }
 }

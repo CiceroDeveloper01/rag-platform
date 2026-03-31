@@ -26,7 +26,7 @@ export function OmnichannelDashboardOverview() {
       <PageHeader
         eyebrow="Omnichannel"
         title="Command center do gateway omnichannel"
-        description="Monitore requests por canal, latencia, uso do RAG, taxa de erro e conectores sem sair do dashboard principal."
+        description="Monitore requests por canal, latencia, uso de conhecimento, taxa de erro e conectores sem sair do dashboard principal."
         actions={
           <div className="flex flex-wrap items-center gap-3">
 
@@ -50,7 +50,7 @@ export function OmnichannelDashboardOverview() {
       {isLoading ? (
         <LoadingPanel
           title="Carregando omnichannel"
-          description="Consolidando overview, metricas por canal, latencia, uso do RAG e requests recentes."
+          description="Consolidando overview, metricas por canal, latencia, uso de conhecimento e requests recentes."
         />
       ) : error || !data ? (
         <ErrorState
@@ -125,7 +125,7 @@ export function OmnichannelDashboardOverview() {
                         tone={request.usedRag ? "success" : "neutral"}
                       >
 
-                        {request.usedRag ? "RAG" : "Direct"}
+                        {request.usedRag ? "Knowledge" : "Direct"}
 
                       </StatusPill>
 
