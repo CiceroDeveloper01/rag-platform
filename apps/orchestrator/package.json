@@ -10,7 +10,7 @@
     "start:dev": "nest start --watch",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "test": "jest",
-    "test:rabbitmq:integration": "jest --runInBand --runTestsByPath src/modules/document-ingestion/document-ingestion.rabbitmq.integration.spec.ts",
+    "test:rabbitmq:integration": "RUN_RABBITMQ_INTEGRATION_TESTS=true jest --runInBand --runTestsByPath src/modules/document-ingestion/document-ingestion.rabbitmq.integration.spec.ts",
     "test:cov": "jest --coverage",
     "test:cov:ci": "jest --coverage --runInBand"
   },

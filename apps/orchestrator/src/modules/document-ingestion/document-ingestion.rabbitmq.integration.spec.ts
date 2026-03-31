@@ -7,6 +7,11 @@ import { DocumentIngestionWorkerService } from './document-ingestion.worker';
 
 jest.setTimeout(30_000);
 
+const describeRabbitMqIntegration =
+  process.env.RUN_RABBITMQ_INTEGRATION_TESTS === 'true'
+    ? describe
+    : describe.skip;
+
 function createTopology(prefix: string) {
   return {
     queue: `${prefix}.requested`,
@@ -149,7 +154,7 @@ async function cleanupTopology(
   await channel.deleteExchange(topology.deadLetterExchange).catch(() => undefined);
 }
 
-describe('Document ingestion RabbitMQ integration', () => {
+describeRabbitMqIntegration('Document ingestion RabbitMQ integration', () => {
   const rabbitMqUrl =
     process.env.RABBITMQ_TEST_URL ?? 'amqp://guest:guest@localhost:5672';
 
