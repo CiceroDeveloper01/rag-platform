@@ -45,16 +45,16 @@ export function LoginForm() {
     <SectionCard className="mx-auto max-w-xl space-y-6">
 
       <div className="space-y-3">
-                <StatusPill tone="info">Demo access</StatusPill>
+        <StatusPill tone="info">Workspace access</StatusPill>
 
         <h2 className="font-[family:var(--font-heading)] text-3xl font-semibold text-slate-950">
                     Entre para acessar a workspace privada
         </h2>
 
         <p className="text-sm leading-7 text-slate-600">
-                    Esta autenticacao usa sessao no frontend com cookie para proteger
-                    rotas e preparar a evolucao para refresh token e integracao real com
-                    backend.
+          Esta autenticacao usa sessao no frontend com cookie para proteger
+          rotas, preservar a navegacao por modulos e preparar a evolucao para
+          identidade corporativa real.
         </p>
 
       </div>
@@ -106,8 +106,8 @@ export function LoginForm() {
       {error ? <ErrorState title="Falha no login" description={error} /> : null}
 
       <div className="rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
-                Credenciais da demo: <strong>demo@ragplatform.dev</strong> /
-                <strong>demo123</strong>
+        Credenciais locais da workspace: <strong>demo@ragplatform.dev</strong> /{" "}
+        <strong>demo123</strong>
 
       </div>
 

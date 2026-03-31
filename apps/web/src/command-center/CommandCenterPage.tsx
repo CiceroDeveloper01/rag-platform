@@ -76,7 +76,7 @@ export function CommandCenterPage() {
       return (
         <LoadingPanel
           title="Conectando ao stream de agentes"
-          description="Abrindo o canal em tempo real para receber traces, reasoning, RAG e resultados de avaliacao."
+          description="Abrindo o canal em tempo real para receber traces, reasoning, consultas de conhecimento e resultados de avaliacao."
         />
       );
     }
@@ -143,17 +143,17 @@ export function CommandCenterPage() {
           <div>
 
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-600">
-                            AI command center
+              Runtime control
             </p>
 
             <h1 className="text-3xl font-semibold text-slate-950">
-                            Agent execution in real time
+              Agent execution in real time
             </h1>
 
             <p className="mt-2 max-w-3xl text-sm text-slate-600">
-                            Acompanhe mensagens recebidas, roteamento, RAG, chamadas de
-                            ferramentas e avaliação final enquanto o orchestrator publica
-                            traces estruturados.
+              Acompanhe mensagens recebidas, roteamento, consultas de
+              conhecimento, chamadas de ferramenta e avaliacao final enquanto o
+              orchestrator publica traces estruturados.
             </p>
 
           </div>

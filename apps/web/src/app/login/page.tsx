@@ -21,8 +21,8 @@ export default function LoginPage() {
 
       <PageHeader
         eyebrow="Login"
-        title="Acesse a area privada da RAG Platform."
-        description="Entre na workspace para usar chat, documentos, dashboard e observabilidade com controle de acesso pronto para evoluir."
+        title="Acesse a area privada da Intelligent Automation Platform."
+        description="Entre na workspace para operar o portal bancario, consultar monitorias e usar o assistente contextual com controle de acesso."
       />
 
       <LoginForm />

@@ -5,10 +5,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "RAG Platform",
-    template: "%s | RAG Platform",
+    default: "Intelligent Automation Platform",
+    template: "%s | Intelligent Automation Platform",
   },
-  description: "Interface web para ingestao, busca e chat com pipeline RAG.",
+  description:
+    "Portal bancario digital com assistente inteligente, modulos de negocio e monitorias operacionais.",
 };
 
 export default function RootLayout({

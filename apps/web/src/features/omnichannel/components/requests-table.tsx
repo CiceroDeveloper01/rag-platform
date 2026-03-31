@@ -173,7 +173,7 @@ export function RequestsTable({
                                 <th className="px-4 py-4">Sender</th>
                                 <th className="px-4 py-4">Preview</th>
                                 <th className="px-4 py-4">Status</th>
-                                <th className="px-4 py-4">RAG</th>
+                                <th className="px-4 py-4">Knowledge</th>
                                 <th className="px-4 py-4">Latencia</th>
                                 <th className="px-4 py-4">Recebida</th>
 

@@ -1,5 +1,5 @@
 import { AssistantPage } from "@/src/features/banking/components/assistant-page";
 
-export default function ChatPage() {
+export default function BankingAssistantRoutePage() {
   return <AssistantPage />;
 }

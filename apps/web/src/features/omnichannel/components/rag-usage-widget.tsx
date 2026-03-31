@@ -8,9 +8,9 @@ const COLORS = ["#0284c7", "#cbd5e1"];
 
 export function RagUsageWidget({ data }: { data: RagUsageMetrics }) {
   const chartData = [
-    { name: "RAG", value: data.ragExecutions },
+    { name: "Knowledge-assisted", value: data.ragExecutions },
     {
-      name: "Direct",
+      name: "Deterministic",
       value: Math.max(data.totalExecutions - data.ragExecutions, 0),
     },
   ];
@@ -21,16 +21,16 @@ export function RagUsageWidget({ data }: { data: RagUsageMetrics }) {
       <div>
 
         <div className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                    RAG adoption
+          Knowledge usage
         </div>
 
         <h2 className="mt-2 font-[family:var(--font-heading)] text-2xl font-semibold text-slate-950">
-                    Uso do RAG
+          Fluxos assistidos por conhecimento
         </h2>
 
         <p className="mt-2 text-sm leading-7 text-slate-600">
-                    {Math.round(data.ragUsagePercentage)}
-          % das execucoes usaram contexto           recuperado.
+          {Math.round(data.ragUsagePercentage)}
+          % das execucoes usaram contexto recuperado.
         </p>
 
       </div>
@@ -72,8 +72,10 @@ export function RagUsageWidget({ data }: { data: RagUsageMetrics }) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <span className="font-medium text-slate-900">Com RAG:</span>
-                    {data.ragExecutions}
+          <span className="font-medium text-slate-900">
+            Assistidas por conhecimento:
+          </span>
+          {data.ragExecutions}
 
         </div>
 

@@ -5,7 +5,7 @@ import type { AgentTraceSocketEvent } from "@/src/services/agent-trace.socket";
 const labels: Record<AgentTraceSocketEvent["step"], string> = {
   agent_trace_started: "Message received",
   agent_routed: "Agent routed",
-  rag_retrieval: "RAG retrieval",
+  rag_retrieval: "Knowledge retrieval",
   tool_called: "Tool called",
   response_generated: "Response generated",
   evaluation_completed: "Evaluation completed",

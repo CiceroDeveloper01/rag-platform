@@ -18,7 +18,7 @@
     "pretest": "npm --prefix ../.. run build:packages",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:rabbitmq:integration": "jest --runInBand --runTestsByPath src/common/messaging/document-ingestion.publisher.integration.spec.ts",
+    "test:rabbitmq:integration": "RUN_RABBITMQ_INTEGRATION_TESTS=true jest --runInBand --runTestsByPath src/common/messaging/document-ingestion.publisher.integration.spec.ts",
     "pretest:cov": "npm --prefix ../.. run build:packages",
     "test:cov": "jest --coverage",
     "test:cov:ci": "jest --coverage --runInBand",
@@ -48,6 +48,7 @@
     "@opentelemetry/resources": "^2.6.0",
     "@opentelemetry/sdk-node": "^0.213.0",
     "@opentelemetry/semantic-conventions": "^1.40.0",
+    "@rag-platform/config": "file:../../packages/config",
     "@rag-platform/contracts": "file:../../packages/contracts",
     "@rag-platform/types": "file:../../packages/types",
     "@rag-platform/utils": "file:../../packages/utils",
@@ -115,6 +116,7 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "moduleNameMapper": {
+      "^@rag-platform/config$": "<rootDir>/../../../packages/config/src/index.ts",
       "^@rag-platform/contracts$": "<rootDir>/../../../packages/contracts/src/index.ts",
       "^@rag-platform/types$": "<rootDir>/../../../packages/types/src/index.ts",
       "^@rag-platform/utils$": "<rootDir>/../../../packages/utils/src/index.ts"

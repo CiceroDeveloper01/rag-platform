@@ -1,5 +1,5 @@
-import { DashboardPage as DashboardRealtimePage } from "@/src/dashboard/DashboardPage";
+import { BankingDashboardPage } from "@/src/features/banking/components/banking-dashboard-page";
 
 export default function DashboardPage() {
-  return <DashboardRealtimePage />;
+  return <BankingDashboardPage />;
 }
