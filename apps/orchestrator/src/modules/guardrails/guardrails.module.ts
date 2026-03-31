@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { LoggerModule } from "@rag-platform/observability";
 import { ActionValidatorService } from "./action-validator.service";
+import { BankingGuardrailService } from "./banking-guardrail.service";
 import { OutputFilterService } from "./output-filter.service";
 import { PolicyEngineService } from "./policy-engine.service";
 import { PromptInjectionGuard } from "./prompt-injection.guard";
@@ -11,6 +12,7 @@ import { SecurityEventLogger } from "./security-event.logger";
   providers: [
     SecurityEventLogger,
     PromptInjectionGuard,
+    BankingGuardrailService,
     PolicyEngineService,
     ActionValidatorService,
     OutputFilterService,
@@ -18,6 +20,7 @@ import { SecurityEventLogger } from "./security-event.logger";
   exports: [
     SecurityEventLogger,
     PromptInjectionGuard,
+    BankingGuardrailService,
     PolicyEngineService,
     ActionValidatorService,
     OutputFilterService,

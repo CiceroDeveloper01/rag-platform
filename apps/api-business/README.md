@@ -1,10 +1,10 @@
 # API Business
 
-`apps/api-business` is the synchronous business/domain API boundary.
+`apps/api-business` is the synchronous business and domain API boundary.
 
 ## Responsibilities
 
-This app owns business capabilities that already exist in the repository, including:
+This app owns business capabilities that already existed in the repository, including:
 
 - chat
 - documents
@@ -14,28 +14,53 @@ This app owns business capabilities that already exist in the repository, includ
 - memory
 - internal ingestion callbacks used by the orchestrator
 
-## Document Ingestion Role
+It now also owns the new `banking` domain used by the AI Account Manager scenario.
 
-`api-business` is the RabbitMQ producer for asynchronous document ingestion.
+## Logical Domain Split
 
-When a document is accepted for heavy processing, this app:
+The current organization is intentionally split in logical terms:
 
-1. validates and stores metadata
-2. persists initial status such as `PENDING`
-3. publishes `document.ingestion.requested`
-4. returns `202 Accepted`
+- `Banking Core`
+  - `modules/banking/customer`
+  - `modules/banking/cards`
+  - `modules/banking/investments`
+  - `modules/banking/credit`
+- `AI Platform Capabilities`
+  - `chat`
+  - `search`
+  - `documents`
+  - `ingestion`
+  - `memory`
+  - `conversations`
+  - internal synchronous support endpoints used by the orchestrator
 
-It also exposes persisted status queries and internal callbacks for:
+This is not a physical split into new applications yet. It is a preparation step for future architectural decisions.
 
-- status updates
-- completion
-- failure
+## Banking Domain
+
+Current banking subdomains:
+
+- `cards`
+- `investments`
+- `customer`
+- `credit`
+
+These modules expose stable HTTP contracts already consumed by orchestrator tools.
 
 ## Architectural Boundaries
 
-- it is not the portal UI
-- it is not the asynchronous worker runtime
+- it is the business API, not the portal UI
+- it is not the asynchronous orchestration runtime
 - it should not absorb presentation concerns that belong to `api-web`
+- it is the correct place for future repositories, integrations, and persistent banking business logic
+
+## Current State
+
+The banking services are currently mock-backed and in-memory, but their controllers, services, DTOs, and routes are already structured as business modules ready for later persistence or external integration.
+
+## Messaging
+
+RabbitMQ topology is now being documented centrally with domain-oriented naming conventions. The current document ingestion publisher still uses the existing active binding for compatibility, while the broader topology map prepares future banking, handoff, and memory workloads.
 
 ## Typical Local Commands
 

@@ -1,7 +1,10 @@
 import { registerAs } from "@nestjs/config";
 import { buildRabbitMqUrl } from "@rag-platform/config";
+import { ACTIVE_MESSAGING_TOPOLOGY } from "@rag-platform/contracts";
 
 export const rabbitMqConfig = registerAs("rabbitmq", () => {
+  const activeIngestionTopology =
+    ACTIVE_MESSAGING_TOPOLOGY.ingestion.documentRequested;
   const host = process.env.RABBITMQ_HOST ?? "localhost";
   const port = Number.parseInt(process.env.RABBITMQ_PORT ?? "5672", 10);
   const username =
@@ -18,30 +21,31 @@ export const rabbitMqConfig = registerAs("rabbitmq", () => {
   const queue =
     process.env.RABBITMQ_QUEUE_DOCUMENT_INGESTION ??
     process.env.RABBITMQ_DOCUMENT_INGESTION_QUEUE ??
-    "document.ingestion.requested";
+    activeIngestionTopology.queue;
   const exchange =
     process.env.RABBITMQ_DOCUMENT_INGESTION_EXCHANGE ??
-    "documents.ingestion";
+    activeIngestionTopology.exchange;
   const routingKey =
-    process.env.RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY ?? queue;
+    process.env.RABBITMQ_DOCUMENT_INGESTION_ROUTING_KEY ??
+    activeIngestionTopology.routingKey;
   const retryExchange =
     process.env.RABBITMQ_DOCUMENT_INGESTION_RETRY_EXCHANGE ??
-    "documents.ingestion.retry";
+    activeIngestionTopology.retryExchange;
   const retryQueue =
     process.env.RABBITMQ_DOCUMENT_INGESTION_RETRY_QUEUE ??
-    `${queue}.retry`;
+    activeIngestionTopology.retryQueue;
   const retryRoutingKey =
     process.env.RABBITMQ_DOCUMENT_INGESTION_RETRY_ROUTING_KEY ??
-    `${routingKey}.retry`;
+    activeIngestionTopology.retryRoutingKey;
   const deadLetterExchange =
     process.env.RABBITMQ_DOCUMENT_INGESTION_DLX ??
-    "documents.ingestion.dlx";
+    activeIngestionTopology.deadLetterExchange;
   const deadLetterQueue =
     process.env.RABBITMQ_DOCUMENT_INGESTION_DLQ ??
-    `${queue}.dlq`;
+    activeIngestionTopology.deadLetterQueue;
   const deadLetterRoutingKey =
     process.env.RABBITMQ_DOCUMENT_INGESTION_DLQ_ROUTING_KEY ??
-    `${routingKey}.dead`;
+    activeIngestionTopology.deadLetterRoutingKey;
 
   return {
     host,

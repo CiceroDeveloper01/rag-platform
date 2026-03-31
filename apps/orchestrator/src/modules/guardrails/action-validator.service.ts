@@ -7,22 +7,31 @@ export class ActionValidatorService {
   constructor(private readonly securityEventLogger: SecurityEventLogger) {}
 
   assertValid(payload: FlowExecutionPayload): void {
-    const isValid =
-      typeof payload.externalMessageId === "string" &&
-      payload.externalMessageId.length > 0 &&
-      typeof payload.channel === "string" &&
-      payload.channel.length > 0 &&
-      (payload.context === undefined ||
-        (typeof payload.context === "object" && payload.context !== null));
-
-    if (isValid) {
+    if (this.isValid(payload)) {
       return;
     }
 
-    this.securityEventLogger.log("invalid_payload", {
-      payload,
-    });
+    this.securityEventLogger.log("invalid_payload", { payload });
 
     throw new Error("Flow execution payload blocked by validator");
+  }
+
+  private isValid(payload: FlowExecutionPayload): boolean {
+    return (
+      this.isValidString(payload.externalMessageId) &&
+      this.isValidString(payload.channel) &&
+      this.isValidContext(payload.context)
+    );
+  }
+
+  private isValidString(value: unknown): value is string {
+    return typeof value === "string" && value.length > 0;
+  }
+
+  private isValidContext(value: unknown): boolean {
+    return (
+      value === undefined ||
+      (typeof value === "object" && value !== null)
+    );
   }
 }

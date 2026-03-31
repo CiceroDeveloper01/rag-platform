@@ -1,6 +1,9 @@
 import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { DocumentIngestionRequestedEvent } from "@rag-platform/contracts";
+import {
+  ACTIVE_MESSAGING_TOPOLOGY,
+  type DocumentIngestionRequestedEvent,
+} from "@rag-platform/contracts";
 import { connect, type ChannelModel, type ConfirmChannel } from "amqplib";
 import { PinoLogger } from "nestjs-pino";
 import { TracingService } from "../observability/services/tracing.service";
@@ -19,6 +22,8 @@ export class DocumentIngestionPublisherService implements OnModuleDestroy {
   }
 
   async publish(payload: DocumentIngestionRequestedEvent): Promise<void> {
+    const activeIngestionTopology =
+      ACTIVE_MESSAGING_TOPOLOGY.ingestion.documentRequested;
     await this.tracingService.runInSpan(
       "documents.ingestion.publish",
       async () => {
@@ -61,7 +66,7 @@ export class DocumentIngestionPublisherService implements OnModuleDestroy {
           "messaging.system": "rabbitmq",
           "messaging.destination":
             this.configService.get<string>("rabbitmq.exchange") ??
-            "documents.ingestion",
+            activeIngestionTopology.exchange,
           "messaging.destination_kind": "exchange",
         },
       },

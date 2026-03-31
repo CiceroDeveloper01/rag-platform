@@ -52,6 +52,7 @@ describe("AgentGraphService", () => {
         }),
       } as any,
       { plan: jest.fn() } as any,
+      { plan: jest.fn() } as any,
     );
 
     const result = await service.execute(inboundMessage);
@@ -92,6 +93,7 @@ describe("AgentGraphService", () => {
         }),
       } as any,
       documentAgent as any,
+      { plan: jest.fn() } as any,
       { plan: jest.fn() } as any,
       { plan: jest.fn() } as any,
     );
@@ -135,6 +137,7 @@ describe("AgentGraphService", () => {
       { plan: jest.fn() } as any,
       { plan: jest.fn() } as any,
       handoffAgent as any,
+      { plan: jest.fn() } as any,
     );
 
     const result = await service.execute({
@@ -153,6 +156,7 @@ describe("AgentGraphService", () => {
       {
         decide: jest.fn().mockRejectedValue(new Error("decision failed")),
       } as any,
+      { plan: jest.fn() } as any,
       { plan: jest.fn() } as any,
       { plan: jest.fn() } as any,
       { plan: jest.fn() } as any,

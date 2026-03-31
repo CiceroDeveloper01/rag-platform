@@ -18,3 +18,11 @@ export const TELEGRAM_JOBS_PROCESSED_TOTAL = "telegram_jobs_processed_total";
 export const TELEGRAM_AGENT_EXECUTIONS_TOTAL =
   "telegram_agent_executions_total";
 export const TELEGRAM_RESPONSES_SENT_TOTAL = "telegram_responses_sent_total";
+export const ACCOUNT_MANAGER_INTENT_TOTAL = "account_manager_intent_total";
+export const ACCOUNT_MANAGER_SPECIALIST_TOTAL =
+  "account_manager_specialist_total";
+export const ACCOUNT_MANAGER_RAG_USAGE_TOTAL =
+  "account_manager_rag_usage_total";
+export const ACCOUNT_MANAGER_TOOL_USAGE_TOTAL =
+  "account_manager_tool_usage_total";
+export const ACCOUNT_MANAGER_HANDOFF_TOTAL = "account_manager_handoff_total";

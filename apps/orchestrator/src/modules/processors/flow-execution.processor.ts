@@ -19,6 +19,7 @@ import { ChannelOutboundRouterService } from "../channels/core/router/channel-ou
 import { TelegramResponseComposerService } from "../channels/telegram/composer/telegram-response-composer.service";
 import { DeadLetterQueueService } from "../queue/dead-letter.queue";
 import {
+  EXECUTE_HANDOFF_JOB,
   EXECUTE_REGISTER_DOCUMENT_JOB,
   EXECUTE_REPLY_CONVERSATION_JOB,
   FLOW_EXECUTION_QUEUE,
@@ -130,7 +131,8 @@ export class FlowExecutionProcessor implements OnModuleInit, OnModuleDestroy {
   ): Promise<void> {
     if (
       job.name !== EXECUTE_REPLY_CONVERSATION_JOB &&
-      job.name !== EXECUTE_REGISTER_DOCUMENT_JOB
+      job.name !== EXECUTE_REGISTER_DOCUMENT_JOB &&
+      job.name !== EXECUTE_HANDOFF_JOB
     ) {
       this.logger.warn(
         "Ignoring unsupported flow execution job",
@@ -147,7 +149,10 @@ export class FlowExecutionProcessor implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    const responseText = this.telegramResponseComposerService.compose(job.data);
+    const responseText =
+      job.name === EXECUTE_HANDOFF_JOB
+        ? this.resolveHandoffResponse(job.data)
+        : this.telegramResponseComposerService.compose(job.data);
     const recipientId = this.telegramResponseComposerService.resolveRecipientId(
       job.data,
     );
@@ -170,6 +175,25 @@ export class FlowExecutionProcessor implements OnModuleInit, OnModuleDestroy {
         externalMessageId: job.data.externalMessageId,
         responseText,
       },
+    );
+  }
+
+  private resolveHandoffResponse(payload: FlowExecutionPayload): string {
+    const handoffMessage =
+      typeof payload.context?.handoffMessage === "string"
+        ? payload.context.handoffMessage
+        : undefined;
+
+    return (
+      handoffMessage ??
+      this.telegramResponseComposerService.compose({
+        ...payload,
+        context: {
+          ...(payload.context ?? {}),
+          responseText:
+            "Sua solicitacao foi encaminhada para atendimento humano.",
+        },
+      })
     );
   }
 
