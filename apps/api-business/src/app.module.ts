@@ -28,6 +28,7 @@ import { StorageModule } from './common/storage/storage.module';
 import { DatabaseModule } from './infra/database/database.module';
 import { ObservabilityModule } from './infra/observability/observability.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BankingModule } from './modules/banking/banking.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
 import { DocumentsModule } from './modules/documents/documents.module';
@@ -81,6 +82,7 @@ import { SearchModule } from './modules/search/search.module';
     ObservabilityModule,
     CommonObservabilityModule,
     AuthModule,
+    BankingModule,
     ConversationsModule,
     HealthModule,
     IngestionModule,
