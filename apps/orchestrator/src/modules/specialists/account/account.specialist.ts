@@ -11,17 +11,28 @@ export class AccountSpecialist {
   ) {}
 
   async execute(context: SpecialistExecutionContext): Promise<SpecialistResult> {
-    const profile = this.getCustomerProfileToolService.execute({
-      customerId:
-        typeof context.message.metadata?.userId === "string"
+    const profileResult = await this.getCustomerProfileToolService.execute({
+      userId:
+        context.message.userId ??
+        (typeof context.message.metadata?.userId === "string"
           ? context.message.metadata.userId
-          : undefined,
+          : context.message.from),
+      tenantId: context.tenantId,
+      correlationId: context.message.externalMessageId,
+      payload: {},
     });
     const accounts = this.getAccountsToolService.execute();
+    const profile = (profileResult.data ?? {
+      fullName: "Cliente RAG Platform",
+      segment: "segmento indisponivel",
+    }) as {
+      fullName: string;
+      segment: string;
+    };
 
     return {
       responseText: [
-        `Localizei o perfil ${profile.customerName}, segmento ${profile.segment}.`,
+        `Localizei o perfil ${profile.fullName}, segmento ${profile.segment}.`,
         `Voce possui ${accounts.length} contas ativas.`,
         ...accounts.map(
           (account) =>

@@ -1,6 +1,6 @@
 # API Documentation
 
-This document provides an overview of the main API endpoints exposed by **RAG Platform**.
+This document provides an overview of the main API endpoints exposed by the **Intelligent Automation Platform**.
 
 The API is responsible for:
 
@@ -95,7 +95,7 @@ Returns:
 - success count
 - failure count
 - average latency
-- RAG usage rate
+- knowledge retrieval usage rate
 
 ---
 
@@ -143,7 +143,7 @@ Includes:
 
 - inbound message
 - execution metadata
-- RAG usage
+- knowledge retrieval usage
 - latency
 - response payload
 
@@ -173,13 +173,13 @@ Returns latency distribution.
 
 ---
 
-## RAG Usage Metrics
+## Knowledge Retrieval Usage Metrics
 
 GET
 
 /api/v1/omnichannel/metrics/rag-usage
 
-Returns percentage of requests using RAG.
+Returns percentage of requests using knowledge retrieval.
 
 ---
 
@@ -207,7 +207,7 @@ Enables or disables connector.
 
 ---
 
-# RAG and Chat Endpoints
+# Knowledge Retrieval and Chat Endpoints
 
 ## Chat
 
@@ -217,7 +217,7 @@ POST
 
 Purpose:
 
-- run the RAG chat pipeline
+- run the knowledge-assisted chat pipeline
 - retrieve relevant chunks
 - assemble contextual prompts
 - return a final answer or stream SSE events

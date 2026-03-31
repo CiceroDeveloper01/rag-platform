@@ -55,7 +55,7 @@ export class DecisionService {
         intent: "CARD_SERVICES",
         strategy: sensitive ? "HYBRID" : "TOOL",
         specialist: "card",
-        suggestedTools: sensitive ? ["BlockCard"] : ["GetCards", "GetInvoice"],
+        suggestedTools: sensitive ? ["BlockCard"] : ["GetCardInfo"],
         confidence: sensitive ? 0.94 : 0.88,
         sensitivity: sensitive ? "sensitive" : "normal",
         requiresHumanHandoff: false,

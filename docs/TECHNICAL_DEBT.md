@@ -50,7 +50,7 @@ The repository still has more than one real path that can exercise retrieval-ori
 
 #### Desired direction
 
-Make the long-term reference path more explicit, or further align the synchronous and asynchronous RAG flows.
+Make the long-term reference path more explicit, or further align the synchronous and asynchronous knowledge retrieval flows.
 
 ### 3. Document ingestion is clearer now, but not fully unified yet
 

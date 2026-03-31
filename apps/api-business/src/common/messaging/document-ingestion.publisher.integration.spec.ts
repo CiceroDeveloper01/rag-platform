@@ -1,7 +1,9 @@
 import { ConfigService } from '@nestjs/config';
+import { isMessagingEnvelope } from '@rag-platform/contracts';
 import type { ConsumeMessage } from 'amqplib';
 import { connect } from 'amqplib';
 import { PinoLogger } from 'nestjs-pino';
+import { ObservabilityMetricsService } from '../observability/services/metrics.service';
 import { TracingService } from '../observability/services/tracing.service';
 import { DocumentIngestionPublisherService } from './document-ingestion.publisher';
 
@@ -81,6 +83,9 @@ describe('DocumentIngestionPublisherService RabbitMQ integration', () => {
         runInSpan: jest.fn(async (_name, operation) => operation()),
       } as unknown as TracingService,
       {
+        incrementCounter: jest.fn(),
+      } as unknown as ObservabilityMetricsService,
+      {
         setContext: jest.fn(),
         info: jest.fn(),
       } as unknown as PinoLogger,
@@ -127,17 +132,29 @@ describe('DocumentIngestionPublisherService RabbitMQ integration', () => {
       expect(message.properties.correlationId).toBe('corr-int-1');
       expect(message.properties.headers).toEqual(
         expect.objectContaining({
+          'x-message-id': 'evt-int-1',
           'x-event-id': 'evt-int-1',
           'x-correlation-id': 'corr-int-1',
+          'x-tenant-id': 'tenant-int',
+          'x-event-type': 'document.ingestion.requested',
+          'x-event-source': 'api-business.document-ingestion.publisher',
           'x-retry-count': 0,
           'x-source-id': 101,
         }),
       );
-      expect(JSON.parse(message.content.toString('utf-8'))).toEqual(
+      const payload = JSON.parse(message.content.toString('utf-8'));
+      expect(isMessagingEnvelope(payload)).toBe(true);
+      expect(payload).toEqual(
         expect.objectContaining({
-          sourceId: 101,
+          messageId: 'evt-int-1',
+          correlationId: 'corr-int-1',
           tenantId: 'tenant-int',
-          filename: 'contract.pdf',
+          eventType: 'document.ingestion.requested',
+          payload: expect.objectContaining({
+            sourceId: 101,
+            tenantId: 'tenant-int',
+            filename: 'contract.pdf',
+          }),
         }),
       );
     } finally {

@@ -15,7 +15,7 @@ https://keepachangelog.com/
 
 Release date: 2026
 
-This version represents the first functional version of **RAG-PLATAFORM**, including the core architecture of the Omnichannel AI Gateway and RAG integration.
+This version represents the first functional version of the platform, including the initial omnichannel gateway and the first knowledge-retrieval capabilities that later evolved into the current Intelligent Automation Platform.
 
 ---
 

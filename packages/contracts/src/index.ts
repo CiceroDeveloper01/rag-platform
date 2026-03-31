@@ -16,6 +16,7 @@ export {
   handoffResponseSchema,
 } from "./internal-api/handoff-request";
 export * from "./interfaces";
+export * from "./messaging";
 export * from "./omnichannel/channel-metrics-response";
 export * from "./omnichannel/connector-list-item-response";
 export * from "./omnichannel/omnichannel-execution-list-item";

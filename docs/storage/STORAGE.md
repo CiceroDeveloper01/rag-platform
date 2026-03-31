@@ -1,6 +1,6 @@
 # Storage Providers
 
-The backend exposes a provider-based storage abstraction for uploaded RAG source files.
+The platform exposes a provider-based storage abstraction for uploaded knowledge source files.
 
 The abstraction lives in `apps/api-business/src/common/storage` and is designed to support local development today and cloud object stores later without changing ingestion flows.
 

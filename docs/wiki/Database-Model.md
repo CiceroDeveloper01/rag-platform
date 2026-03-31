@@ -1,6 +1,6 @@
 # Database Model
 
-[Home](Home) | [RAG Architecture](RAG-Architecture) | [Architecture Overview](Architecture-Overview)
+[Home](Home) | [Knowledge Retrieval Capability](RAG-Architecture) | [Architecture Overview](Architecture-Overview)
 
 This page is derived strictly from the SQL migrations under `database/migrations/`.
 

@@ -1,6 +1,6 @@
 # Database Setup
 
-This directory contains the scripts required to initialize and manage the database used by the **RAG Platform**.
+This directory contains the scripts required to initialize and manage the database used by the **Intelligent Automation Platform**.
 
 The database uses **PostgreSQL** with the **pgvector** extension to store vector embeddings and enable semantic search for Retrieval Augmented Generation (RAG).
 

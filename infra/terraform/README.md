@@ -1,6 +1,6 @@
 # Terraform Infrastructure
 
-This directory contains reusable Terraform modules and environment compositions for **RAG-PLATAFORM** on AWS.
+This directory contains reusable Terraform modules and environment compositions for **Intelligent Automation Platform** on AWS.
 
 ## Structure
 

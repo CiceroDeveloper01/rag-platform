@@ -1,8 +1,8 @@
 # MCP / Omnichannel Architecture
 
-This diagram shows how **RAG Platform** handles multi-channel communication through an MCP-style omnichannel architecture.
+This diagram shows how **Intelligent Automation Platform** handles multi-channel communication through an MCP-style omnichannel architecture.
 
-The platform receives requests from different channels, normalizes them into a common contract, routes them through orchestration and optional RAG retrieval, and dispatches the response back to the originating channel.
+The platform receives requests from different channels, normalizes them into a common contract, routes them through orchestration and optional knowledge retrieval, and dispatches the response back to the originating channel.
 
 ---
 
@@ -26,8 +26,8 @@ flowchart LR
 
     subgraph Core
         ORCH[Omnichannel Orchestrator]
-        POL[RAG Usage Policy]
-        RAG[RAG Gateway]
+        POL[Knowledge Usage Policy]
+        RAG[Knowledge Gateway]
         AG[Agent Executor / LLM]
         PERSIST[(PostgreSQL + pgvector)]
     end
@@ -53,7 +53,7 @@ flowchart LR
     NM --> ORCH
 
     ORCH --> POL
-    POL -->|RAG required| RAG
+    POL -->|Knowledge retrieval required| RAG
     RAG --> AG
     POL -->|Direct response| AG
 
@@ -161,7 +161,7 @@ Responsibilities include:
 - persisting inbound messages
 - building execution context
 - applying routing and orchestration rules
-- deciding whether RAG is needed
+- deciding whether knowledge retrieval is needed
 - calling the agent execution layer
 - persisting execution results
 - triggering outbound dispatch
@@ -170,7 +170,7 @@ This is the heart of the MCP architecture.
 
 ---
 
-## RAG Usage Policy
+## Knowledge Usage Policy
 
 The policy layer decides whether contextual retrieval should be used.
 
@@ -185,9 +185,9 @@ This avoids forcing every request through the retrieval pipeline.
 
 ---
 
-## RAG Gateway
+## Knowledge Gateway
 
-The RAG Gateway provides access to contextual retrieval without coupling the omnichannel module to the internal implementation of the RAG engine.
+The Knowledge Gateway provides access to contextual retrieval without coupling the omnichannel module to the internal implementation of the retrieval engine.
 
 It can reuse:
 
@@ -267,7 +267,7 @@ It can display:
 - channel distribution
 - request details
 - latency metrics
-- RAG usage
+- knowledge retrieval usage
 - connector health
 
 ---
@@ -301,6 +301,6 @@ Benefits include:
 
 - channels can be added incrementally
 - orchestration logic remains centralized
-- RAG stays reusable
+- knowledge retrieval stays reusable
 - business logic remains independent from transport layers
 - observability is built into the system from the beginning

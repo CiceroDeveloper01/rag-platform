@@ -1,6 +1,6 @@
 # Document Processing
 
-[Home](Home) | [RAG Architecture](RAG-Architecture) | [Channel Integrations](Channel-Integrations)
+[Home](Home) | [Knowledge Retrieval Capability](RAG-Architecture) | [Channel Integrations](Channel-Integrations)
 
 Document ingestion is planned by `document-agent` and executed through reusable tools.
 

@@ -1,424 +1,151 @@
 # Observability
 
-RAG Platform follows an **observability-first architecture**.
+This document describes the current observability model of the repository, including the banking runtime added in the orchestrator and the `api-business` integration path.
 
-The platform includes built-in telemetry across:
+## Goals
 
-- the **API layer**
-- the **Omnichannel orchestration layer**
-- the **RAG pipeline**
-- infrastructure components
+The platform tracks:
 
-This enables engineers and operators to monitor system health, understand request behavior, and troubleshoot failures efficiently.
+- API and channel traffic
+- orchestration flow execution
+- knowledge retrieval usage
+- tool execution
+- handoff activity
+- integration calls to `api-business`
+- error rates and latency
 
----
+The goal is to make it clear when a response came from knowledge retrieval, when it came from a deterministic tool, and when it required human escalation.
 
-# Observability Stack
+## Current Stack
 
-The platform uses a modern monitoring stack.
+- Prometheus for metrics
+- Grafana for dashboards
+- Loki for logs
+- Tempo and OpenTelemetry for tracing
+- structured application logs in the NestJS services
 
-| Component               | Purpose                        |
-| ----------------------- | ------------------------------ |
-| Prometheus              | Metrics collection and storage |
-| Grafana                 | Visualization dashboards       |
-| Loki                    | Centralized log aggregation    |
-| Promtail                | Container log collectors       |
-| Tempo                   | Distributed tracing backend    |
-| OpenTelemetry Collector | Telemetry pipeline             |
+## Banking Runtime Observability
 
-These services are available in the **Docker environment** and can also be deployed in production infrastructure.
+The banking branch introduced a few important distinctions:
 
-For local development the full stack is started with:
+### Knowledge-Assisted Flow
 
-```bash
-docker compose --env-file ./infra/docker/.env.docker up -d --build
-```
+Use this classification when the specialist uses retrieval or model-driven response generation.
 
-Quick access URLs:
+Expected telemetry:
 
-- Frontend: `http://localhost:3002`
-- API: `http://localhost:3000`
-- Grafana: `http://localhost:3005`
-- Prometheus: `http://localhost:9090`
-- Tempo: `http://localhost:3200`
-- Loki: `http://localhost:3100`
-- PostgreSQL: `localhost:5433`
+- retrieval usage
+- AI-related timing and counters
+- token and cost telemetry when there is actual LLM usage
+- specialist and intent labels
 
-Local Grafana credentials:
+### Tool-Only Flow
 
-- user: `admin`
-- password: `admin`
+Use this classification when the specialist answers with deterministic data from tools and business APIs.
 
----
+Expected telemetry:
 
-# Instrumentation Strategy
+- tool usage
+- integration latency and success or failure
+- specialist and intent labels
+- no artificial `llmContext`
+- no token or LLM cost attribution
 
-The backend uses a standardized instrumentation approach to reduce duplicated tracing and metrics code.
+This distinction is important for the banking scenario because card information, investment simulations, customer profile queries, and credit limit queries should not appear as if they consumed LLM budget when they did not.
 
-The strategy is:
+## Correlation
 
-- HTTP requests are instrumented through global interceptors
-- important internal application and infrastructure methods use decorators such as `@Trace()` and `@MetricTimer()`
-- telemetry access is centralized through shared observability services and helpers instead of direct SDK usage everywhere
-- short-lived cache entries can be applied to read-heavy flows without bypassing the instrumentation model
+Correlation must follow the request across the banking flow:
 
-This keeps tracing, metrics, correlation, and request logging consistent while preserving thin controllers and clean domain boundaries.
+- inbound message or HTTP request
+- orchestrator routing
+- specialist execution
+- guardrail checks
+- tool execution
+- `api-business` integration
+- handoff when applicable
 
-Related document:
+`correlationId` propagation is part of the integration path so operators can trace a single banking action across services.
 
-- [Instrumentation Guide](INSTRUMENTATION.md)
+## Banking Metrics to Track
 
-## Cache and Observability
+The platform should expose or log enough information to answer:
 
-The backend applies short-lived cache entries in two strategic areas:
+- which intent was detected
+- which specialist handled the message
+- whether the response used knowledge retrieval, tool-only, or handoff
+- which tool executed
+- which `api-business` endpoint was called
+- how long the end-to-end flow took
+- whether the flow failed and where
 
-- omnichannel dashboard query endpoints
-- RAG retrieval and context assembly
+Useful metric dimensions include:
 
-In Docker-based local development, these entries are stored in Redis.
+- `intent`
+- `specialist`
+- `toolName`
+- `endpoint`
+- `status`
+- `channel`
+- `tenant`
 
-The cache policy is intentionally conservative:
+## Handoff Observability
 
-- the final LLM answer is not cached by default
-- channel dispatch operations are not cached
-- mutating routes are not cached
-- dashboard and retrieval caches use short TTLs
+Handoff should be visible as a first-class runtime event.
 
-This improves repeated read performance while preserving observability:
+Track:
 
-- HTTP interceptors still emit request metrics
-- service-level tracing still wraps critical application methods
-- targeted invalidation is triggered after document ingestion and connector state changes where practical
+- handoff requested
+- handoff accepted or dispatched
+- reason for escalation when available
+- originating specialist or flow branch
 
----
+This prevents handoff from looking like a normal bot reply and keeps operational review honest.
 
-# Metrics
+## Integration Observability for `api-business`
 
-Metrics provide visibility into system performance and operational behavior.
+When a banking tool calls `api-business`, the system should record:
 
-Prometheus scrapes metrics exposed by the NestJS API.
+- `correlationId`
+- tool name
+- endpoint path
+- success or failure
+- latency
+- normalized error information
 
-It also scrapes the OpenTelemetry Collector, Loki, Promtail, Tempo-related telemetry targets, and Prometheus itself inside the Docker network.
+Errors must remain explicit. A failed integration should not become a fake success in telemetry.
 
-The same Prometheus instance can also receive `k6` performance metrics through
-remote write during local load testing, which allows ad hoc performance
-inspection in Grafana without introducing a separate metrics backend.
+## Logs
 
-Example metrics endpoint:
+Structured logs should remain the default in backend services.
 
-http://localhost:3000/metrics
+Recommended banking log fields:
 
-To verify locally:
+- `correlationId`
+- `intent`
+- `specialist`
+- `toolName`
+- `endpoint`
+- `handoffRequested`
+- `usedRag` as the current compatibility field name for knowledge retrieval usage
+- `usedLlm`
+- `success`
 
-```bash
-curl http://localhost:3000/metrics
-```
+Sensitive data must remain redacted or masked contextually. Monetary values needed for business responses should remain legible; identifiers such as card numbers and personal documents should not.
 
----
+## Operational Reading Guide
 
-# HTTP Metrics
+When diagnosing a banking interaction:
 
-These metrics track API request behavior.
+1. identify the `correlationId`
+2. confirm the detected intent and selected specialist
+3. check whether the flow was `knowledge-assisted`, `tool-only`, or `handoff`
+4. inspect any `api-business` calls and their latency
+5. confirm whether a guardrail blocked or requested confirmation
+6. verify that AI cost and token telemetry only exist when real LLM usage happened
 
-Metrics include:
+## Related Documents
 
-- rag_platform_api_http_requests_total
-- rag_platform_api_http_errors_total
-- rag_platform_api_http_request_duration_seconds
-
-Labels used:
-
-- method
-- route
-- status_code
-
-These metrics allow monitoring of:
-
-- request throughput
-- endpoint latency
-- error rate
-- per-route behavior
-
----
-
-# RAG Pipeline Metrics
-
-The platform exposes metrics for key stages of the RAG workflow.
-
-Metrics include:
-
-- rag_platform_api_rag_requests_total
-- rag_platform_api_rag_embedding_duration_seconds
-- rag_platform_api_rag_vector_search_duration_seconds
-- rag_platform_api_rag_llm_duration_seconds
-- rag_platform_api_rag_ingestion_total
-- rag_platform_api_rag_chunks_generated_total
-- rag_platform_api_rag_documents_processed_total
-
-These metrics allow analysis of:
-
-- embedding latency
-- vector search performance
-- LLM response time
-- ingestion pipeline throughput
-
----
-
-# Omnichannel Metrics
-
-Since the platform supports multiple communication channels, additional metrics capture channel-level behavior.
-
-Examples include:
-
-- requests per channel
-- average latency per channel
-- RAG usage rate
-- dispatch failures
-- connector health status
-- AI policy accepted traffic
-- AI policy rejections
-- aggregate AI token usage
-
-These metrics power the operational dashboard.
-
----
-
-# Authentication and Conversation Metrics
-
-The platform also tracks activity related to user sessions and conversations.
-
-Metrics include:
-
-- rag_platform_api_auth_logins_total
-- rag_platform_api_conversations_operations_total
-
-These metrics help monitor:
-
-- authentication activity
-- conversation lifecycle operations
-- session trends
-
----
-
-# Logging
-
-The backend uses **structured logging**.
-
-Logging stack:
-
-- nestjs-pino for structured logs
-- Loki for centralized log storage
-- Promtail for container log collection
-
-Logs are structured as JSON in production environments and formatted for readability in development.
-
-In the Docker stack the API runs with JSON logs so Promtail can ship them to Loki without lossy parsing.
-
----
-
-# Sensitive Data Protection
-
-Sensitive fields are automatically redacted.
-
-Protected fields include:
-
-- authorization headers
-- cookies
-- passwords
-- tokens
-- session identifiers
-
-This prevents sensitive data from appearing in logs.
-
----
-
-# Correlation and Troubleshooting
-
-To simplify debugging and incident analysis, the system supports request correlation.
-
-Features include:
-
-- x-request-id propagation
-- request-scoped logging
-- correlation IDs in logs
-- execution metadata stored in the database
-
-This enables tracing a request across:
-
-1. inbound channel
-2. normalization
-3. orchestration
-4. RAG pipeline
-5. agent execution
-6. outbound dispatch
-
----
-
-# Tracing
-
-Distributed tracing is implemented using:
-
-- OpenTelemetry instrumentation
-- Tempo trace visualization
-
-Tracing allows visualization of request execution across internal components.
-
-Typical trace stages include:
-
-1. inbound request
-2. message normalization
-3. orchestration decision
-4. optional RAG retrieval
-5. agent execution
-6. response dispatch
-
-Tracing helps identify:
-
-- slow RAG operations
-- high-latency endpoints
-- execution bottlenecks
-
-For local execution the NestJS API exports OTLP traces to:
-
-`http://otel-collector:4318`
-
-The OpenTelemetry Collector then forwards traces to Tempo.
-
----
-
-# Dashboards
-
-Grafana dashboards provide visibility into platform operations.
-
-Recommended dashboards include:
-
-## API Dashboard
-
-Shows:
-
-- request volume
-- latency percentiles
-- error rate
-- endpoint performance
-
----
-
-## RAG Dashboard
-
-Shows:
-
-- embedding latency
-- vector search latency
-- LLM response duration
-- ingestion throughput
-
----
-
-## Omnichannel Dashboard
-
-Shows:
-
-- requests per channel
-- response latency by channel
-- RAG usage rate
-- dispatch failures
-
----
-
-## Infrastructure Dashboard
-
-Shows:
-
-- container health
-- PostgreSQL connection state
-- API resource usage
-
-Provisioned dashboards are stored in:
-
-- `infra/observability/grafana/dashboards/rag-platform-api-overview.json`
-- `infra/observability/grafana/dashboards/rag-platform-omnichannel-overview.json`
-- `infra/observability/grafana/dashboards/rag-platform-logs-overview.json`
-
----
-
-# Health Monitoring
-
-The platform exposes a health endpoint.
-
-Example:
-
-GET /health
-
-This endpoint verifies:
-
-- database connectivity
-- service availability
-- internal dependencies
-
-Health checks can be used by:
-
-- container orchestrators
-- monitoring systems
-- uptime checks
-
-The local Docker stack also defines health checks for:
-
-- postgres
-- api
-- web
-- otel-collector
-- prometheus
-- grafana
-- loki
-- promtail
-- jaeger
-
----
-
-# Observability Goals
-
-The observability layer was designed to enable:
-
-- fast incident detection
-- performance analysis
-- debugging of AI execution flows
-- monitoring RAG pipeline behavior
-- visibility into omnichannel traffic
-
----
-
-# Future Improvements
-
-Planned improvements include:
-
-- deeper OpenTelemetry instrumentation
-- OTLP trace export
-- Grafana Tempo integration
-- advanced RAG tracing
-- per-agent performance metrics
-- Prometheus alert rules
-
-These improvements will enhance operational visibility as the platform evolves.
-
----
-
-# Local Validation Checklist
-
-After the stack is up, validate:
-
-```bash
-curl http://localhost:3000/health
-curl http://localhost:3000/metrics
-curl http://localhost:9090/targets
-curl http://localhost:3005/api/health
-docker compose --env-file ./infra/docker/.env.docker logs -f api
-```
-
-Expected results:
-
-- API health responds successfully
-- `/metrics` exposes Prometheus metrics, including omnichannel metrics
-- Prometheus targets page shows `up`
-- Grafana loads with provisioned datasources
-- Tempo displays traces once API traffic is generated
-- Loki receives container logs through Promtail
+- [Platform Architecture](../ARCHITECTURE.md)
+- [Banking Architecture](../banking-architecture.md)
+- [Runtime Flow](../runtime-flow.md)

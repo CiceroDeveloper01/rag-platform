@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { createMessagingEnvelope } from '@rag-platform/contracts';
 import { MetricsService, AppLoggerService } from '@rag-platform/observability';
 import { DocumentIngestionInternalClient } from '@rag-platform/sdk';
 import { DocumentIngestionConsumerService } from './document-ingestion.consumer';
@@ -21,24 +22,39 @@ function createConfigService(): ConfigService {
 }
 
 function createMessage(overrides?: Record<string, unknown>) {
+  const event = {
+    eventId: 'evt-1',
+    correlationId: 'corr-1',
+    sourceId: 3,
+    tenantId: 'tenant-acme',
+    filename: 'guide.pdf',
+    mimeType: 'application/pdf',
+    storageKey: 'docs/guide.pdf',
+    storageUrl: 'file:///docs/guide.pdf',
+    fileContentBase64: Buffer.from('hello').toString('base64'),
+    uploadedAt: new Date().toISOString(),
+    ...overrides,
+  };
+
+  const envelope = createMessagingEnvelope({
+    messageId: String(event.eventId),
+    correlationId: String(event.correlationId),
+    tenantId: typeof event.tenantId === 'string' ? event.tenantId : null,
+    eventType: 'document.ingestion.requested',
+    source: 'api-business.document-ingestion.publisher',
+    payload: event,
+    metadata: {
+      sourceId: event.sourceId,
+    },
+  });
+
   return {
-    content: Buffer.from(
-      JSON.stringify({
-        eventId: 'evt-1',
-        correlationId: 'corr-1',
-        sourceId: 3,
-        tenantId: 'tenant-acme',
-        filename: 'guide.pdf',
-        mimeType: 'application/pdf',
-        storageKey: 'docs/guide.pdf',
-        storageUrl: 'file:///docs/guide.pdf',
-        fileContentBase64: Buffer.from('hello').toString('base64'),
-        uploadedAt: new Date().toISOString(),
-        ...overrides,
-      }),
-    ),
+    content: Buffer.from(JSON.stringify(envelope)),
     properties: {
-      headers: {},
+      headers: {
+        'x-event-type': 'document.ingestion.requested',
+        'x-tenant-id': event.tenantId,
+      },
       contentType: 'application/json',
       contentEncoding: 'utf-8',
       messageId: 'evt-1',
@@ -78,6 +94,65 @@ describe('DocumentIngestionConsumerService', () => {
       expect.objectContaining({
         sourceId: 3,
         tenantId: 'tenant-acme',
+      }),
+      0,
+    );
+    expect(ack).toHaveBeenCalled();
+  });
+
+  it('keeps backward compatibility with the legacy raw document ingestion payload', async () => {
+    const ack = jest.fn();
+    const workerService = {
+      process: jest.fn().mockResolvedValue({ status: 'processed' }),
+    } as unknown as DocumentIngestionWorkerService;
+    const service = new DocumentIngestionConsumerService(
+      createConfigService(),
+      {
+        log: jest.fn(),
+        error: jest.fn(),
+      } as unknown as AppLoggerService,
+      {
+        increment: jest.fn(),
+      } as unknown as MetricsService,
+      workerService,
+      {} as DocumentIngestionInternalClient,
+    );
+
+    Object.assign(service, {
+      channel: {
+        ack,
+      },
+    });
+
+    await service.handleMessage({
+      ...createMessage(),
+      content: Buffer.from(
+        JSON.stringify({
+          eventId: 'evt-raw-1',
+          correlationId: 'corr-raw-1',
+          sourceId: 9,
+          tenantId: 'tenant-raw',
+          filename: 'legacy.pdf',
+          mimeType: 'application/pdf',
+          storageKey: 'docs/legacy.pdf',
+          storageUrl: 'file:///docs/legacy.pdf',
+          fileContentBase64: Buffer.from('legacy').toString('base64'),
+          uploadedAt: new Date().toISOString(),
+        }),
+      ),
+      properties: {
+        ...createMessage().properties,
+        messageId: 'evt-raw-1',
+        correlationId: 'corr-raw-1',
+      },
+    } as never);
+
+    expect(workerService.process).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceId: 9,
+        tenantId: 'tenant-raw',
+        eventId: 'evt-raw-1',
+        correlationId: 'corr-raw-1',
       }),
       0,
     );

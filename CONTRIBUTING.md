@@ -1,8 +1,8 @@
-# Contributing to RAG Platform
+# Contributing to Intelligent Automation Platform
 
-First of all, thank you for considering contributing to **RAG Platform**.
+First of all, thank you for considering contributing to **Intelligent Automation Platform**.
 
-This project is a production-oriented TypeScript monorepo for AI agent orchestration, RAG, asynchronous document ingestion, and observability.
+This project is a production-oriented TypeScript monorepo for intelligent automation, decision orchestration, domain integrations, asynchronous document ingestion, knowledge retrieval, and observability.
 
 We welcome contributions from developers, engineers, researchers, and AI enthusiasts.
 
@@ -76,6 +76,8 @@ git clone https://github.com/cicero.developer01/RAG-PLATAFORM.git
 cd RAG-PLATAFORM
 npm ci
 ```
+
+The repository slug still uses the historical name for compatibility, but the project should be presented as **Intelligent Automation Platform**.
 
 Use Docker for infrastructure and run the apps locally for normal development:
 

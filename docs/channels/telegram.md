@@ -65,7 +65,7 @@ Supported commands:
 Demo flow:
 
 1. Send `hello`
-2. The bot should reply with `hello from RAG platform`
+2. The bot should reply with `hello from Intelligent Automation Platform`
 
 ## Observability
 
@@ -111,5 +111,5 @@ Queued payload:
 Outbound response:
 
 ```text
-hello from RAG platform
+hello from Intelligent Automation Platform
 ```

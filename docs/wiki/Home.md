@@ -1,8 +1,8 @@
 # Home
 
-Welcome to the RAG Platform Wiki.
+Welcome to the Intelligent Automation Platform Wiki.
 
-This project is a TypeScript monorepo for orchestrating AI agents through an asynchronous runtime. The platform combines channel integrations, queue-based execution, agent-first routing, document ingestion, RAG retrieval, conversation memory, feature toggles, and operational observability.
+This project is a TypeScript monorepo for intelligent automation through an asynchronous runtime. The platform combines channel integrations, queue-based execution, decision orchestration, document ingestion, knowledge retrieval, conversation memory, feature toggles, and operational observability.
 
 ## Key Concepts
 
@@ -32,7 +32,7 @@ flowchart LR
 - [Agent Architecture](Agent-Architecture)
 - [Queue Topology](Queue-Topology)
 - [Document Processing](Document-Processing)
-- [RAG Architecture](RAG-Architecture)
+- [Knowledge Retrieval Capability](RAG-Architecture)
 - [Feature Toggles](Feature-Toggles)
 - [Observability](Observability)
 - [Testing Strategy](Testing-Strategy)

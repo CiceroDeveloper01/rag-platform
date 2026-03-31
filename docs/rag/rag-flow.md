@@ -1,6 +1,6 @@
-# RAG Flow
+# Knowledge Retrieval Flow
 
-This document describes the current state of the RAG flow implemented in the repository.
+This document describes the current state of the knowledge retrieval flow implemented in the repository.
 
 ## 1. Ingestion Flow
 
@@ -43,17 +43,17 @@ In the current codebase:
 - a local `VectorRepository` exists as fallback
 - the primary search path depends on an internal API endpoint
 
-This means the current RAG flow is functional, but the final vector persistence strategy should still be treated as an evolving area.
+This means the current knowledge retrieval flow is functional, but the final vector persistence strategy should still be treated as an evolving area.
 
 ## 4. Context Assembly
 
 The context used by agents can combine:
 
-- retrieved RAG chunks
+- retrieved knowledge chunks
 - conversation memory
 - language instructions and operational context
 
-## 5. RAG Path Observability
+## 5. Knowledge Retrieval Observability
 
 The runtime currently records:
 

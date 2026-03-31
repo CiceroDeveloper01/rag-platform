@@ -1,6 +1,6 @@
 # API Endpoints
 
-This document consolidates the current HTTP surface of the `rag-platform` backend.
+This document consolidates the current HTTP surface of the Intelligent Automation Platform backend.
 
 ## Base URL
 
@@ -105,7 +105,7 @@ Request:
 
 ### `POST /chat`
 
-Runs the end-to-end RAG flow. Supports JSON and SSE streaming responses.
+Runs the end-to-end knowledge-assisted chat flow. Supports JSON and SSE streaming responses.
 
 Request:
 
@@ -254,7 +254,7 @@ Returns average and p95 latency grouped by channel.
 
 ### `GET /api/v1/omnichannel/metrics/rag-usage`
 
-Returns overall and per-channel RAG usage rates.
+Returns overall and per-channel knowledge retrieval usage rates.
 
 ### `POST /api/v1/omnichannel/dev/process`
 

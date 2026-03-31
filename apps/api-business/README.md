@@ -9,7 +9,7 @@ This app owns business capabilities that already existed in the repository, incl
 - chat
 - documents
 - ingestion
-- search and retrieval
+- search and knowledge retrieval
 - conversations
 - memory
 - internal ingestion callbacks used by the orchestrator

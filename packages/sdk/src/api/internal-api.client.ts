@@ -1,5 +1,8 @@
 import { InternalApiError } from "@rag-platform/shared";
-import { ApiClient } from "../interfaces/api-client.interface";
+import {
+  ApiClient,
+  ApiRequestOptions,
+} from "../interfaces/api-client.interface";
 
 export interface InternalApiClientOptions {
   baseUrl: string;
@@ -50,19 +53,27 @@ export class InternalApiClient implements ApiClient {
   async post<TRequest, TResponse = unknown>(
     path: string,
     payload: TRequest,
+    options?: ApiRequestOptions,
   ): Promise<TResponse> {
     return this.request<TResponse>(path, {
       method: "POST",
       body: JSON.stringify(payload),
       headers: {
         "content-type": "application/json",
+        ...(options?.headers ?? {}),
       },
     });
   }
 
-  async get<TResponse = unknown>(path: string): Promise<TResponse> {
+  async get<TResponse = unknown>(
+    path: string,
+    options?: ApiRequestOptions,
+  ): Promise<TResponse> {
     return this.request<TResponse>(path, {
       method: "GET",
+      headers: {
+        ...(options?.headers ?? {}),
+      },
     });
   }
 

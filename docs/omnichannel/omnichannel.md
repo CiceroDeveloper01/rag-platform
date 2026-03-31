@@ -1,6 +1,6 @@
 # Omnichannel Module
 
-The `omnichannel` module adds a backend-first Omnichannel AI Gateway / MCP core on top of the existing RAG platform.
+The `omnichannel` module adds a backend-first omnichannel gateway and MCP-style integration layer on top of the Intelligent Automation Platform.
 
 ## Runtime Boundary
 
@@ -69,8 +69,8 @@ Provide a single orchestration layer capable of:
 Normalized inbound payload
   -> persist inbound message
   -> start execution trace
-  -> evaluate RAG usage policy
-  -> optionally query existing RAG adapter
+  -> evaluate knowledge usage policy
+  -> optionally query existing knowledge adapter
   -> evaluate AI usage policy
   -> execute agent
   -> persist execution result
@@ -121,20 +121,20 @@ DEV Email payload
   -> simulated transport log
 ```
 
-## Integration with existing RAG
+## Integration with existing knowledge retrieval
 
-The module does not create a new RAG engine.
+The module does not create a new knowledge retrieval engine.
 
 It uses:
 
 - `SearchService` through `ExistingRagGatewayAdapter`
 - existing AI infrastructure through `DefaultAgentExecutor`
 
-This keeps the omnichannel core decoupled while still reusing the validated retrieval stack.
+This keeps the omnichannel core decoupled while still reusing the validated retrieval capability.
 
 ## AI usage policy
 
-The omnichannel module includes an `AiUsagePolicyService` that runs after RAG retrieval and before the agent executor.
+The omnichannel module includes an `AiUsagePolicyService` that runs after knowledge retrieval and before the agent executor.
 
 It enforces:
 
@@ -168,6 +168,7 @@ Relevant environment variables:
 - `GET /api/v1/omnichannel/metrics/channels`
 - `GET /api/v1/omnichannel/metrics/latency`
 - `GET /api/v1/omnichannel/metrics/rag-usage`
+  - legacy route name kept for compatibility; it reports knowledge retrieval usage
 - `PATCH /api/v1/omnichannel/connectors/:id/toggle`
 - `POST /api/v1/omnichannel/dev/process` - disabled by default
 - `POST /api/v1/omnichannel/telegram/webhook` - disabled by default
@@ -369,7 +370,7 @@ This stage adds a read-optimized query layer for:
 - paginated executions listing
 - channel metrics
 - latency metrics by channel
-- RAG usage analytics
+- knowledge retrieval usage analytics
 - connector status and toggle
 
 The data is read from:

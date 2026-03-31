@@ -1,6 +1,6 @@
 # Container Diagram
 
-This view describes the main runtime containers and infrastructure services that make up RAG Platform.
+This view describes the main runtime containers and infrastructure services that make up Intelligent Automation Platform.
 
 The platform is implemented as a monorepo, but at runtime it is composed of a small set of clear containers and supporting services. The local Docker environment is intentionally observability-first so engineers can inspect metrics, logs, and traces during development and demos.
 
@@ -81,7 +81,7 @@ The synchronous business API in `apps/api-business`.
 
 It is responsible for:
 
-- chat and retrieval
+- chat and knowledge retrieval
 - document ingestion requests and persisted status
 - conversations and memory
 - internal callbacks used by the orchestrator
@@ -121,7 +121,7 @@ An external service, not hosted in the local stack.
 It provides:
 
 - embeddings generation
-- LLM completion support for the current RAG flow
+- LLM completion support for the current knowledge-assisted flows
 
 The API integrates with it through the AI abstraction layer already implemented in the backend.
 

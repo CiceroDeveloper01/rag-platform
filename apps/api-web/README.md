@@ -1,31 +1,30 @@
 # API Web
 
-`apps/api-web` is the presentation and BFF boundary for the portal.
+`apps/api-web` is the presentation and BFF boundary for the web experience.
 
 ## Responsibilities
 
-This app owns portal-facing concerns such as:
+This app owns web-facing concerns such as:
 
 - analytics
 - agent traces
 - health
-- omnichannel monitoring
-- simulation
-- document upload and status proxy endpoints for the web portal
-
-## Documents Role
-
-For the current async document flow, `api-web` acts as a proxy boundary for the portal:
-
-- forwards uploads to `api-business`
-- forwards document status queries
-- keeps web-facing concerns out of the business API when a BFF boundary is useful
+- observability-oriented endpoints for the portal
+- document upload and status proxy endpoints
+- future portal-facing composition that should not live in `api-business`
 
 ## Architectural Boundaries
 
-- it is not the source of truth for business persistence
+- it is not the business source of truth
 - it is not the asynchronous worker runtime
-- it should avoid re-implementing domain logic already owned by `api-business`
+- it should avoid re-implementing domain logic that belongs in `api-business`
+- it remains the preferred web-facing API boundary for the `web` app
+
+## Current Role in the Banking Scenario
+
+The banking scenario is currently centered on `orchestrator` and `api-business`.
+
+`api-web` still matters because it remains the natural place for web-specific aggregation, operator views, and future portal endpoints that should expose banking journeys without leaking internal business APIs directly to the frontend.
 
 ## Typical Local Commands
 

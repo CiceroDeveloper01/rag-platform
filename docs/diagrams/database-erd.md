@@ -1,12 +1,12 @@
 # Database ERD
 
-This diagram shows the logical relationships between the main database tables used by **RAG Platform**.
+This diagram shows the logical relationships between the main database tables used by **Intelligent Automation Platform**.
 
 The schema supports:
 
 - user authentication
 - document ingestion
-- RAG retrieval
+- knowledge retrieval
 - chat conversations
 - omnichannel messaging
 - execution tracking
@@ -150,3 +150,5 @@ omnichannel_metric_snapshots {
     timestamp created_at
 }
 ```
+
+`used_rag` and `rag_query` remain current field names for compatibility, even though the platform is now positioned more broadly than a retrieval-centric product.

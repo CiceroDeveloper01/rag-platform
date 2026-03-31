@@ -1,6 +1,6 @@
-# Omnichannel + RAG Flow
+# Omnichannel Automation Flow
 
-This diagram shows the end-to-end execution flow of **RAG Platform**, from inbound channel message to outbound response, including orchestration, optional RAG retrieval, persistence, and observability.
+This diagram shows the end-to-end execution flow of **Intelligent Automation Platform**, from inbound channel message to outbound response, including orchestration, optional knowledge retrieval, persistence, and observability.
 
 ---
 
@@ -14,9 +14,9 @@ flowchart TD
     ORCH[Omnichannel Orchestrator]
 
     P1[(Persist Inbound Message)]
-    POL[RAG Usage Policy]
+    POL[Knowledge Usage Policy]
 
-    RG[RAG Gateway]
+    RG[Knowledge Gateway]
     RET[Retrieval Layer<br/>pgvector / SQL Search]
     CTX[Context Assembly]
 
@@ -38,7 +38,7 @@ flowchart TD
     ORCH --> P1
     ORCH --> POL
 
-    POL -->|RAG required| RG
+    POL -->|Knowledge retrieval required| RG
     RG --> RET
     RET --> CTX
     CTX --> AG
@@ -100,31 +100,31 @@ The orchestrator is responsible for:
 - persisting the inbound message
 - creating execution context
 - applying routing and orchestration logic
-- deciding whether RAG is needed
+- deciding whether knowledge retrieval is needed
 - calling the agent execution layer
 - persisting results
 - triggering outbound dispatch
 
 ---
 
-## 4. RAG Decision
+## 4. Knowledge Retrieval Decision
 
-The **RAG Usage Policy** decides whether contextual retrieval is required.
+The **Knowledge Usage Policy** decides whether contextual retrieval is required.
 
 Possible strategies include:
 
-- keyword-based RAG activation
+- keyword-based knowledge retrieval activation
 - explicit retrieval requests
 - connector-specific policies
 - future agent-driven routing decisions
 
-If retrieval is needed, the orchestrator calls the RAG Gateway.
+If retrieval is needed, the orchestrator calls the Knowledge Gateway.
 
 ---
 
 ## 5. Retrieval
 
-The **RAG Gateway** reuses the existing retrieval engine instead of duplicating it.
+The **Knowledge Gateway** reuses the existing retrieval engine instead of duplicating it.
 
 The retrieval layer performs:
 
@@ -150,7 +150,7 @@ Execution metadata may include:
 - model name
 - token usage
 - latency
-- RAG usage flag
+- knowledge retrieval usage flag
 - execution status
 
 ---

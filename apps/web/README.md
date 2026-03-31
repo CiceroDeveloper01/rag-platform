@@ -1,38 +1,26 @@
 # Web
 
-`apps/web` is the Next.js user interface for the platform.
+`apps/web` is the Next.js user and operator interface for the platform.
 
 ## Responsibilities
 
 The web app currently provides:
 
-- dashboard and observability views
-- omnichannel operator screens
-- chat screens
+- chat and interaction surfaces
+- operational and observability screens
 - document upload and document status views
-
-## Document Status Page
-
-The repository now includes a persisted document status view:
-
-- route: `/documents/status`
-
-The UI polls API endpoints for:
-
-- file name
-- source channel when available
-- status
-- current step
-- timestamps
-- safe error information
-
-The UI does not talk to RabbitMQ directly.
+- future banking-facing user experience layers
 
 ## Architectural Boundaries
 
 - the web app is UI-only
-- it should not hold domain logic that belongs in `api-business`
-- it should prefer `api-web` for presentation/BFF use cases
+- it should not own orchestration logic
+- it should not contain business logic that belongs in `api-business`
+- it should prefer `api-web` for presentation and BFF use cases
+
+## Current Role in the Banking Scenario
+
+The banking account manager is orchestrated in `apps/orchestrator` and backed by `api-business`, while `web` remains the natural place for customer and operator-facing interaction surfaces.
 
 ## Typical Local Commands
 
@@ -48,5 +36,3 @@ npm --prefix apps/web run dev
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 ```
-
-Adjust this to the boundary you want to exercise locally.

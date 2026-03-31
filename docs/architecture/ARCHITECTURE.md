@@ -11,5 +11,5 @@ Supporting documents:
 - [Runtime Flow](../runtime-flow.md)
 - [Telegram Channel](../channels/telegram.md)
 - [Document Ingestion](../rag/document-ingestion.md)
-- [RAG Flow](../rag/rag-flow.md)
+- [Knowledge Retrieval Flow](../rag/rag-flow.md)
 - [Architecture Decision Validation](../ARCHITECTURE_DECISIONS.md)
