@@ -1,6 +1,5 @@
-import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { TenantContextService } from '../../../../common/tenancy/tenant-context.service';
 import { BlockCardRequest } from '../dtos/request/block-card.request';
 import { UnblockCardRequest } from '../dtos/request/unblock-card.request';
 import { CardActionResponse } from '../dtos/response/card-action.response';
@@ -12,18 +11,13 @@ import { CardsService } from '../services/cards.service';
 @ApiTags('Banking')
 @Controller(['banking/cards', 'api/v1/banking/cards'])
 export class CardsController {
-  constructor(
-    private readonly cardsService: CardsService,
-    private readonly tenantContextService: TenantContextService,
-  ) {}
+  constructor(private readonly cardsService: CardsService) {}
 
   @Get()
   @ApiOperation({ summary: 'Lists customer cards.' })
   @ApiOkResponse({ type: CardResponse, isArray: true })
-  listCards(@Headers('x-tenant-id') tenantIdHeader?: string) {
-    return this.cardsService.listCards(
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+  listCards() {
+    return this.cardsService.listCards();
   }
 
   @Get(':id')
@@ -31,12 +25,8 @@ export class CardsController {
   @ApiOkResponse({ type: CardResponse })
   getCardById(
     @Param('id') cardId: string,
-    @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
-    return this.cardsService.getCardById(
-      cardId,
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+    return this.cardsService.getCardById(cardId);
   }
 
   @Get(':id/limit')
@@ -44,12 +34,8 @@ export class CardsController {
   @ApiOkResponse({ type: CardLimitResponse })
   getCardLimit(
     @Param('id') cardId: string,
-    @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
-    return this.cardsService.getCardLimit(
-      cardId,
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+    return this.cardsService.getCardLimit(cardId);
   }
 
   @Get(':id/invoice')
@@ -57,12 +43,8 @@ export class CardsController {
   @ApiOkResponse({ type: CardInvoiceResponse })
   getCardInvoice(
     @Param('id') cardId: string,
-    @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
-    return this.cardsService.getCardInvoice(
-      cardId,
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+    return this.cardsService.getCardInvoice(cardId);
   }
 
   @Post(':id/block')
@@ -72,13 +54,8 @@ export class CardsController {
   blockCard(
     @Param('id') cardId: string,
     @Body() request: BlockCardRequest,
-    @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
-    return this.cardsService.blockCard(
-      cardId,
-      request,
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+    return this.cardsService.blockCard(cardId, request);
   }
 
   @Post(':id/unblock')
@@ -88,12 +65,7 @@ export class CardsController {
   unblockCard(
     @Param('id') cardId: string,
     @Body() request: UnblockCardRequest,
-    @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
-    return this.cardsService.unblockCard(
-      cardId,
-      request,
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+    return this.cardsService.unblockCard(cardId, request);
   }
 }

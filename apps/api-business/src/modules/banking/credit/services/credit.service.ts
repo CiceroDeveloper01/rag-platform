@@ -18,10 +18,7 @@ export class CreditService {
     },
   ];
 
-  simulateCredit(
-    request: SimulateCreditRequest,
-    _tenantId = 'default-tenant',
-  ): CreditSimulationResponse {
+  simulateCredit(request: SimulateCreditRequest): CreditSimulationResponse {
     const estimatedRate = 0.021;
     const totalAmount = Number(
       (
@@ -42,11 +39,11 @@ export class CreditService {
     return simulation;
   }
 
-  getContracts(_tenantId = 'default-tenant'): CreditContractResponse[] {
+  getContracts(): CreditContractResponse[] {
     return [...this.contracts];
   }
 
-  getLimit(_tenantId = 'default-tenant'): CreditLimitResponse {
+  getLimit(): CreditLimitResponse {
     return {
       totalLimit: 30000,
       availableLimit: 18000,

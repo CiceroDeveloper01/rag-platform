@@ -34,11 +34,11 @@ export class InvestmentsService {
     },
   ];
 
-  listProducts(_tenantId = 'default-tenant'): InvestmentProductResponse[] {
+  listProducts(): InvestmentProductResponse[] {
     return [...this.products];
   }
 
-  getPortfolio(_tenantId = 'default-tenant'): InvestmentPortfolioResponse {
+  getPortfolio(): InvestmentPortfolioResponse {
     const positions: InvestmentPositionResponse[] = [
       {
         productId: 'prod-cdb-001',
@@ -64,7 +64,6 @@ export class InvestmentsService {
 
   simulateInvestment(
     request: SimulateInvestmentRequest,
-    _tenantId = 'default-tenant',
   ): InvestmentSimulationResponse {
     const product =
       this.products.find((entry) => entry.type === request.productType) ??
@@ -85,10 +84,7 @@ export class InvestmentsService {
     return simulation;
   }
 
-  createOrder(
-    request: CreateInvestmentOrderRequest,
-    _tenantId = 'default-tenant',
-  ): InvestmentOrderResponse {
+  createOrder(request: CreateInvestmentOrderRequest): InvestmentOrderResponse {
     return {
       orderId: 'ord-001',
       productId: request.productId,

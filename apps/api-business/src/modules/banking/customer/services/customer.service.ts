@@ -13,11 +13,11 @@ export class CustomerService {
     relationshipStatus: 'active',
   };
 
-  getProfile(_tenantId = 'default-tenant'): CustomerProfileResponse {
+  getProfile(): CustomerProfileResponse {
     return { ...this.profile };
   }
 
-  getSummary(_tenantId = 'default-tenant'): CustomerSummaryResponse {
+  getSummary(): CustomerSummaryResponse {
     return {
       id: this.profile.id,
       fullName: this.profile.fullName,

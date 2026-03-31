@@ -1,6 +1,5 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { TenantContextService } from '../../../../common/tenancy/tenant-context.service';
 import { CreateInvestmentOrderRequest } from '../dtos/request/create-investment-order.request';
 import { SimulateInvestmentRequest } from '../dtos/request/simulate-investment.request';
 import { InvestmentOrderResponse } from '../dtos/response/investment-order.response';
@@ -12,27 +11,20 @@ import { InvestmentsService } from '../services/investments.service';
 @ApiTags('Banking')
 @Controller(['banking/investments', 'api/v1/banking/investments'])
 export class InvestmentsController {
-  constructor(
-    private readonly investmentsService: InvestmentsService,
-    private readonly tenantContextService: TenantContextService,
-  ) {}
+  constructor(private readonly investmentsService: InvestmentsService) {}
 
   @Get('products')
   @ApiOperation({ summary: 'Lists available investment products.' })
   @ApiOkResponse({ type: InvestmentProductResponse, isArray: true })
-  listProducts(@Headers('x-tenant-id') tenantIdHeader?: string) {
-    return this.investmentsService.listProducts(
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+  listProducts() {
+    return this.investmentsService.listProducts();
   }
 
   @Get('portfolio')
   @ApiOperation({ summary: 'Returns the customer investment portfolio.' })
   @ApiOkResponse({ type: InvestmentPortfolioResponse })
-  getPortfolio(@Headers('x-tenant-id') tenantIdHeader?: string) {
-    return this.investmentsService.getPortfolio(
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+  getPortfolio() {
+    return this.investmentsService.getPortfolio();
   }
 
   @Post('simulate')
@@ -41,12 +33,8 @@ export class InvestmentsController {
   @ApiOkResponse({ type: InvestmentSimulationResponse })
   simulateInvestment(
     @Body() request: SimulateInvestmentRequest,
-    @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
-    return this.investmentsService.simulateInvestment(
-      request,
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+    return this.investmentsService.simulateInvestment(request);
   }
 
   @Post('order')
@@ -55,11 +43,7 @@ export class InvestmentsController {
   @ApiOkResponse({ type: InvestmentOrderResponse })
   createOrder(
     @Body() request: CreateInvestmentOrderRequest,
-    @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
-    return this.investmentsService.createOrder(
-      request,
-      this.tenantContextService.resolveTenant({ headerTenantId: tenantIdHeader }),
-    );
+    return this.investmentsService.createOrder(request);
   }
 }

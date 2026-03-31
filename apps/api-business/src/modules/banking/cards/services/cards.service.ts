@@ -38,15 +38,15 @@ export class CardsService {
     },
   ];
 
-  listCards(_tenantId = 'default-tenant'): CardResponse[] {
+  listCards(): CardResponse[] {
     return this.cards.map((card) => this.toCardResponse(card));
   }
 
-  getCardById(cardId: string, _tenantId = 'default-tenant'): CardResponse {
+  getCardById(cardId: string): CardResponse {
     return this.toCardResponse(this.findCard(cardId));
   }
 
-  getCardLimit(cardId: string, _tenantId = 'default-tenant'): CardLimitResponse {
+  getCardLimit(cardId: string): CardLimitResponse {
     const card = this.findCard(cardId);
 
     return {
@@ -57,10 +57,7 @@ export class CardsService {
     };
   }
 
-  getCardInvoice(
-    cardId: string,
-    _tenantId = 'default-tenant',
-  ): CardInvoiceResponse {
+  getCardInvoice(cardId: string): CardInvoiceResponse {
     const card = this.findCard(cardId);
 
     return {
@@ -71,11 +68,7 @@ export class CardsService {
     };
   }
 
-  blockCard(
-    cardId: string,
-    request: BlockCardRequest,
-    _tenantId = 'default-tenant',
-  ): CardActionResponse {
+  blockCard(cardId: string, request: BlockCardRequest): CardActionResponse {
     const card = this.findCard(cardId);
     card.status = 'BLOCKED';
 
@@ -90,7 +83,6 @@ export class CardsService {
   unblockCard(
     cardId: string,
     request: UnblockCardRequest,
-    _tenantId = 'default-tenant',
   ): CardActionResponse {
     const card = this.findCard(cardId);
     card.status = 'ACTIVE';

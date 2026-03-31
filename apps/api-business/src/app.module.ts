@@ -81,10 +81,12 @@ import { SearchModule } from './modules/search/search.module';
     AiModule,
     ObservabilityModule,
     CommonObservabilityModule,
+    // Banking Core
     AuthModule,
     BankingModule,
     ConversationsModule,
     HealthModule,
+    // AI Platform Capabilities
     IngestionModule,
     InternalModule,
     MemoryModule,
